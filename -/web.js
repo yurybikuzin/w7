@@ -4584,7 +4584,7 @@ var $;
 (function ($) {
     class $bw_login_warning extends $.$mol_view {
         sub() {
-            return [].concat("Минимальные (!) требования к экрану: 320x320px");
+            return [].concat("Минимальные требования к экрану: 320x320px");
         }
     }
     $.$bw_login_warning = $bw_login_warning;
@@ -4863,7 +4863,7 @@ var $;
         }
         Bar_addon() {
             return ((obj) => {
-                obj.sub = () => [].concat(this.Stay(), this.PassForgotten());
+                obj.sub = () => [].concat(this.Stay(), this.PassForgottenContainer());
                 return obj;
             })(new this.$.$mol_bar);
         }
@@ -4876,6 +4876,12 @@ var $;
         }
         stay_checked(val, force) {
             return (val !== void 0) ? val : false;
+        }
+        PassForgottenContainer() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.PassForgotten());
+                return obj;
+            })(new this.$.$mol_view);
         }
         PassForgotten() {
             return ((obj) => {
@@ -4941,6 +4947,9 @@ var $;
     __decorate([
         $.$mol_mem
     ], $bw_signin_form.prototype, "stay_checked", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_signin_form.prototype, "PassForgottenContainer", null);
     __decorate([
         $.$mol_mem
     ], $bw_signin_form.prototype, "PassForgotten", null);

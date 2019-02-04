@@ -907,8 +907,8 @@
 	--bw-signing-form-logininputicon-height: 21px;
 	--bw-signing-form-passinputicon-right: 26px;
 	--bw-signing-form-passinputicon-width: 26px;
-	--bw-signing-form-passinputicon-closed-height: 13px;
-	--bw-signing-form-passinputicon-open-height: 20px;
+	--bw-signing-form-passinputicon-closed-height: 11px;
+	--bw-signing-form-passinputicon-open-height: 19px;
 	--bw-signup-form-height: 299px;
 }
 
@@ -1438,6 +1438,7 @@
 [bw_signin_form_passinputicon],
 [bw_signin_form_passinputicon]:hover,
 [bw_signin_form_passinputicon]:focus {
+	transition-duration: 0s;
 	position: absolute;
 	right: var(--bw-signing-form-passinputicon-right);
 	right: var(--bw-signing-form-passinputicon-right);
@@ -1454,7 +1455,7 @@
 	z-index: 1;
 }
 
-[bw_signin_form_passinputicon][mol_check_checked] ,
+[bw_signin_form_passinputicon][mol_check_checked],
 [bw_signin_form_passinputicon][mol_check_checked]:hover,
 [bw_signin_form_passinputicon][mol_check_checked]:focus {
 	height: var(--bw-signing-form-passinputicon-open-height);
@@ -1484,13 +1485,17 @@
 
 [bw_signin_form_bar_addon] > *:last-child {
 	flex: 1 0 auto;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+}
+
+[bw_signin_form_passforgotten] {
+	display: block;
 	margin-left: var(--bw-login-text-font-size);
 	margin-left: var(--bw-login-text-font-size);
 
 	/* https://medium.com/@iamryanyu/how-to-align-last-flex-item-to-right-73512e4e5912 */
-	text-align: right;
-
-	/*min-width: calc(127px + 15px);*/
 }
 
 [bw_signin_form_oversubmitspace] {
