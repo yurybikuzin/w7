@@ -4869,11 +4869,15 @@ var $;
         PassInputIcon() {
             return ((obj) => {
                 obj.checked = (val) => this.pass_opened(val);
+                obj.event_click = (val) => this.pass_input_icon_click(val);
                 return obj;
             })(new this.$.$mol_check);
         }
         pass_opened(val, force) {
             return (val !== void 0) ? val : false;
+        }
+        pass_input_icon_click(val, force) {
+            return (val !== void 0) ? val : null;
         }
         OverAddonSpace() {
             return ((obj) => {
@@ -4955,6 +4959,9 @@ var $;
     __decorate([
         $.$mol_mem
     ], $bw_signin_form.prototype, "pass_opened", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_signin_form.prototype, "pass_input_icon_click", null);
     __decorate([
         $.$mol_mem
     ], $bw_signin_form.prototype, "OverAddonSpace", null);
@@ -5127,6 +5134,12 @@ var $;
                 add_node_to_branch(branch, 'check-box-title-outline');
                 return hierarchy;
             }
+            pass_opened(val) {
+                return this.$.$mol_state_session.value('$bw_signin_form_pass_opened', val) || false;
+            }
+            pass_type() {
+                return this.pass_opened() ? "text" : "password";
+            }
         }
         __decorate([
             $.$mol_mem
@@ -5257,17 +5270,24 @@ var $;
         }
         $$.$bw_login_form = $bw_login_form;
         class $bw_signin_form extends $.$bw_signin_form {
+            pass_input_icon_click(val, force) {
+                if (val) {
+                    this.PassInputIcon().checked(!this.PassInputIcon().checked());
+                    new $.$mol_defer(() => this.PassInput().focused(true));
+                }
+                return (val !== void 0) ? val : null;
+            }
             pass_opened(val, force) {
-                return this.$.$mol_state_session.value('$bw_signin_form_pass_opened', val) || false;
+                return bw_login_easter_data.pass_opened(val);
             }
         }
         __decorate([
             $.$mol_mem
-        ], $bw_signin_form.prototype, "pass_opened", null);
+        ], $bw_signin_form.prototype, "pass_input_icon_click", null);
         $$.$bw_signin_form = $bw_signin_form;
         class $bw_signin_form_pass_input extends $.$bw_signin_form_pass_input {
             pass_type() {
-                return (this.$.$mol_state_session.value('$bw_signin_form_pass_opened') || false) ? "text" : "password";
+                return bw_login_easter_data.pass_type();
             }
         }
         __decorate([
