@@ -5218,20 +5218,23 @@ var $;
         }
         $$.$bw_easter_panel_nav_switch = $bw_easter_panel_nav_switch;
         class $bw_signin_form extends $.$bw_signin_form {
-            pass_type() {
-                return this.pass_opened() ? "text" : "password";
-            }
             pass_opened(val, force) {
                 return this.$.$mol_state_session.value('$bw_signin_form_pass_opened', val) || false;
             }
         }
         __decorate([
             $.$mol_mem
-        ], $bw_signin_form.prototype, "pass_type", null);
-        __decorate([
-            $.$mol_mem
         ], $bw_signin_form.prototype, "pass_opened", null);
         $$.$bw_signin_form = $bw_signin_form;
+        class $bw_signin_form_pass_input extends $.$bw_signin_form_pass_input {
+            pass_type() {
+                return (this.$.$mol_state_session.value('$bw_signin_form_pass_opened') || false) ? "text" : "password";
+            }
+        }
+        __decorate([
+            $.$mol_mem
+        ], $bw_signin_form_pass_input.prototype, "pass_type", null);
+        $$.$bw_signin_form_pass_input = $bw_signin_form_pass_input;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
 //login.view.js.map

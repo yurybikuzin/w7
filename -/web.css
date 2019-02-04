@@ -1449,8 +1449,6 @@
 	height: var(--bw-signing-form-passinputicon-closed-height);
 	top: calc(2px + (var(--bw-login-input-height) - var(--bw-signing-form-passinputicon-closed-height)) / 2);
 	top: calc(2px + (var(--bw-login-input-height) - var(--bw-signing-form-passinputicon-closed-height)) / 2);
-
-	/*top: 20px;*/
 	background-image: url(../login/eye-closed.png);
 	background-color: rgba(0, 0, 0, 0);
 	z-index: 1;
