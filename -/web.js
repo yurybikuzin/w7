@@ -2875,6 +2875,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var $;
 (function ($) {
     class $bw extends $.$mol_view {
+        title() {
+            return this.bw_title();
+        }
+        bw_title() {
+            return "";
+        }
         sub() {
             return this.bw_content();
         }
@@ -2993,6 +2999,12 @@ var $;
 })($ || ($ = {}));
 (function ($) {
     class $bw_new_look extends $.$mol_book {
+        title() {
+            return this.new_look_title();
+        }
+        new_look_title() {
+            return "$bw_new_look";
+        }
         pages() {
             return this.blocks();
         }
@@ -3078,7 +3090,6 @@ var $;
 (function ($) {
     var $$;
     (function ($$) {
-        let data;
         class $bw_data extends $.$mol_object {
             way_def() {
                 return {
@@ -3153,10 +3164,13 @@ var $;
         class $bw extends $.$bw {
             constructor() {
                 super();
-                data = new $bw_data();
+                $$.bw_data = new $bw_data();
+            }
+            bw_title() {
+                return this.bw_content()[0].title();
             }
             bw_content() {
-                switch (data.selected_way()) {
+                switch ($$.bw_data.selected_way()) {
                     case 'brand-new': return [this.NewLook()];
                     case 'no-reg': return [this.OldLook()];
                     case 'reg-save': return [this.OldLook()];
@@ -3168,10 +3182,10 @@ var $;
         $$.$bw = $bw;
         class $bw_way_selector extends $.$bw_way_selector {
             ways() {
-                return data.way_enum().map((id) => this.Link(id));
+                return $$.bw_data.way_enum().map((id) => this.Link(id));
             }
             link_title(way) {
-                return data.way_def()[way].title;
+                return $$.bw_data.way_def()[way].title;
             }
             link_arg(way) {
                 return { way };
@@ -3192,10 +3206,10 @@ var $;
         $$.$bw_new_look = $bw_new_look;
         class $bw_look_selector extends $.$bw_look_selector {
             title() {
-                return data.selected_look() == 'old' ? 'new look' : 'old look';
+                return $$.bw_data.selected_look() == 'old' ? 'new look' : 'old look';
             }
             arg() {
-                return data.selected_look() == 'old' ? { look: null } : { look: 'old' };
+                return $$.bw_data.selected_look() == 'old' ? { look: null } : { look: 'old' };
             }
         }
         __decorate([
@@ -3207,16 +3221,16 @@ var $;
         $$.$bw_look_selector = $bw_look_selector;
         class $bw_main_nav extends $.$bw_main_nav {
             items() {
-                return data.main_nav_item_enum().map((id) => this.NavItem(id));
+                return $$.bw_data.main_nav_item_enum().map((id) => this.NavItem(id));
             }
             item_title(id) {
-                return data.main_nav_item_def()[id].title;
+                return $$.bw_data.main_nav_item_def()[id].title;
             }
             item_arg(main_nav) {
                 return { main_nav };
             }
             is_current(id) {
-                return id == data.selected_main_nav();
+                return id == $$.bw_data.selected_main_nav();
             }
         }
         $$.$bw_main_nav = $bw_main_nav;
@@ -4371,6 +4385,12 @@ var $;
         dom_name() {
             return "div";
         }
+        attr() {
+            return this.bw_login_attr();
+        }
+        bw_login_attr() {
+            return ({});
+        }
         sub() {
             return [].concat(this.LeftSpace(), this.Content(), this.RightSpace(), this.EasterPanel());
         }
@@ -5018,6 +5038,12 @@ var $;
 })($ || ($ = {}));
 (function ($) {
     class $bw_signup_form extends $.$mol_view {
+        sub() {
+            return [].concat(this.todo());
+        }
+        todo() {
+            return "";
+        }
     }
     $.$bw_signup_form = $bw_signup_form;
 })($ || ($ = {}));
@@ -5118,6 +5144,9 @@ var $;
                 });
                 bw_login_easter_data = new $bw_login_easter_data();
             }
+            title() {
+                return this.Form().title();
+            }
             easter_panel_shown() {
                 return this._easter_panel_shown_atom.get();
             }
@@ -5134,7 +5163,7 @@ var $;
                 const title = id;
                 return { title };
             }
-            attr() {
+            bw_login_attr() {
                 let result = {};
                 let hierarchy = bw_login_easter_data.hierarchy();
                 Object.keys(hierarchy).forEach((id) => {
@@ -5217,6 +5246,16 @@ var $;
             }
         }
         $$.$bw_easter_panel_nav_switch = $bw_easter_panel_nav_switch;
+        class $bw_login_form extends $.$bw_login_form {
+            title() {
+                let value = this.Deck().Switch().value();
+                return {
+                    '0': { title: 'Вход в WinNER7' },
+                    '1': { title: 'Регистрация в WinNER7' },
+                }[value].title;
+            }
+        }
+        $$.$bw_login_form = $bw_login_form;
         class $bw_signin_form extends $.$bw_signin_form {
             pass_opened(val, force) {
                 return this.$.$mol_state_session.value('$bw_signin_form_pass_opened', val) || false;
