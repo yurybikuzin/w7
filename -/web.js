@@ -1636,6 +1636,175 @@ var $;
 //check.view.js.map
 ;
 "use strict";
+var $;
+(function ($) {
+    class $mol_svg extends $.$mol_view {
+        dom_name() {
+            return "svg";
+        }
+        dom_name_space() {
+            return "http://www.w3.org/2000/svg";
+        }
+    }
+    $.$mol_svg = $mol_svg;
+})($ || ($ = {}));
+//svg.view.tree.js.map
+;
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var $;
+(function ($) {
+    class $mol_state_session extends $.$mol_object {
+        static native() {
+            if (this['native()'])
+                return this['native()'];
+            check: try {
+                const native = $.$mol_dom_context.sessionStorage;
+                if (!native)
+                    break check;
+                native.setItem('', '');
+                native.removeItem('');
+                return this['native()'] = native;
+            }
+            catch (error) {
+                console.warn(error);
+            }
+            return this['native()'] = {
+                getItem(key) {
+                    return this[':' + key];
+                },
+                setItem(key, value) {
+                    this[':' + key] = value;
+                },
+                removeItem(key) {
+                    this[':' + key] = void 0;
+                }
+            };
+        }
+        static value(key, next) {
+            if (next === void 0)
+                return JSON.parse(this.native().getItem(key) || 'null');
+            if (next === null)
+                this.native().removeItem(key);
+            else
+                this.native().setItem(key, JSON.stringify(next));
+            return next;
+        }
+        prefix() { return ''; }
+        value(key, next) {
+            return $mol_state_session.value(this.prefix() + '.' + key, next);
+        }
+    }
+    __decorate([
+        $.$mol_mem_key
+    ], $mol_state_session, "value", null);
+    $.$mol_state_session = $mol_state_session;
+})($ || ($ = {}));
+//session.js.map
+;
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var $;
+(function ($) {
+    class $mol_switch extends $.$mol_view {
+        minimal_height() {
+            return 40;
+        }
+        Option(id) {
+            return ((obj) => {
+                obj.checked = (val) => this.option_checked(id, val);
+                obj.title = () => this.option_title(id);
+                obj.enabled = () => this.option_enabled(id);
+                return obj;
+            })(new this.$.$mol_check);
+        }
+        option_checked(id, val, force) {
+            return (val !== void 0) ? val : false;
+        }
+        option_title(id) {
+            return "";
+        }
+        option_enabled(id) {
+            return this.enabled();
+        }
+        enabled() {
+            return true;
+        }
+        value(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        options() {
+            return ({});
+        }
+        sub() {
+            return this.items();
+        }
+        items() {
+            return [];
+        }
+    }
+    __decorate([
+        $.$mol_mem_key
+    ], $mol_switch.prototype, "Option", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $mol_switch.prototype, "option_checked", null);
+    __decorate([
+        $.$mol_mem
+    ], $mol_switch.prototype, "value", null);
+    $.$mol_switch = $mol_switch;
+})($ || ($ = {}));
+//switch.view.tree.js.map
+;
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var $;
+(function ($) {
+    var $$;
+    (function ($$) {
+        class $mol_switch extends $.$mol_switch {
+            value(next) {
+                return $.$mol_state_session.value(`${this}.value()`, next);
+            }
+            options() {
+                return {};
+            }
+            items() {
+                return Object.keys(this.options()).map(key => this.Option(key));
+            }
+            option_title(key) {
+                return this.options()[key];
+            }
+            option_checked(key, next) {
+                if (next === void 0)
+                    return this.value() == key;
+                this.value(next ? key : null);
+            }
+        }
+        __decorate([
+            $.$mol_mem
+        ], $mol_switch.prototype, "items", null);
+        $$.$mol_switch = $mol_switch;
+    })($$ = $.$$ || ($.$$ = {}));
+})($ || ($ = {}));
+//switch.view.js.map
+;
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1851,21 +2020,6 @@ var $;
     $.$mol_float = $mol_float;
 })($ || ($ = {}));
 //float.view.tree.js.map
-;
-"use strict";
-var $;
-(function ($) {
-    class $mol_svg extends $.$mol_view {
-        dom_name() {
-            return "svg";
-        }
-        dom_name_space() {
-            return "http://www.w3.org/2000/svg";
-        }
-    }
-    $.$mol_svg = $mol_svg;
-})($ || ($ = {}));
-//svg.view.tree.js.map
 ;
 "use strict";
 var $;
@@ -2135,63 +2289,6 @@ var $;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
 //dimmer.view.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    class $mol_state_session extends $.$mol_object {
-        static native() {
-            if (this['native()'])
-                return this['native()'];
-            check: try {
-                const native = $.$mol_dom_context.sessionStorage;
-                if (!native)
-                    break check;
-                native.setItem('', '');
-                native.removeItem('');
-                return this['native()'] = native;
-            }
-            catch (error) {
-                console.warn(error);
-            }
-            return this['native()'] = {
-                getItem(key) {
-                    return this[':' + key];
-                },
-                setItem(key, value) {
-                    this[':' + key] = value;
-                },
-                removeItem(key) {
-                    this[':' + key] = void 0;
-                }
-            };
-        }
-        static value(key, next) {
-            if (next === void 0)
-                return JSON.parse(this.native().getItem(key) || 'null');
-            if (next === null)
-                this.native().removeItem(key);
-            else
-                this.native().setItem(key, JSON.stringify(next));
-            return next;
-        }
-        prefix() { return ''; }
-        value(key, next) {
-            return $mol_state_session.value(this.prefix() + '.' + key, next);
-        }
-    }
-    __decorate([
-        $.$mol_mem_key
-    ], $mol_state_session, "value", null);
-    $.$mol_state_session = $mol_state_session;
-})($ || ($ = {}));
-//session.js.map
 ;
 "use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -2618,112 +2715,6 @@ var $;
 //grid.view.js.map
 ;
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    class $mol_switch extends $.$mol_view {
-        minimal_height() {
-            return 40;
-        }
-        Option(id) {
-            return ((obj) => {
-                obj.checked = (val) => this.option_checked(id, val);
-                obj.title = () => this.option_title(id);
-                obj.enabled = () => this.option_enabled(id);
-                return obj;
-            })(new this.$.$mol_check);
-        }
-        option_checked(id, val, force) {
-            return (val !== void 0) ? val : false;
-        }
-        option_title(id) {
-            return "";
-        }
-        option_enabled(id) {
-            return this.enabled();
-        }
-        enabled() {
-            return true;
-        }
-        value(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        options() {
-            return ({});
-        }
-        sub() {
-            return this.items();
-        }
-        items() {
-            return [];
-        }
-    }
-    __decorate([
-        $.$mol_mem_key
-    ], $mol_switch.prototype, "Option", null);
-    __decorate([
-        $.$mol_mem_key
-    ], $mol_switch.prototype, "option_checked", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_switch.prototype, "value", null);
-    $.$mol_switch = $mol_switch;
-})($ || ($ = {}));
-//switch.view.tree.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    var $$;
-    (function ($$) {
-        class $mol_switch extends $.$mol_switch {
-            value(next) {
-                return $.$mol_state_session.value(`${this}.value()`, next);
-            }
-            options() {
-                return {};
-            }
-            items() {
-                return Object.keys(this.options()).map(key => this.Option(key));
-            }
-            option_title(key) {
-                return this.options()[key];
-            }
-            option_checked(key, next) {
-                if (next === void 0)
-                    return this.value() == key;
-                this.value(next ? key : null);
-            }
-        }
-        __decorate([
-            $.$mol_mem
-        ], $mol_switch.prototype, "items", null);
-        $$.$mol_switch = $mol_switch;
-    })($$ = $.$$ || ($.$$ = {}));
-})($ || ($ = {}));
-//switch.view.js.map
-;
-"use strict";
-var $;
-(function ($) {
-    class $mol_bar extends $.$mol_view {
-    }
-    $.$mol_bar = $mol_bar;
-})($ || ($ = {}));
-//bar.view.tree.js.map
-;
-"use strict";
 var $;
 (function ($) {
     function $mol_merge_dict(target, source) {
@@ -3037,6 +3028,15 @@ var $;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
 //string.view.js.map
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_bar extends $.$mol_view {
+    }
+    $.$mol_bar = $mol_bar;
+})($ || ($ = {}));
+//bar.view.tree.js.map
 ;
 "use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -3864,7 +3864,7 @@ var $;
                 obj.block_title = () => "Настройка поиска";
                 obj.content = () => [].concat(this.SearchDeep(), this.Nova(), this.Apartments(), this.Sold());
                 return obj;
-            })(new this.$.$bw_settings_block);
+            })(new this.$.$bw_workspace_block);
         }
         SearchDeep() {
             return ((obj) => {
@@ -3910,7 +3910,7 @@ var $;
                 obj.block_title = () => "Личные данные";
                 obj.content = () => [].concat(this.Name(), this.Phone(), this.Email(), this.Pass());
                 return obj;
-            })(new this.$.$bw_settings_block);
+            })(new this.$.$bw_workspace_block);
         }
         Name() {
             return ((obj) => {
@@ -3918,7 +3918,7 @@ var $;
                 obj.Control = () => ((obj) => {
                     obj.value = (val) => this.name();
                     return obj;
-                })(new this.$.$bw_input);
+                })(new this.$.$mol_string);
                 return obj;
             })(new this.$.$bw_field);
         }
@@ -3931,7 +3931,7 @@ var $;
                 obj.Control = () => ((obj) => {
                     obj.value = (val) => this.phone();
                     return obj;
-                })(new this.$.$bw_input);
+                })(new this.$.$mol_string);
                 return obj;
             })(new this.$.$bw_field);
         }
@@ -3944,7 +3944,7 @@ var $;
                 obj.Control = () => ((obj) => {
                     obj.value = (val) => this.email();
                     return obj;
-                })(new this.$.$bw_input);
+                })(new this.$.$mol_string);
                 return obj;
             })(new this.$.$bw_field);
         }
@@ -4037,7 +4037,7 @@ var $;
                 obj.value = (val) => this.pass();
                 obj.type = (val) => "password";
                 return obj;
-            })(new this.$.$bw_input);
+            })(new this.$.$mol_string);
         }
         pass() {
             return "************";
@@ -4051,8 +4051,9 @@ var $;
         Link() {
             return ((obj) => {
                 obj.title = () => "редактировать";
+                obj.current = () => false;
                 return obj;
-            })(new this.$.$bw_link);
+            })(new this.$.$mol_link);
         }
     }
     __decorate([
@@ -4067,7 +4068,7 @@ var $;
     $.$bw_settings_input_pass = $bw_settings_input_pass;
 })($ || ($ = {}));
 (function ($) {
-    class $bw_settings_block extends $.$mol_view {
+    class $bw_workspace_block extends $.$mol_view {
         block_title() {
             return "";
         }
@@ -4125,26 +4126,26 @@ var $;
     }
     __decorate([
         $.$mol_mem
-    ], $bw_settings_block.prototype, "Inner", null);
+    ], $bw_workspace_block.prototype, "Inner", null);
     __decorate([
         $.$mol_mem
-    ], $bw_settings_block.prototype, "Header", null);
+    ], $bw_workspace_block.prototype, "Header", null);
     __decorate([
         $.$mol_mem
-    ], $bw_settings_block.prototype, "Caption", null);
+    ], $bw_workspace_block.prototype, "Caption", null);
     __decorate([
         $.$mol_mem
-    ], $bw_settings_block.prototype, "Content", null);
+    ], $bw_workspace_block.prototype, "Content", null);
     __decorate([
         $.$mol_mem
-    ], $bw_settings_block.prototype, "ButtonBar", null);
+    ], $bw_workspace_block.prototype, "ButtonBar", null);
     __decorate([
         $.$mol_mem
-    ], $bw_settings_block.prototype, "Button", null);
-    $.$bw_settings_block = $bw_settings_block;
+    ], $bw_workspace_block.prototype, "Button", null);
+    $.$bw_workspace_block = $bw_workspace_block;
 })($ || ($ = {}));
 (function ($) {
-    class $bw_profile_settings_block extends $.$bw_settings_block {
+    class $bw_profile_settings_block extends $.$bw_workspace_block {
         block_title() {
             return "Настройка профиля";
         }
@@ -4178,7 +4179,7 @@ var $;
                 obj.Control = () => ((obj) => {
                     obj.value = (val) => this.green_name();
                     return obj;
-                })(new this.$.$bw_input);
+                })(new this.$.$mol_string);
                 return obj;
             })(new this.$.$bw_field);
         }
@@ -4191,7 +4192,7 @@ var $;
                 obj.Control = () => ((obj) => {
                     obj.value = (val) => this.green_link();
                     return obj;
-                })(new this.$.$bw_input);
+                })(new this.$.$mol_string);
                 return obj;
             })(new this.$.$bw_field);
         }
@@ -4217,7 +4218,7 @@ var $;
     $.$bw_profile_settings_block = $bw_profile_settings_block;
 })($ || ($ = {}));
 (function ($) {
-    class $bw_blacklist_settings_block extends $.$bw_settings_block {
+    class $bw_blacklist_settings_block extends $.$bw_workspace_block {
         block_title() {
             return "Черный список телефонов";
         }
@@ -4316,10 +4317,11 @@ var $;
         CheckBox(id) {
             return ((obj) => {
                 return obj;
-            })(new this.$.$bw_check_box);
+            })(new this.$.$mol_check_box);
         }
         ButtonsCell(id) {
             return ((obj) => {
+                obj.dom_name = () => "td";
                 obj.sub = () => [].concat(this.EditButton(id), this.DeleteButton(id));
                 return obj;
             })(new this.$.$mol_view);
@@ -4362,7 +4364,7 @@ var $;
     $.$bw_blacklist_settings_block_grid = $bw_blacklist_settings_block_grid;
 })($ || ($ = {}));
 (function ($) {
-    class $bw_settings_block_text extends $.$mol_view {
+    class $bw_workspace_block_text extends $.$mol_view {
         text() {
             return "";
         }
@@ -4370,7 +4372,7 @@ var $;
             return [].concat(this.text());
         }
     }
-    $.$bw_settings_block_text = $bw_settings_block_text;
+    $.$bw_workspace_block_text = $bw_workspace_block_text;
 })($ || ($ = {}));
 (function ($) {
     class $bw_look_selector extends $.$mol_link {
@@ -4650,6 +4652,11 @@ var $;
                             }
                         }
                         else {
+                            if (id == 'theme') {
+                                result['mol_theme'] = bw_easter_data.switch_atom_value(id) === 'on' ?
+                                    '$mol_theme_light' :
+                                    '$mol_theme_dark';
+                            }
                             result['_' + id] = bw_easter_data.switch_atom_value(id) === 'on' ?
                                 bw_easter_data.on_title(id) :
                                 bw_easter_data.off_title(id);
@@ -4759,6 +4766,12 @@ var $;
             $.$mol_mem_key
         ], $bw_easter_panel_nav.prototype, "switch_value", null);
         $$.$bw_easter_panel_nav = $bw_easter_panel_nav;
+        class $bw_easter_panel_nav_switch extends $.$bw_easter_panel_nav_switch {
+            option_enabled(id) {
+                return !this.option_checked(id);
+            }
+        }
+        $$.$bw_easter_panel_nav_switch = $bw_easter_panel_nav_switch;
         class $bw_way_selector extends $.$bw_way_selector {
             ways() {
                 return $$.bw_data.way_enum().map((id) => this.Link(id));
@@ -4902,22 +4915,6 @@ var $;
     $.$bw_label = $bw_label;
 })($ || ($ = {}));
 (function ($) {
-    class $bw_link extends $.$mol_link {
-    }
-    $.$bw_link = $bw_link;
-})($ || ($ = {}));
-(function ($) {
-    class $bw_input extends $.$mol_string {
-        attr() {
-            return (Object.assign({}, super.attr(), { "readonly": this.readonly() }));
-        }
-        readonly() {
-            return false;
-        }
-    }
-    $.$bw_input = $bw_input;
-})($ || ($ = {}));
-(function ($) {
     class $bw_search_deep extends $.$mol_view {
         sub() {
             return [].concat(this.Input(), this.Output(), this.Space(), this.Button());
@@ -4926,7 +4923,7 @@ var $;
             return ((obj) => {
                 obj.value = (val) => this.selected();
                 return obj;
-            })(new this.$.$bw_input);
+            })(new this.$.$mol_string);
         }
         selected() {
             return "50 дней";
@@ -4980,11 +4977,6 @@ var $;
     $.$bw_search_deep = $bw_search_deep;
 })($ || ($ = {}));
 (function ($) {
-    class $bw_check_box extends $.$mol_check_box {
-    }
-    $.$bw_check_box = $bw_check_box;
-})($ || ($ = {}));
-(function ($) {
     class $bw_combo_box extends $.$mol_view {
         options() {
             return ({});
@@ -4998,9 +4990,8 @@ var $;
         Input() {
             return ((obj) => {
                 obj.value = (val) => this.selected();
-                obj.readonly = () => true;
                 return obj;
-            })(new this.$.$bw_input);
+            })(new this.$.$bw_combo_box_string);
         }
         Check() {
             return ((obj) => {
@@ -5070,6 +5061,17 @@ var $;
         $.$mol_mem_key
     ], $bw_combo_box.prototype, "row_click", null);
     $.$bw_combo_box = $bw_combo_box;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_combo_box_string extends $.$mol_string {
+        attr() {
+            return (Object.assign({}, super.attr(), { "readonly": this.readonly() }));
+        }
+        readonly() {
+            return true;
+        }
+    }
+    $.$bw_combo_box_string = $bw_combo_box_string;
 })($ || ($ = {}));
 (function ($) {
     class $bw_button extends $.$mol_button {
@@ -6036,12 +6038,6 @@ var $;
             }
         }
         $$.$bw_login = $bw_login;
-        class $bw_easter_panel_nav_switch extends $.$bw_easter_panel_nav_switch {
-            option_enabled(id) {
-                return !this.option_checked(id);
-            }
-        }
-        $$.$bw_easter_panel_nav_switch = $bw_easter_panel_nav_switch;
         class $bw_login_form extends $.$bw_login_form {
             title() {
                 let value = this.Deck().Switch().value();
