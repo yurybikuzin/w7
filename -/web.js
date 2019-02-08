@@ -3039,27 +3039,6 @@ var $;
 //string.view.js.map
 ;
 "use strict";
-var $;
-(function ($) {
-    class $mol_plugin extends $.$mol_object {
-        dom_node() {
-            return null;
-        }
-        attr_static() {
-            return ({});
-        }
-        event() {
-            return ({});
-        }
-        event_async() {
-            return ({});
-        }
-    }
-    $.$mol_plugin = $mol_plugin;
-})($ || ($ = {}));
-//plugin.view.tree.js.map
-;
-"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -3068,749 +3047,62 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var $;
 (function ($) {
-    var $$;
-    (function ($$) {
-        class $mol_plugin extends $.$mol_plugin {
-            dom_node() {
-                const node = this.object_host().dom_node();
-                $.$mol_dom_render_attributes(node, this.attr_static());
-                $.$mol_dom_render_events(node, this.event());
-                $.$mol_dom_render_events_async(node, this.event_async());
-                return node;
+    class $mol_state_local extends $.$mol_object {
+        static native() {
+            if (this['native()'])
+                return this['native()'];
+            check: try {
+                const native = $.$mol_dom_context.localStorage;
+                if (!native)
+                    break check;
+                native.setItem('', '');
+                native.removeItem('');
+                return this['native()'] = native;
             }
-            render() {
-                return this.dom_node();
+            catch (error) {
+                console.warn(error);
             }
-        }
-        __decorate([
-            $.$mol_mem
-        ], $mol_plugin.prototype, "dom_node", null);
-        $$.$mol_plugin = $mol_plugin;
-    })($$ = $.$$ || ($.$$ = {}));
-})($ || ($ = {}));
-//plugin.view.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    class $mol_state_time extends $.$mol_object {
-        static now(precision, next, force) {
-            const atom = $.$mol_atom_current();
-            const handler = () => {
-                atom['value()'] = Date.now();
-                atom.obsolete_slaves();
-                if (precision > 0) {
-                    setTimeout(handler, precision);
-                }
-                else {
-                    requestAnimationFrame(handler);
+            return this['native()'] = {
+                getItem(key) {
+                    return this[':' + key];
+                },
+                setItem(key, value) {
+                    this[':' + key] = value;
+                },
+                removeItem(key) {
+                    this[':' + key] = void 0;
                 }
             };
-            handler();
-            return Date.now();
+        }
+        static value(key, next, force) {
+            if (next === void 0)
+                return JSON.parse(this.native().getItem(key) || 'null');
+            if (next === null)
+                this.native().removeItem(key);
+            else
+                this.native().setItem(key, JSON.stringify(next));
+            return next;
+        }
+        prefix() { return ''; }
+        value(key, next) {
+            return $mol_state_local.value(this.prefix() + '.' + key, next);
         }
     }
     __decorate([
         $.$mol_mem_key
-    ], $mol_state_time, "now", null);
-    $.$mol_state_time = $mol_state_time;
+    ], $mol_state_local, "value", null);
+    $.$mol_state_local = $mol_state_local;
 })($ || ($ = {}));
-//time.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    class $mol_meter extends $.$mol_plugin {
-        zoom() {
-            return 1;
-        }
-        width(val, force) {
-            return (val !== void 0) ? val : 0;
-        }
-        height(val, force) {
-            return (val !== void 0) ? val : 0;
-        }
-        left(val, force) {
-            return (val !== void 0) ? val : 0;
-        }
-        right(val, force) {
-            return (val !== void 0) ? val : 0;
-        }
-        bottom(val, force) {
-            return (val !== void 0) ? val : 0;
-        }
-        top(val, force) {
-            return (val !== void 0) ? val : 0;
-        }
-    }
-    __decorate([
-        $.$mol_mem
-    ], $mol_meter.prototype, "width", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_meter.prototype, "height", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_meter.prototype, "left", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_meter.prototype, "right", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_meter.prototype, "bottom", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_meter.prototype, "top", null);
-    $.$mol_meter = $mol_meter;
-})($ || ($ = {}));
-//meter.view.tree.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    var $$;
-    (function ($$) {
-        class $mol_meter extends $.$mol_meter {
-            rect() {
-                const node = this.dom_node();
-                if (node !== $.$mol_dom_context.document.body) {
-                    $.$mol_state_time.now();
-                    try {
-                        const { left, top, right, bottom, width, height } = node.getBoundingClientRect();
-                        return { left, top, right, bottom, width, height, zoom: window.devicePixelRatio || 1 };
-                    }
-                    catch (error) {
-                    }
-                }
-                const size = $.$mol_window.size();
-                return {
-                    zoom: window.devicePixelRatio || 1,
-                    left: 0,
-                    top: 0,
-                    right: size.width,
-                    bottom: size.height,
-                    width: size.width,
-                    height: size.height,
-                };
-            }
-            top() {
-                return this.rect().top;
-            }
-            bottom() {
-                return this.rect().bottom;
-            }
-            left() {
-                return this.rect().left;
-            }
-            right() {
-                return this.rect().right;
-            }
-            width() {
-                return this.rect().width;
-            }
-            height() {
-                return this.rect().height;
-            }
-            zoom() {
-                return this.rect().zoom;
-            }
-        }
-        __decorate([
-            $.$mol_mem
-        ], $mol_meter.prototype, "rect", null);
-        __decorate([
-            $.$mol_mem
-        ], $mol_meter.prototype, "top", null);
-        __decorate([
-            $.$mol_mem
-        ], $mol_meter.prototype, "bottom", null);
-        __decorate([
-            $.$mol_mem
-        ], $mol_meter.prototype, "left", null);
-        __decorate([
-            $.$mol_mem
-        ], $mol_meter.prototype, "right", null);
-        __decorate([
-            $.$mol_mem
-        ], $mol_meter.prototype, "width", null);
-        __decorate([
-            $.$mol_mem
-        ], $mol_meter.prototype, "height", null);
-        __decorate([
-            $.$mol_mem
-        ], $mol_meter.prototype, "zoom", null);
-        $$.$mol_meter = $mol_meter;
-    })($$ = $.$$ || ($.$$ = {}));
-})($ || ($ = {}));
-//meter.view.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    class $mol_touch extends $.$mol_plugin {
-        start_zoom(val, force) {
-            return (val !== void 0) ? val : 0;
-        }
-        start_distance(val, force) {
-            return (val !== void 0) ? val : 0;
-        }
-        zoom(val, force) {
-            return (val !== void 0) ? val : 1;
-        }
-        start_pan(val, force) {
-            return (val !== void 0) ? val : [].concat(0, 0);
-        }
-        pan(val, force) {
-            return (val !== void 0) ? val : [].concat(0, 0);
-        }
-        start_pos(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_precision() {
-            return 16;
-        }
-        swipe_right(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_bottom(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_left(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_top(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_from_right(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_from_bottom(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_from_left(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_from_top(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_to_right(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_to_bottom(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_to_left(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        swipe_to_top(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        event() {
-            return (Object.assign({}, super.event(), { "touchstart": (event) => this.event_start(event), "touchmove": (event) => this.event_move(event), "touchend": (event) => this.event_end(event), "mousedown": (event) => this.event_start(event), "mousemove": (event) => this.event_move(event), "mouseup": (event) => this.event_end(event) }));
-        }
-        event_start(event, force) {
-            return (event !== void 0) ? event : null;
-        }
-        event_move(event, force) {
-            return (event !== void 0) ? event : null;
-        }
-        event_end(event, force) {
-            return (event !== void 0) ? event : null;
-        }
-        event_async() {
-            return ({
-                "wheel": (event) => this.event_wheel(event),
-            });
-        }
-        event_wheel(event, force) {
-            return (event !== void 0) ? event : null;
-        }
-    }
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "start_zoom", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "start_distance", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "zoom", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "start_pan", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "pan", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "start_pos", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_right", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_bottom", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_left", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_top", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_from_right", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_from_bottom", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_from_left", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_from_top", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_to_right", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_to_bottom", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_to_left", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "swipe_to_top", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "event_start", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "event_move", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "event_end", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_touch.prototype, "event_wheel", null);
-    $.$mol_touch = $mol_touch;
-})($ || ($ = {}));
-//touch.view.tree.js.map
+//local.js.map
 ;
 "use strict";
 var $;
 (function ($) {
-    var $$;
-    (function ($$) {
-        class $mol_touch extends $.$mol_touch {
-            event_start(event) {
-                if (event.defaultPrevented)
-                    return;
-                this.start_pan(this.pan());
-                if (event instanceof TouchEvent) {
-                    if (event.touches.length === 1) {
-                        const pos = [event.touches[0].pageX, event.touches[0].pageY];
-                        this.start_pos(pos);
-                    }
-                    if (event.touches.length === 2) {
-                        const distance = Math.pow((Math.pow((event.touches[1].pageX - event.touches[0].pageX), 2) + Math.pow((event.touches[1].pageY - event.touches[0].pageY), 2)), .5);
-                        this.start_distance(distance);
-                        this.start_zoom(this.zoom());
-                    }
-                }
-                else if (event instanceof MouseEvent) {
-                    if (event.buttons === 1) {
-                        const pos = [event.pageX, event.pageY];
-                        this.start_pos(pos);
-                    }
-                }
-            }
-            event_move(event) {
-                if (event.defaultPrevented)
-                    return;
-                const start_pan = this.start_pan();
-                let pos;
-                if (event instanceof MouseEvent) {
-                    if (event.buttons === 1)
-                        pos = [event.pageX, event.pageY];
-                    else
-                        this.start_pos(null);
-                }
-                if (event instanceof TouchEvent) {
-                    if (event.touches.length === 1)
-                        pos = [event.touches[0].pageX, event.touches[0].pageY];
-                    else
-                        this.start_pos(null);
-                }
-                if (pos) {
-                    const start_pos = this.start_pos();
-                    if (!start_pos)
-                        return;
-                    const precision = this.swipe_precision();
-                    if (this.pan !== $mol_touch.prototype.pan) {
-                        this.pan([start_pan[0] + pos[0] - start_pos[0], start_pan[1] + pos[1] - start_pos[1]]);
-                        event.preventDefault();
-                    }
-                    if ((this.swipe_right !== $mol_touch.prototype.swipe_right
-                        || this.swipe_from_left !== $mol_touch.prototype.swipe_from_left
-                        || this.swipe_to_right !== $mol_touch.prototype.swipe_to_right)
-                        && pos[0] - start_pos[0] > precision * 2
-                        && Math.abs(pos[1] - start_pos[1]) < precision) {
-                        this.swipe_right(event);
-                        event.preventDefault();
-                    }
-                    if ((this.swipe_left !== $mol_touch.prototype.swipe_left
-                        || this.swipe_from_right !== $mol_touch.prototype.swipe_from_right
-                        || this.swipe_to_left !== $mol_touch.prototype.swipe_to_left)
-                        && start_pos[0] - pos[0] > precision * 2
-                        && Math.abs(pos[1] - start_pos[1]) < precision) {
-                        this.swipe_left(event);
-                        event.preventDefault();
-                    }
-                    if ((this.swipe_bottom !== $mol_touch.prototype.swipe_bottom
-                        || this.swipe_from_top !== $mol_touch.prototype.swipe_from_top
-                        || this.swipe_to_bottom !== $mol_touch.prototype.swipe_to_bottom)
-                        && pos[1] - start_pos[1] > precision * 2
-                        && Math.abs(pos[0] - start_pos[0]) < precision) {
-                        this.swipe_bottom(event);
-                        event.preventDefault();
-                    }
-                    if ((this.swipe_top !== $mol_touch.prototype.swipe_top
-                        || this.swipe_from_bottom !== $mol_touch.prototype.swipe_from_bottom
-                        || this.swipe_to_top !== $mol_touch.prototype.swipe_to_top)
-                        && start_pos[1] - pos[1] > precision * 2
-                        && Math.abs(pos[0] - start_pos[0]) < precision) {
-                        this.swipe_top(event);
-                        event.preventDefault();
-                    }
-                }
-                if (event instanceof TouchEvent && event.touches.length === 2) {
-                    if (this.zoom === $mol_touch.prototype.zoom)
-                        return;
-                    const pos0 = [event.touches[0].pageX, event.touches[0].pageY];
-                    const pos1 = [event.touches[1].pageX, event.touches[1].pageY];
-                    const distance = Math.pow((Math.pow((pos1[0] - pos0[0]), 2) + Math.pow((pos1[1] - pos0[1]), 2)), .5);
-                    const center = [pos1[0] / 2 + pos0[0] / 2, pos1[1] / 2 + pos0[1] / 2];
-                    const start_zoom = this.start_zoom();
-                    const mult = distance / this.start_distance();
-                    this.zoom(start_zoom * mult);
-                    const pan = [(start_pan[0] - center[0]) * mult + center[0], (start_pan[1] - center[1]) * mult + center[1]];
-                    this.pan(pan);
-                    event.preventDefault();
-                }
-            }
-            swipe_left(event) {
-                if (this.dom_node().getBoundingClientRect().right - this.start_pos()[0] < this.swipe_precision() * 2)
-                    this.swipe_from_right(event);
-                else
-                    this.swipe_to_left(event);
-            }
-            swipe_right(event) {
-                if (this.start_pos()[0] - this.dom_node().getBoundingClientRect().left < this.swipe_precision() * 2)
-                    this.swipe_from_left(event);
-                else
-                    this.swipe_to_right(event);
-            }
-            swipe_top(event) {
-                if (this.dom_node().getBoundingClientRect().bottom - this.start_pos()[1] < this.swipe_precision() * 2)
-                    this.swipe_from_bottom(event);
-                else
-                    this.swipe_to_top(event);
-            }
-            swipe_bottom(event) {
-                if (this.start_pos()[1] - this.dom_node().getBoundingClientRect().top < this.swipe_precision() * 2)
-                    this.swipe_from_top(event);
-                else
-                    this.swipe_to_bottom(event);
-            }
-            event_end(event) {
-                this.start_pos(null);
-            }
-            event_wheel(event) {
-                const zoom_prev = this.zoom();
-                const zoom_next = zoom_prev * (1 - .1 * Math.sign(event.deltaY));
-                const mult = zoom_next / zoom_prev;
-                this.zoom(zoom_next);
-                const pan_prev = this.pan();
-                const center = [event.layerX, event.layerY];
-                const pan_next = [(pan_prev[0] - center[0]) * mult + center[0], (pan_prev[1] - center[1]) * mult + center[1]];
-                this.pan(pan_next);
-            }
-        }
-        $$.$mol_touch = $mol_touch;
-    })($$ = $.$$ || ($.$$ = {}));
+    self.addEventListener('storage', event => {
+        $.$mol_state_local.value(event.key, void 0, $.$mol_atom_force_cache);
+    });
 })($ || ($ = {}));
-//touch.view.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    class $mol_ghost extends $.$mol_view {
-        Sub() {
-            return ((obj) => {
-                return obj;
-            })(new this.$.$mol_view);
-        }
-    }
-    __decorate([
-        $.$mol_mem
-    ], $mol_ghost.prototype, "Sub", null);
-    $.$mol_ghost = $mol_ghost;
-})($ || ($ = {}));
-//ghost.view.tree.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    var $$;
-    (function ($$) {
-        class $mol_ghost extends $.$mol_ghost {
-            dom_node() {
-                const node = this.Sub().dom_node();
-                $.$mol_dom_render_attributes(node, this.attr_static());
-                $.$mol_dom_render_events(node, this.event());
-                $.$mol_dom_render_events_async(node, this.event_async());
-                return node;
-            }
-            dom_tree() {
-                const node = this.Sub().dom_tree();
-                super.render();
-                return node;
-            }
-            title() {
-                return this.Sub().title();
-            }
-        }
-        __decorate([
-            $.$mol_mem
-        ], $mol_ghost.prototype, "dom_node", null);
-        $$.$mol_ghost = $mol_ghost;
-    })($$ = $.$$ || ($.$$ = {}));
-})($ || ($ = {}));
-//ghost.view.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    class $mol_book extends $.$mol_view {
-        sub() {
-            return this.pages_wrapped();
-        }
-        pages_wrapped() {
-            return [];
-        }
-        pages() {
-            return [];
-        }
-        plugins() {
-            return [].concat(this.Meter(), this.Touch());
-        }
-        width() {
-            return this.Meter().width();
-        }
-        Meter() {
-            return ((obj) => {
-                return obj;
-            })(new this.$.$mol_meter);
-        }
-        Touch() {
-            return ((obj) => {
-                obj.swipe_from_left = (val) => this.event_front_up(val);
-                obj.swipe_to_left = (val) => this.event_front_down(val);
-                return obj;
-            })(new this.$.$mol_touch);
-        }
-        event_front_up(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        event_front_down(val, force) {
-            return (val !== void 0) ? val : null;
-        }
-        Page(index) {
-            return ((obj) => {
-                obj.Sub = () => this.page(index);
-                obj.visible = () => this.page_visible(index);
-                return obj;
-            })(new this.$.$mol_book_page);
-        }
-        page(index) {
-            return null;
-        }
-        page_visible(index) {
-            return true;
-        }
-        Placeholder() {
-            return ((obj) => {
-                obj.title = () => this.title();
-                return obj;
-            })(new this.$.$mol_book_placeholder);
-        }
-    }
-    __decorate([
-        $.$mol_mem
-    ], $mol_book.prototype, "Meter", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_book.prototype, "Touch", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_book.prototype, "event_front_up", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_book.prototype, "event_front_down", null);
-    __decorate([
-        $.$mol_mem_key
-    ], $mol_book.prototype, "Page", null);
-    __decorate([
-        $.$mol_mem
-    ], $mol_book.prototype, "Placeholder", null);
-    $.$mol_book = $mol_book;
-})($ || ($ = {}));
-(function ($) {
-    class $mol_book_placeholder extends $.$mol_scroll {
-        minimal_width() {
-            return 400;
-        }
-        attr() {
-            return (Object.assign({}, super.attr(), { "tabindex": null }));
-        }
-    }
-    $.$mol_book_placeholder = $mol_book_placeholder;
-})($ || ($ = {}));
-(function ($) {
-    class $mol_book_page extends $.$mol_ghost {
-        attr() {
-            return (Object.assign({}, super.attr(), { "tabindex": 0, "mol_book_page_focused": this.focused(), "mol_book_page_visible": this.visible() }));
-        }
-        visible() {
-            return true;
-        }
-    }
-    $.$mol_book_page = $mol_book_page;
-})($ || ($ = {}));
-//book.view.tree.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    var $$;
-    (function ($$) {
-        class $mol_book extends $.$mol_book {
-            pages_extended() {
-                return [this.Placeholder()].concat(this.pages());
-            }
-            break_point() {
-                const pages = this.pages_extended();
-                const limit = this.width();
-                let width = 0;
-                for (var break_point = pages.length; break_point > 0; --break_point) {
-                    const page = pages[break_point - 1];
-                    if (!page)
-                        continue;
-                    const page_width = page.minimal_width();
-                    if (width + page_width > limit)
-                        break;
-                    width += page_width;
-                }
-                if (width === 0)
-                    --break_point;
-                return break_point;
-            }
-            page(index) {
-                return this.pages_extended()[index];
-            }
-            page_visible(index) {
-                return index >= this.break_point();
-            }
-            pages_wrapped() {
-                const pages = this.pages_extended();
-                const extended = [];
-                for (let i = 1; i < pages.length; ++i) {
-                    if (pages[i])
-                        extended.push(this.Page(i));
-                }
-                if (pages[0])
-                    extended.push(this.Page(0));
-                return extended;
-            }
-            title() {
-                return this.pages().map(page => page.title()).reverse().join(' | ');
-            }
-            event_front_up(event) {
-                if (!event)
-                    return;
-                if (event.defaultPrevented)
-                    return;
-                this.page(1).focused(true);
-            }
-            event_front_down(event) {
-                if (!event)
-                    return;
-                if (event.defaultPrevented)
-                    return;
-                this.page(1).focused(false);
-            }
-        }
-        __decorate([
-            $.$mol_mem
-        ], $mol_book.prototype, "pages_extended", null);
-        __decorate([
-            $.$mol_mem
-        ], $mol_book.prototype, "break_point", null);
-        __decorate([
-            $.$mol_mem
-        ], $mol_book.prototype, "pages_wrapped", null);
-        $$.$mol_book = $mol_book;
-    })($$ = $.$$ || ($.$$ = {}));
-})($ || ($ = {}));
-//book.view.js.map
+//local.web.js.map
 ;
 "use strict";
 var $;
@@ -3913,72 +3205,6 @@ var $;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
 //list.view.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    class $mol_state_local extends $.$mol_object {
-        static native() {
-            if (this['native()'])
-                return this['native()'];
-            check: try {
-                const native = $.$mol_dom_context.localStorage;
-                if (!native)
-                    break check;
-                native.setItem('', '');
-                native.removeItem('');
-                return this['native()'] = native;
-            }
-            catch (error) {
-                console.warn(error);
-            }
-            return this['native()'] = {
-                getItem(key) {
-                    return this[':' + key];
-                },
-                setItem(key, value) {
-                    this[':' + key] = value;
-                },
-                removeItem(key) {
-                    this[':' + key] = void 0;
-                }
-            };
-        }
-        static value(key, next, force) {
-            if (next === void 0)
-                return JSON.parse(this.native().getItem(key) || 'null');
-            if (next === null)
-                this.native().removeItem(key);
-            else
-                this.native().setItem(key, JSON.stringify(next));
-            return next;
-        }
-        prefix() { return ''; }
-        value(key, next) {
-            return $mol_state_local.value(this.prefix() + '.' + key, next);
-        }
-    }
-    __decorate([
-        $.$mol_mem_key
-    ], $mol_state_local, "value", null);
-    $.$mol_state_local = $mol_state_local;
-})($ || ($ = {}));
-//local.js.map
-;
-"use strict";
-var $;
-(function ($) {
-    self.addEventListener('storage', event => {
-        $.$mol_state_local.value(event.key, void 0, $.$mol_atom_force_cache);
-    });
-})($ || ($ = {}));
-//local.web.js.map
 ;
 "use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -4101,6 +3327,33 @@ var $;
         row_expanded_default() {
             return false;
         }
+        ComboBoxCell(id) {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.ComboBox(id));
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        ComboBox(id) {
+            return ((obj) => {
+                obj.options = () => ({
+                    "auto": "auto",
+                    "cinema": "cinema",
+                    "hd": "hd",
+                    "widescreen": "widescreen",
+                    "tablet-landscape": "tablet-landscape",
+                    "small-tablet-landscape": "small-tablet-landscape",
+                    "tablet-portrait": "tablet-portrait",
+                    "small-tablet-portrait": "small-tablet-portrait",
+                    "mobile-landscape": "mobile-landscape",
+                    "mobile-portrait": "mobile-portrait",
+                });
+                obj.selected = (val) => this.selected(id, val);
+                return obj;
+            })(new this.$.$bw_combo_box);
+        }
+        selected(id, val, force) {
+            return (val !== void 0) ? val : "auto";
+        }
         SwitchCell(id) {
             return ((obj) => {
                 obj.sub = () => [].concat(this.Switch(id));
@@ -4127,6 +3380,15 @@ var $;
             return "on";
         }
     }
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_easter_panel_nav.prototype, "ComboBoxCell", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_easter_panel_nav.prototype, "ComboBox", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_easter_panel_nav.prototype, "selected", null);
     __decorate([
         $.$mol_mem_key
     ], $bw_easter_panel_nav.prototype, "SwitchCell", null);
@@ -4231,47 +3493,884 @@ var $;
     $.$bw_old_look = $bw_old_look;
 })($ || ($ = {}));
 (function ($) {
-    class $bw_new_look extends $.$mol_book {
-        title() {
-            return this.new_look_title();
+    class $bw_new_look extends $.$mol_view {
+        sub() {
+            return [].concat(this.Menu(), this.Workspace());
         }
-        new_look_title() {
-            return "$bw_new_look";
-        }
-        pages() {
-            return this.blocks();
-        }
-        blocks() {
-            return [];
-        }
-        LeftBar() {
-            return ((obj) => {
-                obj.minimal_width = () => 60;
-                obj.sub = () => [].concat(this.LookSelector(), this.Nav());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-        LookSelector() {
+        Menu() {
             return ((obj) => {
                 return obj;
-            })(new this.$.$bw_look_selector);
+            })(new this.$.$bw_main_menu);
         }
-        Nav() {
+        Workspace() {
             return ((obj) => {
                 return obj;
-            })(new this.$.$bw_main_nav);
+            })(new this.$.$bw_workspace);
         }
     }
     __decorate([
         $.$mol_mem
-    ], $bw_new_look.prototype, "LeftBar", null);
+    ], $bw_new_look.prototype, "Menu", null);
     __decorate([
         $.$mol_mem
-    ], $bw_new_look.prototype, "LookSelector", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_new_look.prototype, "Nav", null);
+    ], $bw_new_look.prototype, "Workspace", null);
     $.$bw_new_look = $bw_new_look;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_main_menu extends $.$mol_view {
+        sub() {
+            return [].concat(this.Login(), this.List());
+        }
+        Login() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_main_menu_login);
+        }
+        List() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_main_menu_list);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu.prototype, "Login", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu.prototype, "List", null);
+    $.$bw_main_menu = $bw_main_menu;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_main_menu_login extends $.$mol_view {
+        sub() {
+            return [].concat(this.Content());
+        }
+        Content() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Icon(), this.Name());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Icon() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_icon_user);
+        }
+        Name() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_main_menu_login_name);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_login.prototype, "Content", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_login.prototype, "Icon", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_login.prototype, "Name", null);
+    $.$bw_main_menu_login = $bw_main_menu_login;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_main_menu_login_name extends $.$mol_view {
+        sub() {
+            return [].concat(this.user_name());
+        }
+        user_name() {
+            return "novoseltsev.st@gmail.com";
+        }
+    }
+    $.$bw_main_menu_login_name = $bw_main_menu_login_name;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_main_menu_list extends $.$mol_view {
+        sub() {
+            return [].concat(this.MainPage(), this.SearchPage(), this.OrdersPage(), this.ClientsPage(), this.AdvPage(), this.DocsPage(), this.UsersPage(), this.FeedbackPage(), this.SubscriptionPage(), this.SettingsPage(), this.CmaPage(), this.HistoryPage(), this.FavoritesPage(), this.ArchivePage());
+        }
+        MainPage() {
+            return ((obj) => {
+                obj.id = () => "main";
+                obj.title = () => "Главная";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_home);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        SearchPage() {
+            return ((obj) => {
+                obj.id = () => "search";
+                obj.title = () => "Поиск";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_search);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        OrdersPage() {
+            return ((obj) => {
+                obj.id = () => "orders";
+                obj.title = () => "Заказы";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_buy);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        ClientsPage() {
+            return ((obj) => {
+                obj.id = () => "clients";
+                obj.title = () => "Клиенты";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_meeting);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        AdvPage() {
+            return ((obj) => {
+                obj.id = () => "adv";
+                obj.title = () => "Мои объявления";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_resume_website);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        DocsPage() {
+            return ((obj) => {
+                obj.id = () => "docs";
+                obj.title = () => "Документы";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_wipes);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        UsersPage() {
+            return ((obj) => {
+                obj.id = () => "users";
+                obj.title = () => "Пользователи";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_add_user_group);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        FeedbackPage() {
+            return ((obj) => {
+                obj.id = () => "feedback";
+                obj.title = () => "Обратная связь";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_info_popup);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        SubscriptionPage() {
+            return ((obj) => {
+                obj.id = () => "subscription";
+                obj.title = () => "Подписка";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_wallet_copy_2);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        SettingsPage() {
+            return ((obj) => {
+                obj.id = () => "settings";
+                obj.title = () => "Настройки";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_settings);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        CmaPage() {
+            return ((obj) => {
+                obj.id = () => "cma";
+                obj.title = () => "СМА";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_sell_property);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        HistoryPage() {
+            return ((obj) => {
+                obj.id = () => "history";
+                obj.title = () => "История поиска";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_last_hour);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        FavoritesPage() {
+            return ((obj) => {
+                obj.id = () => "favorites";
+                obj.title = () => "Избранное";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_star);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+        ArchivePage() {
+            return ((obj) => {
+                obj.id = () => "archive";
+                obj.title = () => "Архивные данные";
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_winrar);
+                return obj;
+            })(new this.$.$bw_main_menu_list_item);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "MainPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "SearchPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "OrdersPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "ClientsPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "AdvPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "DocsPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "UsersPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "FeedbackPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "SubscriptionPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "SettingsPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "CmaPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "HistoryPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "FavoritesPage", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list.prototype, "ArchivePage", null);
+    $.$bw_main_menu_list = $bw_main_menu_list;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_main_menu_list_item extends $.$mol_check {
+        id() {
+            return "";
+        }
+        title() {
+            return "";
+        }
+        Icon() {
+            return null;
+        }
+        minimal_height() {
+            return 52;
+        }
+        sub() {
+            return [].concat(this.Content());
+        }
+        Content() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Icon(), this.Title());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Title() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.title());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list_item.prototype, "Content", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_main_menu_list_item.prototype, "Title", null);
+    $.$bw_main_menu_list_item = $bw_main_menu_list_item;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_workspace extends $.$mol_view {
+        sub() {
+            return [].concat(this.Content());
+        }
+        Content() {
+            return null;
+        }
+        SettingsWorkspace() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_settings_workspace);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_workspace.prototype, "SettingsWorkspace", null);
+    $.$bw_workspace = $bw_workspace;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_settings_workspace extends $.$mol_view {
+        sub() {
+            return [].concat(this.Menu(), this.Content());
+        }
+        Menu() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "search": "Настройка поиска",
+                    "personal": "Личные данные",
+                    "profile": "Настройка профиля",
+                    "blacklist": "Черный список",
+                });
+                return obj;
+            })(new this.$.$mol_switch);
+        }
+        Content() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Narrow(), this.Wide());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Narrow() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.SearchSettings(), this.PersonalSettings(), this.ProfileSettings());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        SearchSettings() {
+            return ((obj) => {
+                obj.block_title = () => "Настройка поиска";
+                obj.content = () => [].concat(this.SearchDeep(), this.Nova(), this.Apartments(), this.Sold());
+                return obj;
+            })(new this.$.$bw_settings_block);
+        }
+        SearchDeep() {
+            return ((obj) => {
+                obj.label = () => "Глубина поиска";
+                obj.Control = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_search_deep);
+                return obj;
+            })(new this.$.$bw_field);
+        }
+        Nova() {
+            return ((obj) => {
+                obj.label = () => "Новостройки";
+                obj.Control = () => ((obj) => {
+                    obj.selected = () => "Включая новостройки";
+                    return obj;
+                })(new this.$.$bw_combo_box);
+                return obj;
+            })(new this.$.$bw_field);
+        }
+        Apartments() {
+            return ((obj) => {
+                obj.label = () => "Апартаменты";
+                obj.Control = () => ((obj) => {
+                    obj.selected = () => "Включая апартаменты";
+                    return obj;
+                })(new this.$.$bw_combo_box);
+                return obj;
+            })(new this.$.$bw_field);
+        }
+        Sold() {
+            return ((obj) => {
+                obj.label = () => "Снятые с продажи";
+                obj.Control = () => ((obj) => {
+                    obj.selected = () => "Кроме снятых с продажи/аренды";
+                    return obj;
+                })(new this.$.$bw_combo_box);
+                return obj;
+            })(new this.$.$bw_field);
+        }
+        PersonalSettings() {
+            return ((obj) => {
+                obj.block_title = () => "Личные данные";
+                obj.content = () => [].concat(this.Name(), this.Phone(), this.Email(), this.Pass());
+                return obj;
+            })(new this.$.$bw_settings_block);
+        }
+        Name() {
+            return ((obj) => {
+                obj.label = () => "ФИО";
+                obj.Control = () => ((obj) => {
+                    obj.value = (val) => this.name();
+                    return obj;
+                })(new this.$.$bw_input);
+                return obj;
+            })(new this.$.$bw_field);
+        }
+        name() {
+            return "Новосельцев Станислав Игоревич";
+        }
+        Phone() {
+            return ((obj) => {
+                obj.label = () => "Телефон";
+                obj.Control = () => ((obj) => {
+                    obj.value = (val) => this.phone();
+                    return obj;
+                })(new this.$.$bw_input);
+                return obj;
+            })(new this.$.$bw_field);
+        }
+        phone() {
+            return "+7 (978) 072-23-90";
+        }
+        Email() {
+            return ((obj) => {
+                obj.label = () => "E-mail";
+                obj.Control = () => ((obj) => {
+                    obj.value = (val) => this.email();
+                    return obj;
+                })(new this.$.$bw_input);
+                return obj;
+            })(new this.$.$bw_field);
+        }
+        email() {
+            return "novoseltsev.st@gmail.com";
+        }
+        Pass() {
+            return ((obj) => {
+                obj.label = () => "Пароль";
+                obj.Control = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_settings_input_pass);
+                return obj;
+            })(new this.$.$bw_field);
+        }
+        ProfileSettings() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_profile_settings_block);
+        }
+        Wide() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.BlacklistSettings());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        BlacklistSettings() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_blacklist_settings_block);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Menu", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Content", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Narrow", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "SearchSettings", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "SearchDeep", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Nova", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Apartments", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Sold", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "PersonalSettings", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Name", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Phone", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Email", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Pass", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "ProfileSettings", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "Wide", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_workspace.prototype, "BlacklistSettings", null);
+    $.$bw_settings_workspace = $bw_settings_workspace;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_settings_input_pass extends $.$mol_view {
+        sub() {
+            return [].concat(this.Input(), this.Space(), this.Link());
+        }
+        Input() {
+            return ((obj) => {
+                obj.value = (val) => this.pass();
+                obj.type = (val) => "password";
+                return obj;
+            })(new this.$.$bw_input);
+        }
+        pass() {
+            return "************";
+        }
+        Space() {
+            return ((obj) => {
+                obj.dom_name = () => "horspace";
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Link() {
+            return ((obj) => {
+                obj.title = () => "редактировать";
+                return obj;
+            })(new this.$.$bw_link);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_input_pass.prototype, "Input", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_input_pass.prototype, "Space", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_input_pass.prototype, "Link", null);
+    $.$bw_settings_input_pass = $bw_settings_input_pass;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_settings_block extends $.$mol_view {
+        block_title() {
+            return "";
+        }
+        content() {
+            return [];
+        }
+        button_title() {
+            return "Сохранить";
+        }
+        HeaderAddon() {
+            return null;
+        }
+        ButtonBarAddon() {
+            return null;
+        }
+        sub() {
+            return [].concat(this.Inner());
+        }
+        Inner() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Header(), this.Content(), this.ButtonBar());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Header() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Caption(), this.HeaderAddon());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Caption() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.block_title());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Content() {
+            return ((obj) => {
+                obj.sub = () => this.content();
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        ButtonBar() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Button(), this.ButtonBarAddon());
+                return obj;
+            })(new this.$.$mol_bar);
+        }
+        Button() {
+            return ((obj) => {
+                obj.title = () => this.button_title();
+                return obj;
+            })(new this.$.$bw_button);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_block.prototype, "Inner", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_block.prototype, "Header", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_block.prototype, "Caption", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_block.prototype, "Content", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_block.prototype, "ButtonBar", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_settings_block.prototype, "Button", null);
+    $.$bw_settings_block = $bw_settings_block;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_profile_settings_block extends $.$bw_settings_block {
+        block_title() {
+            return "Настройка профиля";
+        }
+        button_title() {
+            return "Отправить";
+        }
+        content() {
+            return [].concat(this.GreenText(), this.GreenName(), this.GreenLink());
+        }
+        GreenText() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Para0(), this.Para1());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Para0() {
+            return ((obj) => {
+                obj.sub = () => [].concat("Вы не раскрыли свое лицо! Ваши объявления публикуются в белой зоне Базы WinNER (в подвале выборки).");
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Para1() {
+            return ((obj) => {
+                obj.sub = () => [].concat("Для публикации в \"зеленой зоне\" Вам необходимо раскрыть свое лицо. Публикация в \"зеленой зоне\" бесплатна для действующих клиентов.");
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        GreenName() {
+            return ((obj) => {
+                obj.label = () => "Наименование";
+                obj.Control = () => ((obj) => {
+                    obj.value = (val) => this.green_name();
+                    return obj;
+                })(new this.$.$bw_input);
+                return obj;
+            })(new this.$.$bw_field);
+        }
+        green_name() {
+            return "";
+        }
+        GreenLink() {
+            return ((obj) => {
+                obj.label = () => "Ссылка на сайт";
+                obj.Control = () => ((obj) => {
+                    obj.value = (val) => this.green_link();
+                    return obj;
+                })(new this.$.$bw_input);
+                return obj;
+            })(new this.$.$bw_field);
+        }
+        green_link() {
+            return "";
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_profile_settings_block.prototype, "GreenText", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_profile_settings_block.prototype, "Para0", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_profile_settings_block.prototype, "Para1", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_profile_settings_block.prototype, "GreenName", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_profile_settings_block.prototype, "GreenLink", null);
+    $.$bw_profile_settings_block = $bw_profile_settings_block;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_blacklist_settings_block extends $.$bw_settings_block {
+        block_title() {
+            return "Черный список телефонов";
+        }
+        button_title() {
+            return "Добавить";
+        }
+        ButtonBarAddon() {
+            return ((obj) => {
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_trash);
+                return obj;
+            })(new this.$.$bw_button);
+        }
+        content() {
+            return [].concat(this.Grid());
+        }
+        Grid() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_blacklist_settings_block_grid);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_blacklist_settings_block.prototype, "ButtonBarAddon", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_blacklist_settings_block.prototype, "Grid", null);
+    $.$bw_blacklist_settings_block = $bw_blacklist_settings_block;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_blacklist_settings_block_grid extends $.$mol_grid {
+        row_height() {
+            return 44;
+        }
+        col_ids() {
+            return [].concat("check-box", "phone", "description", "author", "buttons");
+        }
+        records() {
+            return ({
+                "0": this.row0(),
+                "1": this.row1(),
+                "2": this.row2(),
+                "3": this.row3(),
+                "4": this.row4(),
+            });
+        }
+        row0() {
+            return ({
+                "phone": "+7 (911) 922-11-88",
+                "description": "Не отвечает на телефонные звонки после того, как наше агенство предложило взять квартиру в ипотеку",
+                "author": "Петров Александр Сергеевич",
+            });
+        }
+        row1() {
+            return ({
+                "phone": "+7 (911) 922-11-88",
+                "description": "Не отвечает на телефонные звонки после того, как наше агенство предложило взять квартиру в ипотеку",
+                "author": "Петров Александр Сергеевич",
+            });
+        }
+        row2() {
+            return ({
+                "phone": "+7 (911) 922-11-88",
+                "description": "Не отвечает на телефонные звонки после того, как наше агенство предложило взять квартиру в ипотеку",
+                "author": "Петров Александр Сергеевич",
+            });
+        }
+        row3() {
+            return ({
+                "phone": "+7 (911) 922-11-88",
+                "description": "Не отвечает на телефонные звонки после того, как наше агенство предложило взять квартиру в ипотеку",
+                "author": "Петров Александр Сергеевич",
+            });
+        }
+        row4() {
+            return ({
+                "phone": "+7 (911) 922-11-88",
+                "description": "Не отвечает на телефонные звонки после того, как наше агенство предложило взять квартиру в ипотеку",
+                "author": "Петров Александр Сергеевич",
+            });
+        }
+        SearchIcon(colId) {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_icon_search);
+        }
+        CheckBoxCell(id) {
+            return ((obj) => {
+                obj.dom_name = () => "td";
+                obj.sub = () => [].concat(this.CheckBox(id));
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        CheckBox(id) {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_check_box);
+        }
+        ButtonsCell(id) {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.EditButton(id), this.DeleteButton(id));
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        EditButton(id) {
+            return ((obj) => {
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_edit);
+                return obj;
+            })(new this.$.$bw_button);
+        }
+        DeleteButton(id) {
+            return ((obj) => {
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_trash);
+                return obj;
+            })(new this.$.$bw_button);
+        }
+    }
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_blacklist_settings_block_grid.prototype, "SearchIcon", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_blacklist_settings_block_grid.prototype, "CheckBoxCell", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_blacklist_settings_block_grid.prototype, "CheckBox", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_blacklist_settings_block_grid.prototype, "ButtonsCell", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_blacklist_settings_block_grid.prototype, "EditButton", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_blacklist_settings_block_grid.prototype, "DeleteButton", null);
+    $.$bw_blacklist_settings_block_grid = $bw_blacklist_settings_block_grid;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_settings_block_text extends $.$mol_view {
+        text() {
+            return "";
+        }
+        sub() {
+            return [].concat(this.text());
+        }
+    }
+    $.$bw_settings_block_text = $bw_settings_block_text;
 })($ || ($ = {}));
 (function ($) {
     class $bw_look_selector extends $.$mol_link {
@@ -4292,37 +4391,6 @@ var $;
         $.$mol_mem
     ], $bw_look_selector.prototype, "link_click", null);
     $.$bw_look_selector = $bw_look_selector;
-})($ || ($ = {}));
-(function ($) {
-    class $bw_main_nav extends $.$mol_list {
-        rows() {
-            return this.items();
-        }
-        items() {
-            return [];
-        }
-        NavItem(id) {
-            return ((obj) => {
-                obj.title = () => this.item_title(id);
-                obj.arg = () => this.item_arg(id);
-                obj.current = () => this.is_current(id);
-                return obj;
-            })(new this.$.$mol_link);
-        }
-        item_title(id) {
-            return "";
-        }
-        item_arg(id) {
-            return ({});
-        }
-        is_current(id) {
-            return false;
-        }
-    }
-    __decorate([
-        $.$mol_mem_key
-    ], $bw_main_nav.prototype, "NavItem", null);
-    $.$bw_main_nav = $bw_main_nav;
 })($ || ($ = {}));
 //bw.view.tree.js.map
 ;
@@ -4346,27 +4414,50 @@ var $;
                 this._switch_states = {};
                 Object.keys(hierarchy).map((id) => {
                     if (!hierarchy[id].sub.length) {
-                        this._switch_state_atoms[id] = new $.$mol_atom(this.switch_state_atom_name(id), (next) => {
-                            if (next !== void 0) {
-                                this._switch_states[id] = next;
-                            }
-                            return this._switch_states[id];
-                        });
+                        if (id == 'viewport-width') {
+                            this._switch_state_atoms[id] = new $.$mol_atom(this.switch_state_atom_name(id), (next) => {
+                                if (next !== void 0) {
+                                    this._viewportWidth = next;
+                                }
+                                return this._viewportWidth;
+                            });
+                        }
+                        else {
+                            this._switch_state_atoms[id] = new $.$mol_atom(this.switch_state_atom_name(id), (next) => {
+                                if (next !== void 0) {
+                                    this._switch_states[id] = next;
+                                }
+                                return this._switch_states[id];
+                            });
+                        }
                     }
                 });
             }
             switch_atom_value(id, next) {
-                if (next != void 0) {
-                    this._switch_state_atoms[id].set(next === 'on');
-                    if (id == 'theme') {
-                        this.$.$mol_state_local.value('theme', next === 'on' ? 'light' : 'dark');
+                if (id == 'viewport-width') {
+                    if (next != void 0) {
+                        this.$.$mol_state_local.value('viewport-width', next);
+                        this._switch_state_atoms[id].set(next);
                     }
+                    let result = this._switch_state_atoms[id].get();
+                    if (result === undefined) {
+                        result = this.$.$mol_state_local.value('viewport-width');
+                    }
+                    return result || 'auto';
                 }
-                let result = this._switch_state_atoms[id].get();
-                if (id == 'theme' && result === undefined) {
-                    result = this.$.$mol_state_local.value('theme') === 'light';
+                else {
+                    if (next != void 0) {
+                        this._switch_state_atoms[id].set(next === 'on');
+                        if (id == 'theme') {
+                            this.$.$mol_state_local.value('theme', next === 'on' ? 'light' : 'dark');
+                        }
+                    }
+                    let result = this._switch_state_atoms[id].get();
+                    if (id == 'theme' && result === undefined) {
+                        result = this.$.$mol_state_local.value('theme') === 'light';
+                    }
+                    return result ? 'on' : 'off';
                 }
-                return result ? 'on' : 'off';
             }
             switch_state_atom_name(id) {
                 return 'bw_easter_data.hierarchy()["' + id + '"]';
@@ -4398,6 +4489,7 @@ var $;
                     }
                     return hierarchy[id];
                 };
+                add_node_to_branch(root, 'viewport-width', { off: 'auto', on: 'on' });
                 add_node_to_branch(root, 'theme', { off: 'dark', on: 'light' });
                 let branch = add_node_to_branch(root, 'Рекомендации для light-темы');
                 add_node_to_branch(branch, 'non-white-background');
@@ -4476,6 +4568,12 @@ var $;
                 let result = this.$.$mol_state_arg.value('page') || 'selector';
                 return result;
             }
+            selected_main_menu_item(val) {
+                if (val !== void 0) {
+                    this.$.$mol_state_session.value('main_menu_item', val);
+                }
+                return this.$.$mol_state_session.value('main_menu_item') || 'main';
+            }
         }
         __decorate([
             $.$mol_mem
@@ -4498,6 +4596,9 @@ var $;
         __decorate([
             $.$mol_mem
         ], $bw_data.prototype, "selected_page", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_data.prototype, "selected_main_menu_item", null);
         class $bw extends $.$bw {
             constructor() {
                 super();
@@ -4537,9 +4638,22 @@ var $;
                 let hierarchy = bw_easter_data.hierarchy();
                 Object.keys(hierarchy).forEach((id) => {
                     if (!hierarchy[id].sub.length) {
-                        result['_' + id] = bw_easter_data.switch_atom_value(id) === 'on' ?
-                            bw_easter_data.on_title(id) :
-                            bw_easter_data.off_title(id);
+                        if (id == 'viewport-width') {
+                            const switch_atom_value = bw_easter_data.switch_atom_value(id);
+                            console.log({ switch_atom_value });
+                            if (bw_easter_data.switch_atom_value(id) == 'auto') {
+                                new $.$mol_defer(() => window.dispatchEvent(new Event('obtainActualMediaQueryTrue')));
+                            }
+                            else {
+                                new $.$mol_defer(() => window.dispatchEvent(new Event('obtainActualMediaQueryFalse')));
+                                result['_' + id] = bw_easter_data.switch_atom_value(id);
+                            }
+                        }
+                        else {
+                            result['_' + id] = bw_easter_data.switch_atom_value(id) === 'on' ?
+                                bw_easter_data.on_title(id) :
+                                bw_easter_data.off_title(id);
+                        }
                     }
                 });
                 return result;
@@ -4564,12 +4678,29 @@ var $;
         $$.$bw = $bw;
         class $bw_easter_panel_nav extends $.$bw_easter_panel_nav {
             Cell(id) {
-                if (id.col === 'title')
+                if (id.col === 'title') {
                     return super.Cell(id);
-                return this.SwitchCell(id);
+                }
+                else if (id.row[id.row.length - 1] == 'viewport-width') {
+                    return this.ComboBoxCell(id);
+                }
+                else {
+                    return this.SwitchCell(id);
+                }
             }
             get_node(id) {
                 return bw_easter_data.hierarchy()[id.row[id.row.length - 1]];
+            }
+            selected(id, val, force) {
+                const row_id = id.row[id.row.length - 1];
+                switch (row_id) {
+                    case 'viewport-width':
+                        if (val !== void 0) {
+                            bw_easter_data.switch_atom_value(row_id, val);
+                        }
+                        return bw_easter_data.switch_atom_value(row_id);
+                    default: return (val !== void 0) ? val : "auto";
+                }
             }
             switch_value(id, val, force) {
                 let node = this.get_node(id);
@@ -4623,6 +4754,9 @@ var $;
         }
         __decorate([
             $.$mol_mem_key
+        ], $bw_easter_panel_nav.prototype, "selected", null);
+        __decorate([
+            $.$mol_mem_key
         ], $bw_easter_panel_nav.prototype, "switch_value", null);
         $$.$bw_easter_panel_nav = $bw_easter_panel_nav;
         class $bw_way_selector extends $.$bw_way_selector {
@@ -4649,12 +4783,6 @@ var $;
         ], $bw_way_selector.prototype, "ways", null);
         $$.$bw_way_selector = $bw_way_selector;
         class $bw_new_look extends $.$bw_new_look {
-            blocks() {
-                let sub = [];
-                sub.push(this.LeftBar());
-                sub.push(super.Placeholder());
-                return sub;
-            }
         }
         $$.$bw_new_look = $bw_new_look;
         class $bw_look_selector extends $.$bw_look_selector {
@@ -4672,24 +4800,379 @@ var $;
             $.$mol_mem
         ], $bw_look_selector.prototype, "title", null);
         $$.$bw_look_selector = $bw_look_selector;
-        class $bw_main_nav extends $.$bw_main_nav {
-            items() {
-                return $$.bw_data.main_nav_item_enum().map((id) => this.NavItem(id));
+        class $bw_main_menu_list_item extends $.$bw_main_menu_list_item {
+            checked(val, force) {
+                if (val !== void 0) {
+                    $$.bw_data.selected_main_menu_item(this.id());
+                }
+                return (val !== void 0) ? val : this.id() === $$.bw_data.selected_main_menu_item();
             }
-            item_title(id) {
-                return $$.bw_data.main_nav_item_def()[id].title;
-            }
-            item_arg(main_nav) {
-                return { main_nav };
-            }
-            is_current(id) {
-                return id == $$.bw_data.selected_main_nav();
+            enabled() {
+                return !this.checked();
             }
         }
-        $$.$bw_main_nav = $bw_main_nav;
+        $$.$bw_main_menu_list_item = $bw_main_menu_list_item;
+        class $bw_workspace extends $.$bw_workspace {
+            Content() {
+                switch ($$.bw_data.selected_main_menu_item()) {
+                    case 'settings': return this.SettingsWorkspace();
+                }
+                return null;
+            }
+        }
+        __decorate([
+            $.$mol_mem
+        ], $bw_workspace.prototype, "Content", null);
+        $$.$bw_workspace = $bw_workspace;
+        class $bw_blacklist_settings_block_grid extends $.$bw_blacklist_settings_block_grid {
+            col_head_content(colId) {
+                switch (colId) {
+                    case 'buttons':
+                        return [];
+                    case 'phone':
+                        return ['Телефон', this.SearchIcon(colId)];
+                    case 'description':
+                        return ['Описание', this.SearchIcon(colId)];
+                    case 'author':
+                        return ['Кто добавил'];
+                    case 'check-box':
+                        return [this.CheckBox({ col: colId, row: ['', ''] })];
+                    default: return [colId];
+                }
+            }
+            Cell(id) {
+                let result;
+                switch (id.col) {
+                    case 'check-box':
+                        result = this.CheckBoxCell(id);
+                        break;
+                    case 'buttons':
+                        result = this.ButtonsCell(id);
+                        break;
+                    default: result = super.Cell(id);
+                }
+                return result;
+            }
+        }
+        $$.$bw_blacklist_settings_block_grid = $bw_blacklist_settings_block_grid;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
 //bw.view.js.map
+;
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var $;
+(function ($) {
+    class $bw_field extends $.$mol_view {
+        label() {
+            return "";
+        }
+        Control() {
+            return null;
+        }
+        sub() {
+            return [].concat(this.Label(), this.Control());
+        }
+        Label() {
+            return ((obj) => {
+                obj.text = () => this.label();
+                return obj;
+            })(new this.$.$bw_label);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_field.prototype, "Label", null);
+    $.$bw_field = $bw_field;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_label extends $.$mol_view {
+        text() {
+            return "";
+        }
+        sub() {
+            return [].concat(this.text());
+        }
+    }
+    $.$bw_label = $bw_label;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_link extends $.$mol_link {
+    }
+    $.$bw_link = $bw_link;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_input extends $.$mol_string {
+        attr() {
+            return (Object.assign({}, super.attr(), { "readonly": this.readonly() }));
+        }
+        readonly() {
+            return false;
+        }
+    }
+    $.$bw_input = $bw_input;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_search_deep extends $.$mol_view {
+        sub() {
+            return [].concat(this.Input(), this.Output(), this.Space(), this.Button());
+        }
+        Input() {
+            return ((obj) => {
+                obj.value = (val) => this.selected();
+                return obj;
+            })(new this.$.$bw_input);
+        }
+        selected() {
+            return "50 дней";
+        }
+        Output() {
+            return ((obj) => {
+                obj.text = () => "с 5 декабря 2018г.";
+                return obj;
+            })(new this.$.$bw_label);
+        }
+        Space() {
+            return ((obj) => {
+                obj.dom_name = () => "horspace";
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Button() {
+            return ((obj) => {
+                obj.event_click = (val) => this.icon_click(val);
+                obj.sub = () => [].concat(this.Icon());
+                return obj;
+            })(new this.$.$mol_button);
+        }
+        icon_click(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        Icon() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_icon_today);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_deep.prototype, "Input", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_deep.prototype, "Output", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_deep.prototype, "Space", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_deep.prototype, "Button", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_deep.prototype, "icon_click", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_deep.prototype, "Icon", null);
+    $.$bw_search_deep = $bw_search_deep;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_check_box extends $.$mol_check_box {
+    }
+    $.$bw_check_box = $bw_check_box;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_combo_box extends $.$mol_view {
+        options() {
+            return ({});
+        }
+        selected(val, force) {
+            return (val !== void 0) ? val : "";
+        }
+        sub() {
+            return [].concat(this.Input(), this.Check(), this.list());
+        }
+        Input() {
+            return ((obj) => {
+                obj.value = (val) => this.selected();
+                obj.readonly = () => true;
+                return obj;
+            })(new this.$.$bw_input);
+        }
+        Check() {
+            return ((obj) => {
+                obj.checked = (val) => this.dropped_down(val);
+                obj.Icon = () => ((obj) => {
+                    return obj;
+                })(new this.$.$bw_icon_triangle);
+                return obj;
+            })(new this.$.$mol_check);
+        }
+        dropped_down(val, force) {
+            return (val !== void 0) ? val : false;
+        }
+        list() {
+            return null;
+        }
+        List() {
+            return ((obj) => {
+                obj.rows = () => [].concat(this.option_rows());
+                return obj;
+            })(new this.$.$mol_list);
+        }
+        option_rows() {
+            return [];
+        }
+        Row(id) {
+            return ((obj) => {
+                obj.minimal_height = () => 32;
+                obj.title = () => this.row_title(id);
+                obj.checked = (val) => this.row_checked(id, val);
+                obj.event_click = (val) => this.row_click(id, val);
+                return obj;
+            })(new this.$.$mol_check);
+        }
+        row_title(id) {
+            return "";
+        }
+        row_checked(id, val, force) {
+            return (val !== void 0) ? val : false;
+        }
+        row_click(id, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_combo_box.prototype, "selected", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_combo_box.prototype, "Input", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_combo_box.prototype, "Check", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_combo_box.prototype, "dropped_down", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_combo_box.prototype, "List", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_combo_box.prototype, "Row", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_combo_box.prototype, "row_checked", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_combo_box.prototype, "row_click", null);
+    $.$bw_combo_box = $bw_combo_box;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_button extends $.$mol_button {
+        title() {
+            return "";
+        }
+        Icon() {
+            return null;
+        }
+        sub() {
+            return [].concat(this.Image());
+        }
+        Image() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Icon(), this.caption());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        caption() {
+            return null;
+        }
+        Caption() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.title());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_button.prototype, "Image", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_button.prototype, "Caption", null);
+    $.$bw_button = $bw_button;
+})($ || ($ = {}));
+//bw_controls.view.tree.js.map
+;
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var $;
+(function ($) {
+    var $$;
+    (function ($$) {
+        class $bw_button extends $.$bw_button {
+            caption() {
+                return !this.title() ? null : this.Caption();
+            }
+        }
+        $$.$bw_button = $bw_button;
+        class $bw_combo_box extends $.$bw_combo_box {
+            constructor() {
+                super();
+                this._dropped_down = false;
+                this._dropped_down_atom = new $.$mol_atom(this.dom_id(), (next) => {
+                    if (next !== void 0) {
+                        this._dropped_down = next;
+                    }
+                    return this._dropped_down;
+                });
+            }
+            dropped_down(val) {
+                if (val !== undefined) {
+                    this._dropped_down_atom.set(val);
+                }
+                return this._dropped_down_atom.get();
+            }
+            list() {
+                return !this.dropped_down() ? null : this.List();
+            }
+            option_rows() {
+                return Object.keys(this.options()).map(id => this.Row(id));
+            }
+            row_title(id) {
+                return this.options()[id];
+            }
+            row_checked(id, val, force) {
+                if (val !== void 0) {
+                    this.selected(id);
+                    return true;
+                }
+                else {
+                    return id === this.selected();
+                }
+            }
+            row_click(id, val, force) {
+                this.row_checked(id, true);
+                this.dropped_down(false);
+                return (val !== void 0) ? val : null;
+            }
+        }
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_combo_box.prototype, "row_checked", null);
+        $$.$bw_combo_box = $bw_combo_box;
+    })($$ = $.$$ || ($.$$ = {}));
+})($ || ($ = {}));
+//bw_controls.view.js.map
 ;
 "use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -5608,4 +6091,561 @@ var $;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
 //login.view.js.map
+;
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var $;
+(function ($) {
+    class $bw_icon_home extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 78 69";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M39 1.4L56.3 17V8h7l.1 15.5c4.8 4 9.3 8.3 14 12.4L67 36v31.3c-6 0-11.8.3-17.7-.1.2-8 0-16.2 0-24.2H28.8v24.2c-5.9.4-11.8.1-17.7.1V36H.7L39 1.3z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_home.prototype, "Path", null);
+    $.$bw_icon_home = $bw_icon_home;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_user extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 66 66";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M27.4 2.6c2.2-.9 4.4-1 6.6-1C41.2 1.7 47.4 9 47 16c-.1 6.8-6.2 13.1-13 13.6-7.5.7-14.9-6-15-13.6a14.3 14.3 0 0 1 8.4-13.4zM22 41.5c2.8 3.3 6.5 5.5 11 5.4 4.5 0 8.2-2.1 11-5.4 7 1.4 15 4 19.3 10 2 3.6.8 8.8 1 12.8H1.7c.3-4-.8-9.2 1.1-12.8 4.5-6 12.2-8.6 19.2-10z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_user.prototype, "Path", null);
+    $.$bw_icon_user = $bw_icon_user;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_trash extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 48 60";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M18 .2c4-.2 8 0 12 0l3 3h15V9c-16 0-32 .2-48-.2V3.2h15l3-3zM3 15l.1 39c0 3.1 2.7 5.8 5.8 5.8 9.7.2 19.4 0 29.1 0 3 .3 5.7-1.3 6.7-4.2.4-2.5.2-5.1.2-7.6V15H3.1zm9 6h6V54h-6V21.1zm24 0v33l-6-.1V21h6z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_trash.prototype, "Path", null);
+    $.$bw_icon_trash = $bw_icon_trash;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_search extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 60 57";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M23.1 2.6c-7 .1-13.8 4-16.9 10.5-2.4 4-2.1 9.3-1.5 13.7 1.6 5.3 5.4 10 10.4 12.3 4.3 2 9.5 2.3 14 1 2.6-1 5-2.6 7.4-3.9.2 2.2-.3 4.2 1.5 5.8l15 15h.7l5.2-5C53.5 46.4 48 41 42.5 35.6A82 82 0 0 1 38 35c1.7-3.8 4.1-6.7 4.5-11A19.3 19.3 0 0 0 23 2.6zm.5 5.5c5.9.2 11.3 4 12.9 10 .3 3.5.7 8-1.5 10.8-2.6 4-7 6.7-12 6.5-6.5 0-12.2-5-13.3-11.4A13.9 13.9 0 0 1 23.6 8.1z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_search.prototype, "Path", null);
+    $.$bw_icon_search = $bw_icon_search;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_edit extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 54 54";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M42.9 0h1.5l.4.2C48 3.1 51 6.2 54 9.4v1.8c-1.9 1.6-3.8 4.6-6 5.6A185 185 0 0 1 37.2 6c1-2.2 4-4.2 5.7-6zM32.4 10.2c4.2 3.1 7.5 7.5 11.5 10.9C33.4 32.3 22.1 43 11.3 54H0V42.2c1-.7 2-1.4 2.9-2.3 9.8-10 19.8-19.7 29.5-29.7z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_edit.prototype, "Path", null);
+    $.$bw_icon_edit = $bw_icon_edit;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_buy extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 72 72";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M6.6 1l-6 .1v7h7.1c4.1 9.1 7.7 18.4 11.7 27.6-2 3.4-5.7 7-5 11.2.1 3.5 3 6.4 6.5 6.4h42.5v-7H21c1.3-2.4 2.7-4.7 4.2-7l24.7.1c2.3 0 4.8 0 6.3-2.1 4-5.5 6.7-12 10.2-17.8 1.4-2.4 3-4.8 3.9-7.4.2-2.3-1-4-3.4-4-8.2-.2-16.4 0-24.6 0V1h-6.8v7L15.4 8A230 230 0 0 0 12.6 1h-6zm29 7h6.8v10.6h10.5c-4.7 4.7-9.4 9.2-13.9 14-4.4-4.8-9.2-9.3-13.8-14h10.4V8.1zM20.2 57.1c5.4-1 10.3 4.7 7.8 9.8-2.3 4.1-7.5 5.5-11.1 2.2a7 7 0 0 1 3.3-12zM53.5 57.6c3.6-1.6 7.7 0 9.4 3.5 1.2 3.4.3 7-3 9-4.4 2.6-10.6-1-10.5-6.1-.2-2.9 1.8-5 4.1-6.4z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_buy.prototype, "Path", null);
+    $.$bw_icon_buy = $bw_icon_buy;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_meeting extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 66 72";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M10.3 1.3c2.6-.6 5.4.1 7.1 2.3a7 7 0 0 1-1 9.8A7 7 0 0 1 5.3 9.8a7 7 0 0 1 5-8.5zM52.2 1.3c3-.7 6 .4 7.6 3 2 2.8 1.4 7-1.4 9.1a7 7 0 0 1-9.9-1c-3.1-3.8-1.1-10 3.7-11.1zM8 22.1c2.9-.2 5.9-.3 8.8.1 2.2.2 4 2.2 5.4 3.6L33 36.6c4.4-4.2 8.5-8.7 12.9-12.8 2.3-2.1 5.2-1.7 8.1-1.9 3 .2 5.8-.2 8.1 2 2 1.6 2.4 3.6 2.3 6v41h-7V50h-7v21h-7V36.8C39.7 40 36.4 43.7 33 47c-3.5-3.4-6.8-7-10.4-10.3V71h-7V50h-7v21h-7V29c-.2-3.5 3-6.6 6.4-6.8z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_meeting.prototype, "Path", null);
+    $.$bw_icon_meeting = $bw_icon_meeting;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_resume_website extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 66 66";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M55 1.6H9C5.7 1.7 3 3 2 6.2c-.6 3.2-.3 6.6-.4 9.9v40c0 2.5 0 4.6 2 6.4 1.8 1.9 4 2 6.4 2h46c2.5 0 4.6 0 6.4-2 2-1.8 2-4 2-6.4V10c0-2.5 0-4.6-2-6.4-2-2.2-4.6-1.9-7.4-2zm-29 7c1.8 0 3.7 1.3 3.6 3.4.1 2.2-2.4 4.3-4.6 3.5-2.7-.8-3.3-5-.9-6.4.6-.4 1.2-.5 1.9-.5zm-10.5 0c1.3 0 2.6.6 3.1 1.9 1.2 1.9-.5 5-2.6 5-3.4.5-5.4-4-2.6-6.2.6-.5 1.4-.7 2.1-.7zm20.9 0h21v7h-21v-7zm-27.8 14h48.8v34.7H8.6V22.6zm12 7c-.9 0-1.7.2-2.4.5-3.1 1.5-3.5 6.5-.9 8.6 2 1.7 5.3 1.7 7.2-.3 2-2 2-5.6-.3-7.6-1-1-2.3-1.3-3.7-1.2zm22.8 0h-7v6.8h14v-6.8h-7zm0 13.7c-2.3 0-4.6 0-7 .2-.2 2.3 0 4.6 0 6.9h14v-7h-7zm-22.7 0c-2.5 0-5 .8-7.2 2.2-1.6.9-1.3 3.3-1.8 4.8h18v-3.6a14 14 0 0 0-9-3.3z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_resume_website.prototype, "Path", null);
+    $.$bw_icon_resume_website = $bw_icon_resume_website;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_wipes extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 72 72";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M29 1.4c-.1 3.1.4 7.3-1.8 9.8-2.1 2.8-6 4.3-9.1 5.9-5.7 2.5-11.4 5.2-17 8v5c12.6 4.4 25.3 8.6 37.8 13.1l23.7-10.6c3.5-1.6 6.2-4.9 7.3-8.6 1.2-4.6 1-9.9 1-14.6-13.9-3-27.9-5.2-41.8-8zm6.5 8.6c3 0 6.3 1.2 9.3 1.6 6.3 1 12.5 2.3 18.8 3.5-.2 2.7 0 6-1 8.5-.7 1.7-2.6 2.3-4 3.1-6.3 2.8-12.4 5.8-18.7 8.4-1.6.8-2.9 0-4.4-.5-7.3-2.5-14.8-4.8-21.8-7.8 5.5-2.6 11.6-5 16.5-8.6 3-2.1 3.7-5.1 5.3-8.2zM1.1 36v7l37.4 13.6c1.3.5 2.8-.5 4-1L71 43v-7c-10.2 4.3-20.2 9.1-30.4 13.5-2 .7-4.5-1-6.4-1.6l-33-12zm0 14v7l37.4 13.5c1.3.5 2.2-.1 3.4-.6l29-12.9v-7c-10.5 4.4-20.7 9.5-31.1 13.7-2.1 0-4.4-1.4-6.4-2C22.5 57.8 11.9 53.6 1 50z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_wipes.prototype, "Path", null);
+    $.$bw_icon_wipes = $bw_icon_wipes;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_add_user_group extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 81 72";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M56.4 2A10.5 10.5 0 0 0 47 16.9c2.5 6 10.2 7.9 15.4 4.5 5.2-3.3 6.2-11 2-15.6-2-2.4-4.9-3.6-7.9-3.6zM21.1 2l-2.7.5c-6 2-9 8.6-6.4 14.4 2.8 6.3 11.3 8 16.5 3.5a10.7 10.7 0 0 0 0-15.8C26.3 2.8 23.6 2 21 2zm.3 28c-4.7 0-9.4.8-13.6 2.5-2.9 1.1-6 3.5-6.9 6.5-.6 3.9-.2 8-.2 12h28c0-4-.3-8 0-12 .3-3 1.9-5.2 3.4-7.7A46 46 0 0 0 21.4 30zm35.2 0c-5.3 0-10.6.9-15.4 3.2a10.7 10.7 0 0 0-5.3 5.8c-.6 3.9-.2 8-.3 12h20.8c0-3-.3-6.3.3-9.3 1-2.4 3.5-4.5 6.3-4.6 4.4-.3 8.8 0 13.2-.3-3.7-4.3-8.9-5.6-14.3-6.4l-5.3-.3zm13.7 14h-7v10.3H53v7c3.4 0 7 0 10.4.2V72h7V61.4H81v-7c-3.6 0-7.1 0-10.7-.2V43.9z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_add_user_group.prototype, "Path", null);
+    $.$bw_icon_add_user_group = $bw_icon_add_user_group;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_info_popup extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 66 72";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M11 1.6c-2.6.1-5.6-.1-7.5 2-2 1.8-1.8 4.8-2 7.4.2 12 .1 24 .1 36 0 4-.2 8.1.2 12A5.9 5.9 0 0 0 7 64.2c5.3.7 10.8 0 16.1.2 4.3-.6 7.2 4.7 10 7.2 2.3-2.3 4.5-5.3 7.3-7 6.4-.8 13.3.6 19.6-.6 3.2-.9 4.5-3.7 4.4-6.9.2-15 0-30 .1-45-.1-2.7.3-6.4-2-8.5-1.9-2-4.8-1.8-7.4-2-14.7.2-29.3.2-44 0zm18.6 14h6.8v7c-2.2-.2-4.6-.1-6.9 0l.1-7zm0 14h6.8v20.7h-6.8V29.6z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_info_popup.prototype, "Path", null);
+    $.$bw_icon_info_popup = $bw_icon_info_popup;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_wallet_copy_2 extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 66 66";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M14 1.6c-2.5 0-5 0-7.1 1.3a10 10 0 0 0-5.2 9L1.6 55c.1 2.8-.2 5.4 2 7.5 1.8 1.8 4 1.8 6.4 1.9h46c2.4-.1 4.6 0 6.5-2 2-2 1.8-4.6 2-7.4-.2-10.7 0-21.4-.2-32 .1-3.2-1.2-6-4.4-7-3.8-.7-8-.3-11.9-.4-12 0-24 .2-36 0-2.9.1-4.1-3.1-3-5.4.6-1.5 2.6-1.4 4-1.6h48v-7H14zm39.6 34.8c1.3-.2 2.7.5 3.3 1.8 1.3 2.4 0 5.3-2.9 5.2-3.2 0-5-3.7-2.5-6 .5-.6 1.3-1 2.1-1z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_wallet_copy_2.prototype, "Path", null);
+    $.$bw_icon_wallet_copy_2 = $bw_icon_wallet_copy_2;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_settings extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 72 72";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M36.2 1l-3 .2c-1.3 2-1.4 5-1.9 7.2l-4.8 1.4C24.8 8 23.3 5.4 21 4.5c-2 .8-3.6 2-5.4 3l2.5 7-3.6 3.6-7-2.5c-1 1.8-2.2 3.5-3 5.4.9 2.3 3.5 3.8 5.3 5.5l-1.4 4.8L1 32.8v6.4l7.3 1.5 1.4 4.8C8 47.2 5.4 48.8 4.5 51c.8 2 2 3.6 3 5.4l7-2.5 3.6 3.6-2.5 7c1.8 1 3.4 2.2 5.4 3 2.3-.8 3.9-3.6 5.5-5.3l4.8 1.4 1.5 7.3c2 0 4.1.1 6.2-.1 1-2.3 1.2-4.8 1.7-7.2l4.8-1.4c1.7 1.8 3.3 4.4 5.5 5.3 2-.8 3.6-2 5.4-3l-2.5-7 3.6-3.6 7 2.5c1-1.8 2.2-3.5 3-5.4-.9-2.3-3.5-3.9-5.3-5.5l1.4-4.8 7.3-1.5v-6.4l-7.3-1.5-1.4-4.8c1.8-1.6 4.4-3.2 5.3-5.5-.8-2-2-3.6-3-5.4l-7 2.5-3.6-3.6 2.5-7c-1.8-1-3.5-2.2-5.4-3-2.2.9-3.9 3.5-5.5 5.3l-4.8-1.4L39.2 1h-3zm-3.6 14.1v10.6c-2 1.3-4 2.6-5.4 4.6-1.6 2.2-1.5 5.2-1.7 7.8L16 43.4c-1.5-6.3-1.6-12.6 2-18.2 3.1-5.7 8.5-8.4 14.5-10zm7 .2a21.2 21.2 0 0 1 15 11.1c3 5.5 2.6 11.1 1.3 17L46.5 38c-.2-2.4-.1-5.1-1.4-7.3-1.3-2.3-3.6-3.6-5.7-5 0-3.5-.2-7 .1-10.5zM43 44.2c3.2 1.7 6.3 3.4 9.3 5.3A22.5 22.5 0 0 1 35 56.9c-6.1-.2-11-3.3-15.3-7.4 3-1.8 6-3.7 9.2-5.2 2.4.9 4.5 2.2 7.1 2 2.7.2 4.7-1 7-2.1z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_settings.prototype, "Path", null);
+    $.$bw_icon_settings = $bw_icon_settings;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_sell_property extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 78 69";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M39 1.5C26.1 12.8 13.4 24.5.6 35.9l10.4.2v31.2h56V36.1l10.4-.2C64.5 24.5 51.9 13 39 1.5zM38.2 15h3.4v4.7c1.9 1.2 4.2 2.4 5.5 4.2 1.3 2 1.6 4.6 2 6.9h-6.4l-1.4-4.3c-1.2-.6-2.3-1-3.6-1.4-.3 2-1.7 4.8-.4 6.6 2.6 3.3 8.3 4.8 10.5 8.5a13 13 0 0 1 .5 9c-1.2 3.4-4 4.2-7 5.7l-.4 4.5-3.4.1-.1-4.5c-2.2-1-5-2-6.4-4-1.5-2-1.7-4.9-2.1-7.3h6.5c.7 2 .8 5.9 3.6 5.7 3.6.4 4-4.8 2.4-7-2.4-3-7.4-4-9.7-7.1-1.9-2.9-2-7.1-.7-10.2 1.3-3 4.1-4 6.9-5.5 0-1.6.2-3 .3-4.6z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_sell_property.prototype, "Path", null);
+    $.$bw_icon_sell_property = $bw_icon_sell_property;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_last_hour extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 72 72";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M36.7 1c-2 0-3.8.2-5.7.4a37.6 37.6 0 0 0-19.8 9.8L4.7 4.6V22H22l-5.8-5.8a31.8 31.8 0 0 1 16.2-8l.4 3.5h6.4l.4-3.6a30 30 0 0 1 16.1 8.2c4.6 4.4 6.8 10 8.2 16.2l-3.6.2v6.6l3.6.2a30.1 30.1 0 0 1-8.2 16.2 30 30 0 0 1-16.1 8.1l-.4-3.5h-6.4l-.4 3.5a30 30 0 0 1-16.1-8C11.7 51.2 9.5 45.6 8 39.5l3.6-.3v-6.6H1.1c-.6 10 2.6 20.2 9.8 27.5A34.9 34.9 0 1 0 36.7 1zm2.5 24c-3 .8-5.9 1.8-8.7 3V32l4.1-1.7v17h4.5c.2-7.4 0-14.8 0-22.2z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_last_hour.prototype, "Path", null);
+    $.$bw_icon_last_hour = $bw_icon_last_hour;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_star extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 78 75";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M39 .6c3.6 8.6 7.3 17 10.8 25.6 9.3.8 18.5 1.5 27.7 2.5L56.4 46.9c2.2 9 4.5 18 6.5 27-8-4.7-16-9.6-23.9-14.4-8 4.8-15.8 9.7-23.9 14.4 2-9 4.3-18 6.5-27L.6 28.7l27.6-2.5c3-7.6 6.5-15 9.4-22.6l1.4-3z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_star.prototype, "Path", null);
+    $.$bw_icon_star = $bw_icon_star;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_winrar extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 72 66";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M12.5 1.5c-2.6 0-5.1 0-7.6.2-1.7.3-3.7.2-3.7 2.4.2 3 2 6 2.4 9-.3 2.3-1.6 4.6-2.1 7 .1 3.3 1.8 6.6 1.7 10-.4 1.7-1.3 3.5-2 5.2.7 2.9 1.8 5.8 2 8.7-.1 2.7-1.6 5.2-2 7.9 2.3 3.1 6.6 4.9 9.8 7 3.8 2.2 7.4 5.6 12 5.5 6.2.1 12.4-.1 18.6 0A45.5 45.5 0 0 0 43 48c-1.1-1.2-3.4-2.1-3.4-4-.4-4.5 0-9 0-13.6l5.8-1.1L48 27l2.9 2c1.8.5 3.7.8 5.5 1.4 1 5 .4 10.6.2 15.8l-3.4 1c.2 5.7.3 11.4-1 17.1 5.1-.2 10.5.4 15.6-.5 4.4-4 3-12.1 1.7-17.2 1.6-5.8 1.6-9.9 0-15.7 1.4-5.4 2.4-11.7-1-16.6-2.6-3-7-4.7-10.3-6.7-3.6-2-7.2-4.8-11.2-5.8-4.6-.7-9.5-.2-14.1-.2C39 6.1 46 9.4 52 14.1c2.4 3 1 9 1.4 12.8-1.7-.6-3.5-1.5-5.3-1.8-1.7.4-3.4 1.2-5 2 0-3.7.2-7.4-.4-11-.3-1.7-2-2.7-3.2-3.6-3.6-2.5-7.4-4.6-11-7-2.7-1.6-5.2-3.6-8.5-3.8l-7.5-.2zM11 11c3 2.2 6.6 4 9.1 6.9 1.2 2.2.6 5.7.7 8.2-3.8-2.2-7.6-4.4-11.2-6.8L11 11zM26.8 17c1 1.9 2.2 3.7 2.3 5.9 0 2.6-1.2 4.5-2.2 6.8-.8-4.4-.8-8.3 0-12.7zm-16.1 11c3.2 2 7 3.7 9.6 6.5.8 2.2.7 4.7 1 7-4.1-2.3-8-4.8-12-7.2l1.4-6.2zM53.4 33L43 33v10.4h3.4v-7H50v7h3.4V32.9zm-24.8 1.9c.3 4 1.2 7.5-1.8 10.8-.5-3.2-1-6.6-.4-9.8l2.2-1zm-17.8 8.6c3.3 2.2 7.2 4 9.8 7 .5 2 .3 4.2.3 6.3-4-2.3-7.7-4.7-11.5-7.1l.7-3.2.7-3zm17.8 7.4c.3 3 .3 6 .2 9l-2.7.5c.1-2.8 0-5.7.4-8.6l2-.9z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_winrar.prototype, "Path", null);
+    $.$bw_icon_winrar = $bw_icon_winrar;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_today extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 84 84";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M21.6 0l-2 1.8c-.3 4.1-.6 8.6 0 12.7 1.6 2.7 6.3 2.1 6.2-1.5 0-3.8.7-8.3-.6-11.9l-.6-.5-.7-.6h-2.3zM60 0c-.8 1-1.8 1.7-1.8 3-.2 3.6-.3 7.3 0 10.8.6 3.3 5.9 3 6.3 0 .3-4 .2-8 0-12l-2-1.8H60zM10.7 6.6a13 13 0 0 0-5.2 1C2.4 9 .9 11.6 0 14.8v60.6c1.3 4.8 3.7 7.2 8.5 8.5h66.9c4.8-1.1 7.3-3.8 8.6-8.5V15.3c-.7-3.5-2.7-6.9-6.2-8.1-3-1-6.7-.5-10-.5-.2 3.2.8 8-1.6 10.5-2.4 3-7.9 3-10-.4-2-2.7-1.2-7-1.3-10.1H29c-.1 3 .6 7.4-1.3 10-2.1 3.4-7.6 3.6-10 .5-2.4-2.5-1.4-7.3-1.6-10.5-1.7 0-3.6-.2-5.5-.1zM42 29h35.3l.1 43c-.2 2 .5 3.8-1.5 5-3 .5-6 .3-8.9.3H17c-3 0-6 .2-8.9-.2-2-1.3-1.3-3.1-1.5-5.1V29H42zm13.1 7h-1L37.8 60.4c-2.7-2.5-5.1-5.3-8-7.8-2.2-.5-3.2 1.4-4.6 2.8-1.1 1.1-1.5 2.5-.3 3.7 2.8 3.1 6 6 9 9 1.4 1.3 2.8 3.2 5 3 1-.2 1.9-1.7 2.6-2.5 4.8-6.9 9.4-14 14.2-20.8 1.8-2.5 3.4-5 4.9-7.7-1.5-1.6-3.1-3.8-5.5-4z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_today.prototype, "Path", null);
+    $.$bw_icon_today = $bw_icon_today;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_triangle extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 33 27";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M0 0h33v.3C27.3 9 22 18.1 16.5 27h-.1C11 18 5.4 9 0 0z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_triangle.prototype, "Path", null);
+    $.$bw_icon_triangle = $bw_icon_triangle;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_close_btn extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 51 51";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M.7.7C.3 1 0 2.5 0 3.9c0 2 2.4 5 9.5 12.1l9.5 9.5-9.6 9.6C1.1 43.4-.1 45.1.2 47.6c.2 2.4.8 2.9 3.3 3.2 2.6.2 4.2-1 12.5-9.3l9.5-9.5 9.6 9.6c8.3 8.3 10 9.5 12.5 9.2 2.4-.2 3-.8 3.2-3.2.3-2.5-.9-4.2-9.2-12.5L32 25.5l9.5-9.5c8.3-8.3 9.5-9.9 9.3-12.5C50.5 1 50 .4 47.6.2c-2.5-.3-4.2.9-12.5 9.2L25.5 19 16 9.5C8.9 2.4 5.9 0 3.9 0 2.5 0 1 .3.7.7z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_close_btn.prototype, "Path", null);
+    $.$bw_icon_close_btn = $bw_icon_close_btn;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_eye_closed extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 78 33";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M2 0c.4 1.2 1 2.3 1.7 3.3a54.6 54.6 0 0 0 21.4 16.5 38 38 0 0 0 29.2-.5 55.9 55.9 0 0 0 20-16c.9-1 1.2-2.1 1.7-3.3h-2.9a57 57 0 0 1-18.4 15.7A35 35 0 0 1 26 17 53.3 53.3 0 0 1 4.9 0H2zm6.7 11.2L2.4 18l2.2 2 6.3-6.8-2.1-2h-.1zm62 .1l-2.3 2 6.3 6.6 2.2-2-6.2-6.6zm-13.8 8.6l-2.7 1.3c1.4 2.8 2.8 5.5 4.4 8.2l2.5-1.4c-1.4-2.7-2.7-5.5-4.2-8v-.1zm-36.9.6l-3.7 7.4 2.7 1.3 3.7-7.4-2.7-1.3zM37.5 24v9h3v-9h-3z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_eye_closed.prototype, "Path", null);
+    $.$bw_icon_eye_closed = $bw_icon_eye_closed;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_eye_opened extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 78 57";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M37.5 0v9h3V0h-3zm21.1 3.6l-4.5 8.1 2.7 1.3L61 5l-2.4-1.4zM19 3.8l-2.7 1.3 3.7 7.4 2.7-1.3L19 3.8zm21 6.8a38.4 38.4 0 0 0-18.3 4.1A61.4 61.4 0 0 0 1.1 33a59.7 59.7 0 0 0 22.5 19.3 38.2 38.2 0 0 0 31.9-.7A61.1 61.1 0 0 0 76.8 33a59.7 59.7 0 0 0-22.5-19.3h-.1c-4.5-2-9.4-3-14.3-3.1zM74.6 13l-6.3 6.8 2.2 2 6.3-6.7-2.1-2.1h-.1zm-70 .1a70 70 0 0 0-2.3 2l6.3 6.6 2.2-2-6.2-6.6zm34.1.4A35 35 0 0 1 52 16a52.8 52.8 0 0 1 21 17c-5.5 7-12 13-20.2 16.6A35 35 0 0 1 26 50 52.7 52.7 0 0 1 5 33c5.5-7 12-13 20.2-16.6a35 35 0 0 1 13.6-2.9zm.3 3a13.5 13.5 0 0 0-4 .6h.1A13.5 13.5 0 0 0 26 33a13.5 13.5 0 0 0 26.1-6 13.5 13.5 0 0 0-13-10.5zm.2 3a10.5 10.5 0 0 1 6.1 18.8 10.5 10.5 0 1 1-10.2-18.1 10.5 10.5 0 0 1 4.1-.7zm-.3 2.9c-4.7.7-6.9 2.9-7.6 7.6l3-.1c1-3.1 1.4-3.5 4.6-4.5v-3z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_eye_opened.prototype, "Path", null);
+    $.$bw_icon_eye_opened = $bw_icon_eye_opened;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_phone_email extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 78 57";
+        }
+        sub() {
+            return [].concat(this.Path());
+        }
+        Path() {
+            return ((obj) => {
+                obj.geometry = () => "M2.1 3.4c-.8.9-1.1 9.7-.9 30.2l.3 28.9 19.9.3c13.8.2 20.3-.1 21.2-.9 1.1-.9 1.4-6.5 1.4-29 0-23.9-.2-28-1.6-29.3-2.1-2.2-38.5-2.4-40.3-.2zM40 26v20H5V6h35v20zm0 28.5V59H5v-9h35v4.5zM74.7 24.7C57.8 51.5 56.1 54.5 57.1 55.5c.6.6 1.5.6 2.4 0 2.2-1.4 26.5-40.6 25.9-41.6-1.4-2.4-3.9.1-10.7 10.8zM98.6 16.2c-.8 3-.8 33.6 0 36.6l.6 2.2 27.7-.2 27.6-.3v-40l-27.6-.3-27.7-.2-.6 2.2zm42.8 7.5l-9.2 11A30.3 30.3 0 0 1 127 40c-.7 0-13.2-14.2-17.9-20.3-1.3-1.6-.3-1.7 17.9-1.7h19.2l-4.8 5.7zM113 31l3.8 4.6-7.4 7.6-7.4 7.5V34.6l.1-16.1 3.5 4L113 31zm38 3.7v15.7l-7-6.9a40.5 40.5 0 0 1-6.8-7.7c.3-.8 13.1-16.7 13.6-16.8.1 0 .2 7.1.2 15.7zM127 45c.4 0 2.3-1.2 4-2.7l3.2-2.6 5.6 5.6 5.7 5.7h-37.9l5.9-6 5.8-5.9 3.4 2.9c1.9 1.7 3.8 3 4.3 3z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_phone_email.prototype, "Path", null);
+    $.$bw_icon_phone_email = $bw_icon_phone_email;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_logo extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 487 442";
+        }
+        sub() {
+            return [].concat(this.PathBlue(), this.PathCyan());
+        }
+        PathBlue() {
+            return ((obj) => {
+                obj.geometry = () => "M222.3 105.4c-3.3.9-7.5 2.5-9.4 3.5a48.6 48.6 0 0 0-15.2 14.7c-1.9 3.9-6.8 20-11.8 39.4a36240.2 36240.2 0 0 1-40.2 155c-7.4 29.5-14.4 49.5-17.3 49.5-1.9 0-4-2.8-6.3-8.5-2.5-5.8-6.7-22.8-34.8-140l-7.9-32.5-6-25-6-25.5c-2-8.3-4.6-17-5.7-19.2-4-8.3-11.9-10.4-38.7-10-16.9.2-17.4.3-19.3 2.6-1.3 1.6-1.9 3.9-1.9 7.5.1 5.9-.6 3 10.3 43.6A22792.6 22792.6 0 0 1 41 269l18 68c14.6 57.3 23 80.5 32.5 89.9 13.6 13.6 37.4 16.3 58 6.7a50.6 50.6 0 0 0 21.3-21.4c2.7-5.8 13.8-45.6 25.2-90.4C207 278 211.3 262 227.2 204c7.4-27 8-28.2 11.1-25.5 2 1.6 7 17.7 13.5 43l9 35 9 34.5 11 42 10.5 40c6.3 24.2 7.8 27.5 10.4 22.7 1.4-2.5 11-31.8 18.8-56.7 7.6-24.7 7.6-24.3 1.3-47-2.3-8.3-6.4-23.3-9-33.5l-21-80-3.6-14a305 305 0 0 0-11.5-39.2 44.5 44.5 0 0 0-14.7-15.5 55.8 55.8 0 0 0-39.7-4.4z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+        PathCyan() {
+            return ((obj) => {
+                obj.geometry = () => "M444.8 1.7a31.6 31.6 0 0 0-10.5 1.2 41.9 41.9 0 0 0-32 33 30.2 30.2 0 0 0-.6 13.9 44.1 44.1 0 0 0 23.8 31.9c6.4 3 7.4 3.3 17.3 3.3 13.6 0 19.5-2.2 28.6-10.7A41.7 41.7 0 0 0 451 2.6a31.6 31.6 0 0 0-6.2-1zm-63.3 105.8c-39 0-77.8.3-79.4 1h-.1c-1.2.5-2.5 1.6-2.8 2.4-.5 1.4 3 15.3 10.3 40l3.8 13 38.3.4c36 .2 38.3.3 37.8 2l-8.5 29.2c-4.4 15-10.3 35.8-13 46a7149.1 7149.1 0 0 1-37 132c-12.6 42.2-15.6 56.3-13.2 60.8.6 1 3.1 2.8 5.5 3.7 3.8 1.5 7.6 1.6 28.7 1.2 26.8-.5 31.3-1.2 36-6 4.5-4.5 6.8-9.7 10.6-24.6 1.8-7.5 7-26.4 11.3-42.1a1843 1843 0 0 0 16.8-62.5 25909 25909 0 0 0 46-171.5 38.2 38.2 0 0 0 1.7-12.6c-.7-4.1-7-10-12.2-11.3-2.4-.7-41.6-1-80.6-1z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_logo.prototype, "PathBlue", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_logo.prototype, "PathCyan", null);
+    $.$bw_icon_logo = $bw_icon_logo;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_logo_winner extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 843 90";
+        }
+        sub() {
+            return [].concat(this.PathBlue(), this.PathCyan());
+        }
+        PathBlue() {
+            return ((obj) => {
+                obj.geometry = () => "M62.6 1.7c-10.7 0-11.7 10.6-14.3 20.6l-7.5 28c-1.6 6.7-3.3 13-5.3 19-.2.8-1.9 1-2.1 0-5.2-19.6-10.7-41.2-15.7-61.2-2-7.2-.3-6.3-14.3-6.3-5.5 0-1.3 9.7 0 14.3l9.2 33.4c2.1 7.8 3.8 14.7 6.1 22.4 3.4 11.4 5.4 15.5 12.2 16.4 1.5.2 3.3.1 5.4.2 2 0 3.7-1 5.1-1.8 6.3-3.5 7-13.7 8.6-19.2L55 49l2.7-9.5L62.6 21c1-1.7 2.5-2.9 4.8 7.5l12 47.6c1.6 5.4 3.5 9 6.2 10.7 2.3 1.4 4.9 1.8 9 1.8 2.7 0 4.6-.8 6.3-2 3.9-2.7 6-8.6 7.2-13.6 2-7.6 4.2-14.5 6.1-22.4l9.3-33.4c4.5-16.7 5.6-15.4-7.8-15.4-4 0-4.4.8-6 5.8l-7 26.5c-1 3.8-7 32.8-8.8 35.3-.6.8-1.5.8-2 0-.8-1.2-1.6-3.6-2.6-7.5l-7.7-28.6-5.2-19C73.6 4.5 72.6 1.7 62.6 1.7zm190.7 0c-9.1 0-13.5 9.1-13.5 18.5v65.3c.1 1.5 1.3 3 2.6 3h11.8c1 0 2.4-2 2.4-3V30.8c0-3-.2-8.4.6-7.7l33.4 51.6c6 9 7.4 13.3 15.7 13.8h4c6 0 10.6-5.3 10.6-11.4V4.2c0-2.1-4.3-2.5-8.4-2.4-4 0-8 .4-8 2.4v29.5c0 12.3.4 24.6.4 30 0 2.7 0 3-.6 2.8l-33.7-52.2c-.7-1.1-6-12.6-17.3-12.6zm96.8 0c-10 0-12.8 7.4-12.8 17.2v56.6c0 8.5 3.7 13 12.2 13H401c4.2 0 4-1.3 4-7 0-5.8.2-8.1-4-8.1h-41.4c-6.8 0-6 .6-6-7.2v-9c0-6 1.9-5.2 5-5.3H394c9.3 0 10.3 0 10.3-7s-1.2-6.6-10.4-6.7h-34.5c-3.9 0-5.6.3-5.6-2.6V21.7c0-4.4.3-5 2.1-5h45c4.4 0 4.2-1.9 4.2-7.2 0-5.3.1-7.8-4-7.8h-51zm80.9.1c-7.9 0-13 6.6-13 14.4v68.5c0 2.2.6 3.4 2.7 3.7h5.1c2.4 0 4.1.1 5.4-.1 2-.4 2.7-1.8 2.7-3.6l.1-65.9c0-2.5 2-2.1 3.6-2.1h27.3c9 0 12.7 7.2 12.7 14.5.1 7.2-3.1 13.9-12.9 14H451c-4.6 0-7.8 2.7-7.6 7.8 0 1.8 1.4 4.5 3.8 7l12.4 12.3 15.5 15a5 5 0 0 0 3 1.2H492c1.2 0 2.8-.9.7-3l-5.1-5.3-23.2-21.8c-.8-1 1.3-.8 3.7-.8 3.5-.1 25.6-2.9 25.6-26.4 0-23.6-13-29.4-21.5-29.4H431zM186.7 23.6h-10.3c-5 0-8.5 3-8.5 8v50.5c0 4.1.7 6.1 3 6.3h8.2c4 0 3.7-3 3.7-7V38.1c0-2 .8-2.7 2.5-2.9h13.2c9.4.4 13.5 3.2 13.5 19.9v29.5c0 2.4.7 3.6 3.3 3.8h7.7c3.4 0 4.2-1.2 4.1-3.9V54.8c-.2-9.7-1.3-18.8-4.4-23.2a13.4 13.4 0 0 0-6.7-5.4 108 108 0 0 0-29.3-2.6zm-40.4 1.2c-3.2 0-7.9.2-7.7 2-.1 3 .1 49.9.1 56 0 3.4.7 5.2 2.7 5.5 2 .2 6.2.2 9.4.1 2.2 0 2.8-2.8 2.9-4.1V26.8c.4-1.8-4-2-7.4-2z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+        PathCyan() {
+            return ((obj) => {
+                obj.geometry = () => "M146.1 1.8a7.4 7.4 0 1 1 0 14.8 7.4 7.4 0 0 1 0-14.8";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_logo_winner.prototype, "PathBlue", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_logo_winner.prototype, "PathCyan", null);
+    $.$bw_icon_logo_winner = $bw_icon_logo_winner;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_icon_logo_baza_winner extends $.$mol_svg_root {
+        view_box() {
+            return "0 0 843 90";
+        }
+        sub() {
+            return [].concat(this.PathBlue(), this.PathCyan());
+        }
+        PathBlue() {
+            return ((obj) => {
+                obj.geometry = () => "M467.8 1.7h-4.3c-4.1 0-4.5.8-6.2 5.8L450.4 34c-.9 3.8-7 32.8-8.8 35.3-.5.8-1.5.8-2 0a26 26 0 0 1-2.5-7.5l-7.7-28.6-5.3-19c-2.7-9.7-3.8-12.5-13.8-12.5-10.6 0-11.7 10.6-14.2 20.6l-7.6 28c-1.6 6.7-3.3 13-5.2 19-.3.8-2 1-2.2 0-5.9-19.6-10.7-41.2-15.6-61.2-2-7.2-.4-6.3-14.3-6.3-5.6 0-1.3 9.7-.1 14.3l9.3 33.4c2 7.8 3.8 14.7 6 22.4 3.4 11.4 5.5 15.5 12.2 16.4 1.6.2 3.3.1 5.4.2 2 0 3.7-1 5.2-1.8 6.3-3.5 6.9-13.7 8.6-19.2l5-18.5c.9-3.3 1.6-6.3 2.6-9.5l4.9-18.6c1-1.7 2.6-2.9 4.8 7.5l12 47.6c1.6 5.4 3.6 9 6.2 10.7 2.3 1.4 4.9 1.8 9 1.8a10 10 0 0 0 6.3-2c4-2.7 6-8.6 7.2-13.6 2-7.6 4.2-14.5 6.2-22.4l9.2-33.4c4-14.6 5.3-15.4-3.4-15.4zm133.3 0c-9 0-13.5 9.1-13.5 18.5h-.1v60.5l.1 4.8c0 1.5 1.2 3 2.5 3H602c1 0 2.4-2 2.4-3V30.8c0-3-.1-8.4.7-7.7l33.3 51.6c6 9 7.4 13.3 15.7 13.8h4c6 0 10.6-5.3 10.6-11.4V4.2c0-2.1-4.3-2.5-8.4-2.4-4 0-8 .4-7.9 2.4v29.5c0 12.3.4 24.6.3 30 0 2.7 0 3-.6 2.8l-33.7-52.2c-.7-1.1-6-12.6-17.3-12.6zm96.7 0c-10 0-12.8 7.4-12.8 17.2v56.6c0 8.5 3.7 13 12.2 13h51.6c4.2 0 4-1.3 4-7 0-5.8.3-8.1-4-8.1h-41.4c-6.8 0-5.9.6-5.9-7.2v-9c0-6 1.8-5.2 5-5.3h35.2c9.3 0 10.3 0 10.3-7s-1.2-6.6-10.3-6.7h-34.5c-4 0-5.7.3-5.7-2.6V21.7c.1-4.4.3-5 2.2-5h45c4.4 0 4.1-1.9 4-7.2 0-5.3.2-7.8-3.9-7.8h-51zm80.8.1c-7.9 0-13 6.6-13 14.4h.1v68.5c0 2.2.6 3.4 2.8 3.7h5c2.4 0 4.2.1 5.4-.1 2-.4 2.8-1.8 2.8-3.6V18.8c0-2.5 2-2.1 3.6-2.1h27.4c8.9 0 12.6 7.2 12.7 14.5 0 7.2-3.2 13.9-13 14h-13.8c-4.6 0-7.8 2.7-7.6 7.8 0 1.8 1.4 4.5 3.8 7l12.4 12.3 15.5 15a5 5 0 0 0 3 1.2h13.9c1.3 0 2.8-.9.8-3l-5.2-5.3L812 58.4c-.7-1 1.4-.8 3.7-.8 3.6-.1 25.6-2.9 25.6-26.4 0-23.6-13-29.4-21.5-29.4h-41.2zM14.2 2C4.3 2 1.5 9.4 1.5 19v56.3c0 8.4 3.7 13.2 12.1 13.2 0 0 32.3 0 43-.2 7.5-.5 16.6-.6 22-7.1a33.9 33.9 0 0 0 6.8-21c0-5.3-2.1-13.4-6.4-18.2-6.6-6.8-12.5-6-21.9-6.3-9.8-.2-31.5 0-33 0-2.2.3-2.6 3.9-2.7 6.4 0 2.4.4 6.1 2.4 6.2h13.3c4.5 0 14.4 0 19 .3 8.4.7 13.5 3 13.7 11.9.2 9-3.9 12.7-12.5 12.9H24c-6.8 0-6 0-6-7.4V22c0-2.7.2-5 2-5h54c4 0 3.6-2 3.6-7.3s.7-7.5-3.3-7.7H14.2zm520.2 21.6h-10.2c-5.2 0-8.6 3-8.6 8v50.5c0 4.1.7 6.1 3 6.3h8.2c4 0 3.8-3 3.8-7V38.1c-.1-2 .7-2.7 2.4-2.9h13.2c9.4.4 13.5 3.2 13.5 19.9v29.5c0 2.4.8 3.6 3.3 3.8h7.7c3.4 0 4.2-1.2 4.2-3.9V54.8c-.3-9.7-1.4-18.8-4.5-23.2a13.4 13.4 0 0 0-6.7-5.4 107 107 0 0 0-29.3-2.6zM494 24.8c-3.1 0-7.9.2-7.6 2-.2 3 0 49.9 0 56 0 3.4.7 5.2 2.8 5.5 2 .2 6.1.2 9.3.1 2.3 0 2.9-2.8 2.9-4.1V26.8c.4-1.8-4-2-7.4-2zm-296 .3c-10.4 0-28.1 1-27.2 15.7.2.5 4.8.5 7 .5 2 0 5.7-.1 6-.6 0-6.1 9.3-5.3 15.8-5.3 3.3 0 8.7 1.5 10.2 2.5s1.5 2.6 1.6 4.9c0 2-.4 3.7-1.8 4.5-1.3.8-3.7.8-5.3.8h-14c-.9 0-1.4 3.6-1.4 5.3 0 1.7.4 4.8 1.5 4.9h7.8c3.4 0 6.7.4 9.5 1.7 2.8 1.3 3.7 3.3 3.7 7.8 0 4.6-1 6.6-4 8a29.4 29.4 0 0 1-11.3 1.9c-7.8 0-14.7-2.5-14.7-9.5V66c-.8-.7-4.1-.9-6.5-.9-2.4 0-6.1-.2-6.9.5 0 7.3 1.6 11 4.5 14.5 4.9 5.6 13.3 8.3 24.4 8.3a40 40 0 0 0 14.7-2.3 19 19 0 0 0 13.3-18.3c0-6.7-1.1-11-5-14.4a17 17 0 0 0 3.3-3.9c1-1.4 1.7-3.7 1.7-8.5 0-8.5-6.7-11.9-10.2-13.4a54.2 54.2 0 0 0-16.7-2.5zm-70.7.3c-13.5 0-25.1-.3-27.2 14.5l-.1.1h13.3c1-1.8 1-2.3 3.2-3.1 2-.9 4.7-1 10.3-1 3.4 0 10.4 0 12.7 1.5 1.8 1.1 3.6 3.3 3.6 5.6v5.4h-25.3c-7.2 0-13.8 1.6-17.5 8.1-.8 1.2-2.9 6-2.9 12.3.1 20.4 15.6 19.6 31.4 19.7a14 14 0 0 0 8.6-2c.8-.7 2.4-1.2 5.8-1.5 0 1.5-.3 3.4 1.8 3.4h8.2c2 0 3 0 3-1.8V52.7c0-10 .5-21.4-10.6-25.5-5.6-2-12.2-1.7-18.3-1.8zm139.2 0c-13.5 0-25.1-.3-27.2 14.5v.1h13.2c1-1.8 1-2.3 3.2-3.2 2-.8 4.7-.8 10.3-.8 3.4 0 10.4 0 12.7 1.4 1.8 1.1 3.6 3.3 3.6 5.6v5.4H257c-7.2 0-13.8 1.6-17.5 8.1-.8 1.2-2.9 6-2.9 12.3.1 20.4 15.6 19.6 31.4 19.7a14 14 0 0 0 8.6-2c.8-.7 2.4-1.2 5.8-1.5 0 1.5-.3 3.4 1.8 3.4h8.2c2 0 3 0 3-1.8V52.7c0-10 .5-21.4-10.6-25.5-5.6-2-12.2-1.7-18.3-1.8zM130.1 58.6c7.4 0 13 .7 13 9.5 0 10-7.2 10.6-16.3 10.6-9.1 0-15.6-.3-15.6-10.6 0-10.3 6.6-9.4 15.6-9.5h3.3zm139.2 0c7.4 0 13 .7 13 9.5 0 10-7.3 10.6-16.3 10.6-9.1 0-15.6-.3-15.6-10.6 0-10.3 6.6-9.4 15.6-9.5h3.3z";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+        PathCyan() {
+            return ((obj) => {
+                obj.geometry = () => "M493.8 1a7.4 7.4 0 1 1 0 14.9 7.4 7.4 0 0 1 0-14.9";
+                return obj;
+            })(new this.$.$mol_svg_path);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_logo_baza_winner.prototype, "PathBlue", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_icon_logo_baza_winner.prototype, "PathCyan", null);
+    $.$bw_icon_logo_baza_winner = $bw_icon_logo_baza_winner;
+})($ || ($ = {}));
+//icon.view.tree.js.map
 //# sourceMappingURL=web.js.map
