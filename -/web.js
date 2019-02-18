@@ -9917,8 +9917,8 @@ var $;
             const scrollTop = offsetParent.scrollTop;
             const scrollBottom = scrollTop + offsetParent.clientHeight;
             if (offsetTop < scrollTop) {
-                offsetParent.scrollTo({
-                    top: offsetTop,
+                offsetParent.scrollBy({
+                    top: offsetTop - scrollTop,
                     behavior: 'smooth',
                 });
             }
