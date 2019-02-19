@@ -6462,6 +6462,7 @@ var $;
             return ({
                 "bw_workspace_block_selected": this.is_selected(),
                 "bw_focused": this.focused(),
+                "bw_block_name": this.block_name(),
             });
         }
         is_selected() {
@@ -9890,13 +9891,81 @@ var $;
                             const blocks = this.blocks();
                             const block = blocks[val].block;
                             if (!block.focused()) {
-                                adjust_offset_parent_scroll_top(block, 16);
-                                $$.do_autofocus(block);
+                                const activeElement = document.activeElement;
+                                if (activeElement)
+                                    activeElement.blur();
+                                adjustOffsetParentScrollTop(block, {
+                                    margin: 16,
+                                    after: () => $$.do_autofocus(block),
+                                });
                             }
                         });
                     }
                     return val;
                 }
+            }
+            Content() {
+                const result = super.Content();
+                const dom_node = result.dom_node();
+                let lastScrollTop = 0;
+                let lastScrollDelta = 0;
+                let isScrolling;
+                dom_node.addEventListener('scroll', event => {
+                    if (event.target === dom_node) {
+                        const scrollTop = dom_node.scrollTop;
+                        lastScrollDelta = scrollTop - lastScrollTop;
+                        lastScrollTop = scrollTop;
+                        if (!event.target.stopSmoothScroll) {
+                            clearTimeout(isScrolling);
+                            isScrolling = setTimeout(() => {
+                                const clientHeight = dom_node.clientHeight;
+                                const scrollBottom = scrollTop + clientHeight;
+                                let block;
+                                if (lastScrollDelta > 0) {
+                                    const items = [...dom_node.querySelectorAll('[bw_workspace_block]')]
+                                        .map((node) => node)
+                                        .map((node) => {
+                                        const caption = node.querySelector('[bw_workspace_block_caption]');
+                                        return {
+                                            node,
+                                            offsetTop: actualOffsetTop(node, dom_node),
+                                            offsetBottom: actualOffsetTop(caption, dom_node) + caption.offsetHeight,
+                                        };
+                                    })
+                                        .filter((value) => value.offsetBottom > scrollTop && value.offsetTop < scrollBottom)
+                                        .sort((a, b) => (a.offsetTop - b.offsetTop) || (a.node.offsetLeft - b.node.offsetLeft));
+                                    if (items.length && items[0].offsetTop >= scrollTop) {
+                                        block = items[0].node;
+                                    }
+                                }
+                                else if (lastScrollDelta < 0) {
+                                    const items = [...dom_node.querySelectorAll('[bw_workspace_block]')]
+                                        .map((node) => node)
+                                        .map((node) => {
+                                        const offsetTop = actualOffsetTop(node, dom_node);
+                                        return {
+                                            node,
+                                            offsetTop: offsetTop,
+                                            offsetBottom: offsetTop + node.offsetHeight,
+                                        };
+                                    })
+                                        .filter((value) => value.offsetBottom > scrollTop && value.offsetBottom < scrollBottom)
+                                        .sort((a, b) => (b.offsetTop - a.offsetTop) || (a.node.offsetLeft - b.node.offsetLeft));
+                                    if (items.length && items[0].offsetTop <= scrollTop) {
+                                        block = items[0].node;
+                                    }
+                                }
+                                if (block) {
+                                    new $.$mol_defer(() => {
+                                        const block_name = block.getAttribute('bw_block_name');
+                                        this.selected_block(block_name);
+                                    });
+                                }
+                            }, 30);
+                        }
+                    }
+                });
+                return result;
             }
         }
         __decorate([
@@ -9905,11 +9974,16 @@ var $;
         __decorate([
             $.$mol_mem
         ], $bw_settings_workspace.prototype, "selected_block", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_settings_workspace.prototype, "Content", null);
         $$.$bw_settings_workspace = $bw_settings_workspace;
-        function adjust_offset_parent_scroll_top(obj, margin) {
+        function adjustOffsetParentScrollTop(obj, opt) {
             const node = obj.dom_node();
             const offsetParent = node.offsetParent;
             const offsetParentClientHeight = node.offsetParent.clientHeight;
+            const margin = opt == void 0 ? void 0 : opt.margin;
+            const after = opt === void 0 ? void 0 : opt.after;
             const topMargin = margin == void 0 ? 0 : typeof margin === 'number' ? margin : (margin.top || 0);
             const bottomMargin = margin == void 0 ? 0 : typeof margin === 'number' ? margin : (margin.bottom || 0);
             const offsetTop = node.offsetTop - topMargin;
@@ -9917,21 +9991,99 @@ var $;
             const scrollTop = offsetParent.scrollTop;
             const scrollBottom = scrollTop + offsetParent.clientHeight;
             if (offsetTop < scrollTop) {
-                offsetParent.scrollBy({
-                    top: offsetTop - scrollTop,
-                    behavior: 'smooth',
-                });
+                smoothScroll(offsetParent, offsetTop, after);
             }
             else if (offsetTop > scrollTop && offsetBottom > scrollBottom) {
                 const deltaTop = offsetTop - scrollTop;
                 const deltaBottom = offsetBottom - scrollBottom;
-                offsetParent.scrollBy({
-                    top: Math.min(deltaTop, deltaBottom),
+                smoothScroll(offsetParent, offsetParent.scrollTop + Math.min(deltaTop, deltaBottom), after);
+            }
+        }
+        $$.adjustOffsetParentScrollTop = adjustOffsetParentScrollTop;
+        function smoothScroll(dom_node, scrollTo, after) {
+            scrollTo = Math.min(Math.max(0, scrollTo), dom_node.scrollHeight - dom_node.clientHeight);
+            let lastScrollTop = dom_node.scrollTop;
+            const delta = scrollTo - lastScrollTop;
+            if (delta != 0) {
+                let lastScrollDelta = 0;
+                let isScrolling;
+                const scrollListener = () => {
+                    if (event.target === dom_node) {
+                        const scrollTop = dom_node.scrollTop;
+                        lastScrollDelta = scrollTop - lastScrollTop;
+                        lastScrollTop = scrollTop;
+                        clearTimeout(isScrolling);
+                        if (scrollTop == scrollTo) {
+                            if (dom_node.stopSmoothScroll) {
+                                dom_node.stopSmoothScroll();
+                                if (after !== void 0) {
+                                    after();
+                                }
+                            }
+                            else {
+                                console.error('BUG: unreachable');
+                                dom_node.removeEventListener('scroll', scrollListener);
+                            }
+                        }
+                        else if (Math.sign(lastScrollDelta) != Math.sign(delta) ||
+                            Math.sign(delta) > 0 && scrollTop > scrollTo ||
+                            Math.sign(delta) < 0 && scrollTop < scrollTo) {
+                            if (dom_node.stopSmoothScroll) {
+                                dom_node.stopSmoothScroll();
+                            }
+                            else {
+                                console.error('BUG: unreachable');
+                                dom_node.removeEventListener('scroll', scrollListener);
+                            }
+                        }
+                        else {
+                            isScrolling = setTimeout(function () {
+                                dom_node.scrollTo({
+                                    top: scrollTo,
+                                    behavior: 'smooth',
+                                });
+                            }, 30);
+                        }
+                    }
+                };
+                dom_node.addEventListener('scroll', scrollListener);
+                if (dom_node.stopSmoothScroll) {
+                    dom_node.stopSmoothScroll();
+                }
+                dom_node.stopSmoothScroll = () => {
+                    dom_node.removeEventListener('scroll', scrollListener);
+                    delete dom_node.stopSmoothScroll;
+                };
+                dom_node.scrollTo({
+                    top: scrollTo,
                     behavior: 'smooth',
                 });
             }
+            else if (after !== void 0) {
+                after();
+            }
         }
-        $$.adjust_offset_parent_scroll_top = adjust_offset_parent_scroll_top;
+        $$.smoothScroll = smoothScroll;
+        function actualOffsetTop(fromEl, toEl) {
+            let result = 0;
+            while (true) {
+                result += fromEl.offsetTop;
+                const offsetParent = fromEl.offsetParent;
+                if (!offsetParent) {
+                    console.error({ msg: 'fromEl is not descendant of toEl', fromEl, toEl });
+                    return null;
+                }
+                else if (offsetParent === toEl) {
+                    return result;
+                }
+                else {
+                    fromEl = offsetParent;
+                    const delta = fromEl.offsetHeight - fromEl.clientHeight;
+                    result += delta;
+                }
+            }
+        }
+        $$.actualOffsetTop = actualOffsetTop;
         class $bw_search_settings_block extends $.$bw_search_settings_block {
             selected_nova(val, force) {
                 return $$.bw_data.selected('nova', val);
@@ -10069,7 +10221,7 @@ var $;
                     };
                     this.data(new_data);
                     this.rec_id_to_edit(null);
-                    new $.$mol_defer(() => adjust_offset_parent_scroll_top(this, 16));
+                    new $.$mol_defer(() => adjustOffsetParentScrollTop(this, { margin: 16 }));
                 }
             }
             data(val) {
