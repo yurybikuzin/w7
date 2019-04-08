@@ -2102,13 +2102,15 @@ var $;
             return result;
         }
         $$.bw_animate = bw_animate;
-        function bw_animate_descr_value(obj, name, fn_initial, fn_store, has_key = false) {
+        function bw_animate_descr_value(obj, name, fn_initial, fn_store, fn_is, has_key = false) {
             const fn_equal = obj[name + '_equal'] || $bw_equal;
             const fn_trigger = obj[name + '_animation_trigger'];
             const fn_triggered_value = obj[name + '_animation_triggered_value'];
             const fn_steps = obj[name + '_animation_steps'];
             const fn_step_value = obj[name + '_animation_step_value'];
             const fn_easing = obj[name + '_animation_easing'];
+            const fn_start = obj[name + '_animation_start'];
+            const fn_after_step = obj[name + '_animation_after_step'];
             const fn_finish = obj[name + '_animation_finish'];
             return function $bw_animate_value(key) {
                 const data_key = '_' + name + '_anim_data' + (has_key ? `_${key}` : '');
@@ -2148,7 +2150,8 @@ var $;
                             let step = 0;
                             const finishAnimation = () => {
                                 stopAnimation();
-                                fn_finish && fn_finish.apply(host, [...keyArg, { start: result, end: value, trigger, steps }]);
+                                fn_is.apply(host, [...keyArg, false]);
+                                fn_finish && fn_finish.apply(host, [...keyArg, { start: result, end: value, trigger, steps, fn_store }]);
                             };
                             const nextAnimation = () => {
                                 const data = this[data_key];
@@ -2166,6 +2169,9 @@ var $;
                                         bw_easing_value(result, value, step / steps, fn_easing ? fn_easing.apply(host, args) :
                                             defaults.easing);
                                     fn_store.apply(host, [...keyArg, value_new]);
+                                    if (typeof fn_after_step == 'function') {
+                                        fn_after_step.apply(host, [...keyArg, { step, steps, start: result, end: value, trigger, step_value: value_new }]);
+                                    }
                                     nextAnimation();
                                 }
                             };
@@ -2176,6 +2182,10 @@ var $;
                                 is_not_raf: !raf,
                                 id: raf ? raf(stepAnimation) : setInterval(stepAnimation, timeInterval),
                             };
+                            fn_is.apply(host, [...keyArg, true]);
+                            if (typeof fn_start == 'function') {
+                                fn_start.apply(host, [...keyArg, { steps, start: result, end: value, trigger }]);
+                            }
                         }
                     }
                 }
@@ -2189,7 +2199,15 @@ var $;
             };
             $.$mol_mem(obj, name, descr);
             const fn_store = descr.value;
-            descr.value = bw_animate_descr_value(obj, name, fn_initial, fn_store);
+            const animation_is_name = name + '_animation_is';
+            obj[animation_is_name] = function (val, force) {
+                return (val !== void 0) ? val : false;
+            };
+            const animation_is_descr = Object.getOwnPropertyDescriptor(obj, animation_is_name);
+            $.$mol_mem(obj, animation_is_name, animation_is_descr);
+            const fn_is = animation_is_descr.value;
+            Object.defineProperty(obj, animation_is_name, animation_is_descr);
+            descr.value = bw_animate_descr_value(obj, name, fn_initial, fn_store, fn_is);
             descr.value['mem_value'] = fn_store;
         }
         $$.$bw_animate = $bw_animate;
@@ -2200,10 +2218,29 @@ var $;
             };
             $.$mol_mem_key(obj, name, descr);
             const fn_store = descr.value;
-            descr.value = bw_animate_descr_value(obj, name, fn_initial, fn_store, true);
+            const animation_is_name = name + '_animation_is';
+            obj[animation_is_name] = function (key, val, force) {
+                return (val !== void 0) ? val : false;
+            };
+            const animation_is_descr = Object.getOwnPropertyDescriptor(obj, animation_is_name);
+            $.$mol_mem_key(obj, animation_is_name, animation_is_descr);
+            const fn_is = animation_is_descr.value;
+            Object.defineProperty(obj, animation_is_name, animation_is_descr);
+            descr.value = bw_animate_descr_value(obj, name, fn_initial, fn_store, fn_is, true);
             descr.value['mem_value'] = fn_store;
         }
         $$.$bw_animate_key = $bw_animate_key;
+        function $bw_meter(obj, name, descr) {
+            let fn_source = descr.value;
+            descr.value = function (val, force) {
+                return (val !== void 0) ? val : null;
+            };
+            $.$mol_mem(obj, name, descr);
+            const fn_store = descr.value;
+            descr.value = bw_meter_descr_value(obj, name, fn_source, fn_store);
+            descr.value['mem_value'] = fn_store;
+        }
+        $$.$bw_meter = $bw_meter;
         function $bw_meter_key(obj, name, descr) {
             let fn_source = descr.value;
             descr.value = function (key, val, force) {
@@ -2242,6 +2279,56 @@ var $;
                 }
                 return result;
             };
+        }
+        function $bw_conditional(obj, name, descr) {
+            descr.value = bw_conditional_descr_value(obj, name, descr);
+        }
+        $$.$bw_conditional = $bw_conditional;
+        function $bw_conditional_key(obj, name, descr) {
+            descr.value = bw_conditional_descr_value(obj, name, descr, true);
+        }
+        $$.$bw_conditional_key = $bw_conditional_key;
+        function bw_conditional_descr_value(obj, name, descr, has_key = false) {
+            const condition_name = name + '_condition';
+            const fn_condition = obj[condition_name];
+            if (typeof fn_condition != 'function') {
+                const constructorName = obj.constructor.name;
+                console.error(constructorName + ': @ $bw_conditional' + (has_key ? '_key' : '') + ' ' + name + '() REQUIRES ' + condition_name + '(): boolean {...}');
+            }
+            const else_name = name + '_else';
+            const fn_else = obj[else_name];
+            let fn_source = descr.value;
+            const condition_descr = Object.getOwnPropertyDescriptor(obj, condition_name);
+            if (has_key) {
+                $.$mol_mem_key(obj, condition_name, condition_descr);
+            }
+            else {
+                $.$mol_mem(obj, condition_name, condition_descr);
+            }
+            const fn_condition_atom = condition_descr.value;
+            Object.defineProperty(obj, condition_name, condition_descr);
+            const fn_store = descr.value;
+            const fn_result = function $bw_conditional_value(key) {
+                const keyArg = has_key ? [key] : [];
+                const result = fn_condition_atom.apply(this, [...keyArg]) ?
+                    fn_source.apply(this, [...keyArg]) :
+                    (!fn_else ? null : fn_else.apply(this, [...keyArg]));
+                return result;
+            };
+            let result;
+            if (has_key) {
+                result = function (key, val, force) {
+                    return fn_result.call(this, key);
+                };
+                $.$mol_mem_key(obj, name, descr);
+            }
+            else {
+                result = function (val, force) {
+                    return fn_result.call(this);
+                };
+                $.$mol_mem(obj, name, descr);
+            }
+            return result;
         }
         var initials;
         function getInitials() {
@@ -13132,7 +13219,12 @@ var $;
                 return result;
             }
             row_i_max() {
-                const result = Math.max(0, Math.ceil(this.body_height() / this.row_min_height()) * 2);
+                let result = null;
+                const body_height = this.body_height();
+                if (Number.isFinite(body_height)) {
+                    const row_min_height = this.row_min_height();
+                    result = Math.max(0, Math.ceil(body_height / row_min_height) * 2);
+                }
                 return result;
             }
             viewport_min() {
@@ -13144,9 +13236,11 @@ var $;
             rows() {
                 let result = [];
                 const row_i_max = this.row_i_max();
-                result.length = row_i_max + 1;
-                for (let i = 0; i <= row_i_max; i++) {
-                    result[i] = this.Row(i);
+                if (Number.isFinite(row_i_max)) {
+                    result.length = row_i_max + 1;
+                    for (let i = 0; i <= row_i_max; i++) {
+                        result[i] = this.Row(i);
+                    }
                 }
                 return result;
             }
@@ -13214,8 +13308,8 @@ var $;
                 const row_i_diap = this.row_i_diap();
                 const row_i_first = row_i_diap.first;
                 const row_i_last = row_i_diap.last;
-                if (rows_count >= 2) {
-                    const row_defs = super.row_defs();
+                const row_defs = super.row_defs();
+                if (rows_count >= 2 && row_defs) {
                     let row_i = row_i_first;
                     const row_def = row_defs[row_i];
                     let top = row_def.top - delta;
@@ -14883,251 +14977,22 @@ var $;
                 obj.style = () => ({
                     "opacity": this.main_params_opacity(),
                 });
-                obj.sub = () => [].concat(this.MainUpper(), this.MainDowner());
                 return obj;
-            })(new this.$.$mol_view);
+            })(new this.$.$bw_search_params_block_main);
         }
         main_params_opacity() {
             return 0;
         }
-        MainUpper() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.MainUpperFirstRow(), this.MainUpperSecondRow());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-        MainUpperFirstRow() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.ApartmentType(), this.GeoSpot());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-        ApartmentType() {
-            return ((obj) => {
-                obj.label = () => "Квартира";
-                obj.control = () => [].concat(this.Studio(), this.FreePlan());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        Studio() {
-            return ((obj) => {
-                obj.title = () => "Студия";
-                return obj;
-            })(new this.$.$mol_check_box);
-        }
-        FreePlan() {
-            return ((obj) => {
-                obj.title = () => "Св.планировка";
-                return obj;
-            })(new this.$.$mol_check_box);
-        }
-        GeoSpot() {
-            return ((obj) => {
-                obj.label = () => "Адрес";
-                obj.control = () => [].concat(this.GeoSpotControl());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        GeoSpotControl() {
-            return ((obj) => {
-                obj.hint = () => "Город, район, адрес, метро, название ЖКХ";
-                return obj;
-            })(new this.$.$bw_search_params_input_commitable);
-        }
-        MainUpperSecondRow() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.OnlyWith());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-        OnlyWith() {
-            return ((obj) => {
-                obj.label = () => "Только с";
-                obj.control = () => [].concat(this.Photo(), this.Video());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        Photo() {
-            return ((obj) => {
-                obj.title = () => "Фото";
-                return obj;
-            })(new this.$.$mol_check_box);
-        }
-        Video() {
-            return ((obj) => {
-                obj.title = () => "Видео";
-                return obj;
-            })(new this.$.$mol_check_box);
-        }
-        MainDowner() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.MainDownerFirstCol(), this.MainDownerSecondCol(), this.MainDownerThirdCol());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-        MainDownerFirstCol() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.RoomQt(), this.SqTotal(), this.Storey());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-        RoomQt() {
-            return ((obj) => {
-                obj.label = () => "Комнаты";
-                obj.control = () => [].concat(this.RoomQtSwitch());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        RoomQtSwitch() {
-            return ((obj) => {
-                obj.options = () => ({
-                    "one": 1,
-                    "two": 2,
-                    "three": 3,
-                    "four": 4,
-                    "five": 5,
-                    "sixplus": "6+",
-                });
-                return obj;
-            })(new this.$.$mol_switch);
-        }
-        SqTotal() {
-            return ((obj) => {
-                obj.label = () => "Площадь";
-                obj.control = () => [].concat(this.SqTotalControl());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        SqTotalControl() {
-            return ((obj) => {
-                return obj;
-            })(new this.$.$bw_search_param_diap);
-        }
-        Storey() {
-            return ((obj) => {
-                obj.label = () => "Этаж";
-                obj.control = () => [].concat(this.StoreyControl());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        StoreyControl() {
-            return ((obj) => {
-                return obj;
-            })(new this.$.$bw_search_param_diap);
-        }
-        MainDownerSecondCol() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.DealType(), this.Price(), this.PricePerSq());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-        DealType() {
-            return ((obj) => {
-                obj.label = () => "Тип сделки";
-                obj.control = () => [].concat(this.DealTypeCombo());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        DealTypeCombo() {
-            return ((obj) => {
-                obj.options = () => ({
-                    "direct_sale": "Прямая продажа",
-                    "alternative": "Альтернатива",
-                });
-                obj.value = () => "Прямая продажа";
-                return obj;
-            })(new this.$.$bw_input_combo);
-        }
-        Price() {
-            return ((obj) => {
-                obj.label = () => "Цена";
-                obj.control = () => [].concat(this.PriceControl());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        PriceControl() {
-            return ((obj) => {
-                return obj;
-            })(new this.$.$bw_search_param_diap);
-        }
-        PricePerSq() {
-            return ((obj) => {
-                obj.label = () => "Цена за м²";
-                obj.control = () => [].concat(this.PricePerSqControl());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        PricePerSqControl() {
-            return ((obj) => {
-                return obj;
-            })(new this.$.$bw_search_param_diap);
-        }
-        MainDownerThirdCol() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.Area(), this.Far(), this.Location());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-        Area() {
-            return ((obj) => {
-                obj.label = () => "Область";
-                obj.control = () => [].concat(this.AreaTypeCombo());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        AreaTypeCombo() {
-            return ((obj) => {
-                obj.options = () => ({
-                    "both": "Москва и область",
-                    "msk": "Москва",
-                });
-                obj.value = () => "Москва и область";
-                return obj;
-            })(new this.$.$bw_input_combo);
-        }
-        Far() {
-            return ((obj) => {
-                obj.label = () => "От станции";
-                obj.control = () => [].concat(this.FarCombo());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        FarCombo() {
-            return ((obj) => {
-                obj.options = () => ({
-                    "walk_2": "До 2 минут пешком",
-                    "walk_5": "До 5 минут пешком",
-                    "walk_10": "До 10 минут пешком",
-                    "bus_5": "До 5 минут транспортом",
-                    "bus_10": "До 10 минут транспортом",
-                    "bus_15": "До 15 минут транспортом",
-                });
-                obj.value = () => "До 2 минут пешком";
-                return obj;
-            })(new this.$.$bw_input_combo);
-        }
-        Location() {
-            return ((obj) => {
-                obj.label = () => "Цена за м²";
-                obj.control = () => [].concat(this.LocationControl());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        LocationControl() {
-            return ((obj) => {
-                obj.options = () => ({
-                    "subway": "Метро",
-                    "railway": "Ж/Д",
-                    "districts": "Районы",
-                    "map": "Карта",
-                });
-                return obj;
-            })(new this.$.$mol_switch);
-        }
         Full() {
             return ((obj) => {
+                obj.style = () => ({
+                    "opacity": this.full_params_opacity(),
+                });
                 return obj;
-            })(new this.$.$mol_view);
+            })(new this.$.$bw_search_params_block_full);
+        }
+        full_params_opacity() {
+            return 0;
         }
         Footer() {
             return ((obj) => {
@@ -15193,105 +15058,6 @@ var $;
     ], $bw_search_params.prototype, "Main", null);
     __decorate([
         $.$mol_mem
-    ], $bw_search_params.prototype, "MainUpper", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "MainUpperFirstRow", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "ApartmentType", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Studio", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "FreePlan", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "GeoSpot", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "GeoSpotControl", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "MainUpperSecondRow", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "OnlyWith", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Photo", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Video", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "MainDowner", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "MainDownerFirstCol", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "RoomQt", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "RoomQtSwitch", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "SqTotal", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "SqTotalControl", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Storey", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "StoreyControl", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "MainDownerSecondCol", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "DealType", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "DealTypeCombo", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Price", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "PriceControl", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "PricePerSq", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "PricePerSqControl", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "MainDownerThirdCol", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Area", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "AreaTypeCombo", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Far", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "FarCombo", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Location", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "LocationControl", null);
-    __decorate([
-        $.$mol_mem
     ], $bw_search_params.prototype, "Full", null);
     __decorate([
         $.$mol_mem
@@ -15315,6 +15081,449 @@ var $;
         $.$mol_mem
     ], $bw_search_params.prototype, "client_rect", null);
     $.$bw_search_params = $bw_search_params;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_search_params_block extends $.$mol_view {
+        sub() {
+            return [].concat(this.Upper(), this.Downer());
+        }
+        Upper() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.UpperFirstRow(), this.UpperSecondRow());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        UpperFirstRow() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.ApartmentType(), this.GeoSpot());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        ApartmentType() {
+            return ((obj) => {
+                obj.label = () => "Квартира";
+                obj.control = () => [].concat(this.Studio(), this.FreePlan());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        Studio() {
+            return ((obj) => {
+                obj.title = () => "Студия";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        FreePlan() {
+            return ((obj) => {
+                obj.title = () => "Св.планировка";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        GeoSpot() {
+            return ((obj) => {
+                obj.label = () => "Адрес";
+                obj.control = () => [].concat(this.GeoSpotControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        GeoSpotControl() {
+            return ((obj) => {
+                obj.hint = () => "Город, район, адрес, метро, название ЖКХ";
+                return obj;
+            })(new this.$.$bw_search_params_input_commitable);
+        }
+        UpperSecondRow() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.OnlyWith());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        OnlyWith() {
+            return ((obj) => {
+                obj.label = () => "Только с";
+                obj.control = () => [].concat(this.Photo(), this.Video());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        Photo() {
+            return ((obj) => {
+                obj.title = () => "Фото";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        Video() {
+            return ((obj) => {
+                obj.title = () => "Видео";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        Downer() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.DownerFirstCol(), this.DownerSecondCol(), this.DownerThirdCol());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        DownerFirstCol() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.RoomQt(), this.SqTotal(), this.Storey());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        RoomQt() {
+            return ((obj) => {
+                obj.label = () => "Комнаты";
+                obj.control = () => [].concat(this.RoomQtSwitch());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        RoomQtSwitch() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "one": 1,
+                    "two": 2,
+                    "three": 3,
+                    "four": 4,
+                    "five": 5,
+                    "sixplus": "6+",
+                });
+                return obj;
+            })(new this.$.$mol_switch);
+        }
+        SqTotal() {
+            return ((obj) => {
+                obj.label = () => "Площадь";
+                obj.control = () => [].concat(this.SqTotalControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        SqTotalControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        Storey() {
+            return ((obj) => {
+                obj.label = () => "Этаж";
+                obj.control = () => [].concat(this.StoreyControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        StoreyControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        DownerSecondCol() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.DealType(), this.Price(), this.PricePerSq());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        DealType() {
+            return ((obj) => {
+                obj.label = () => "Тип сделки";
+                obj.control = () => [].concat(this.DealTypeCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        DealTypeCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "direct_sale": "Прямая продажа",
+                    "alternative": "Альтернатива",
+                });
+                obj.value = () => "Прямая продажа";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Price() {
+            return ((obj) => {
+                obj.label = () => "Цена";
+                obj.control = () => [].concat(this.PriceControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        PriceControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        PricePerSq() {
+            return ((obj) => {
+                obj.label = () => "Цена за м²";
+                obj.control = () => [].concat(this.PricePerSqControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        PricePerSqControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        DownerThirdCol() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Area(), this.Far(), this.Location());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Area() {
+            return ((obj) => {
+                obj.label = () => "Область";
+                obj.control = () => [].concat(this.AreaTypeCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        AreaTypeCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "both": "Москва и область",
+                    "msk": "Москва",
+                });
+                obj.value = () => "Москва и область";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Far() {
+            return ((obj) => {
+                obj.label = () => "От станции";
+                obj.control = () => [].concat(this.FarCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        FarCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "walk_2": "До 2 минут пешком",
+                    "walk_5": "До 5 минут пешком",
+                    "walk_10": "До 10 минут пешком",
+                    "bus_5": "До 5 минут транспортом",
+                    "bus_10": "До 10 минут транспортом",
+                    "bus_15": "До 15 минут транспортом",
+                });
+                obj.value = () => "До 2 минут пешком";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Location() {
+            return ((obj) => {
+                obj.label = () => "Цена за м²";
+                obj.control = () => [].concat(this.LocationControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        LocationControl() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "subway": "Метро",
+                    "railway": "Ж/Д",
+                    "districts": "Районы",
+                    "map": "Карта",
+                });
+                return obj;
+            })(new this.$.$mol_switch);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "Upper", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "UpperFirstRow", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "ApartmentType", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "Studio", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "FreePlan", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "GeoSpot", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "GeoSpotControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "UpperSecondRow", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "OnlyWith", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "Photo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "Video", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "Downer", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "DownerFirstCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "RoomQt", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "RoomQtSwitch", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "SqTotal", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "SqTotalControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "Storey", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "StoreyControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "DownerSecondCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "DealType", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "DealTypeCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "Price", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "PriceControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "PricePerSq", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "PricePerSqControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "DownerThirdCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "Area", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "AreaTypeCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "Far", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "FarCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "Location", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block.prototype, "LocationControl", null);
+    $.$bw_search_params_block = $bw_search_params_block;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_search_params_block_main extends $.$bw_search_params_block {
+    }
+    $.$bw_search_params_block_main = $bw_search_params_block_main;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_search_params_block_full extends $.$bw_search_params_block {
+        sub() {
+            return [].concat(this.Upper(), this.Downer());
+        }
+        Upper() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.UpperFirstRow(), this.UpperSecondRow());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        UpperFirstRow() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.ApartmentType(), this.GeoSpot(), this.GeoTuning());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        GeoTuning() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.WithoutNewMsk(), this.OnlyNewMsk());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        WithoutNewMsk() {
+            return ((obj) => {
+                obj.title = () => "Без Новой Москвы";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        OnlyNewMsk() {
+            return ((obj) => {
+                obj.title = () => "Только Новая Москва";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        Downer() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.DownerFirstCol(), this.DownerSecondCol(), this.DownerThirdCol(), this.DownerForthCol());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        DownerFirstCol() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.RoomQt(), this.SqTotal(), this.Storey());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        DownerSecondCol() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.DealType(), this.Price(), this.PricePerSq());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        DownerThirdCol() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Area(), this.Far(), this.Location());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        DownerForthCol() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$mol_view);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Upper", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "UpperFirstRow", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "GeoTuning", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "WithoutNewMsk", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "OnlyNewMsk", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Downer", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "DownerFirstCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "DownerSecondCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "DownerThirdCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "DownerForthCol", null);
+    $.$bw_search_params_block_full = $bw_search_params_block_full;
 })($ || ($ = {}));
 (function ($) {
     class $bw_search_params_input_commitable extends $.$bw_input_checkable {
@@ -15552,11 +15761,11 @@ var $;
                 return obj;
             })(new this.$.$bw_search_result_grid);
         }
-        grid_height_to_use() {
-            return 0;
+        grid_height_to_use(val, force) {
+            return (val !== void 0) ? val : null;
         }
         grid_height_animated() {
-            return 0;
+            return null;
         }
         grid_top() {
             return 0;
@@ -15568,6 +15777,9 @@ var $;
             return null;
         }
         content_client_rect(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        content_client_rect_height(val, force) {
             return (val !== void 0) ? val : null;
         }
     }
@@ -15645,7 +15857,13 @@ var $;
     ], $bw_search_result.prototype, "Grid", null);
     __decorate([
         $.$mol_mem
+    ], $bw_search_result.prototype, "grid_height_to_use", null);
+    __decorate([
+        $.$mol_mem
     ], $bw_search_result.prototype, "content_client_rect", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_result.prototype, "content_client_rect_height", null);
     $.$bw_search_result = $bw_search_result;
 })($ || ($ = {}));
 (function ($) {
@@ -16228,15 +16446,52 @@ var $;
         $$.$bw_search_block_table = $bw_search_block_table;
         class $bw_search_params extends $.$bw_search_params {
             main_params_opacity() {
-                return this.mode() === 'short' ? 0 : 1;
+                const result = this.mode() === 'main' ? 1 : 0;
+                return result;
             }
             Main() {
-                const result = this.mode() == 'short' && this.main_params_opacity() == 0 ? null : super.Main();
+                const result = super.Main();
+                return result;
+            }
+            Main_condition() {
+                let mode;
+                let main_params_opacity_animation_is;
+                let main_params_opacity;
+                const result = (() => (mode = this.mode()) == 'main')() ||
+                    (() => main_params_opacity_animation_is = this.main_params_opacity_animation_is())() ||
+                    (() => (main_params_opacity = this.main_params_opacity()) == 1)();
+                return result;
+            }
+            full_params_opacity() {
+                const result = this.mode() === 'full' ? 1 : 0;
+                return result;
+            }
+            Full() {
+                const result = super.Full();
+                return result;
+            }
+            Full_condition() {
+                const result = this.mode() == 'full' ||
+                    this.full_params_opacity_animation_is() ||
+                    this.full_params_opacity() == 1;
                 return result;
             }
             min_height() {
                 const result = this.min_height_config()[this.mode()] || 0;
                 return result;
+            }
+            min_height_animation_start(p) {
+                const delta = p.end - p.start;
+                if (delta < 0) {
+                    let content_client_rect_height = $bw_search.instance().Result().content_client_rect_height();
+                    if (content_client_rect_height) {
+                        content_client_rect_height -= delta;
+                        $bw_search.instance().Result().content_client_rect_height(content_client_rect_height);
+                    }
+                }
+            }
+            min_height_animation_finish(p) {
+                $bw_search.instance().Result().content_client_rect_height(null);
             }
             min_height_config() {
                 return { full: 627, main: 295, short: 100 };
@@ -16342,6 +16597,15 @@ var $;
             $$.$bw_animate
         ], $bw_search_params.prototype, "main_params_opacity", null);
         __decorate([
+            $$.$bw_conditional
+        ], $bw_search_params.prototype, "Main", null);
+        __decorate([
+            $$.$bw_animate
+        ], $bw_search_params.prototype, "full_params_opacity", null);
+        __decorate([
+            $$.$bw_conditional
+        ], $bw_search_params.prototype, "Full", null);
+        __decorate([
             $$.$bw_animate
         ], $bw_search_params.prototype, "min_height", null);
         __decorate([
@@ -16393,13 +16657,8 @@ var $;
         $$.$bw_search_menu_option = $bw_search_menu_option;
         class $bw_search_result extends $.$bw_search_result {
             content_client_rect() {
-                return $$.meter({
-                    _super: (val) => super.content_client_rect(val),
-                    _value: () => {
-                        const result = this.Content().dom_node().getBoundingClientRect();
-                        return result;
-                    }
-                });
+                const result = this.Content().dom_node().getBoundingClientRect();
+                return result;
             }
             map_height() {
                 return !this.map_on() ? 0 : this.map_height_max();
@@ -16420,12 +16679,21 @@ var $;
             grid_top_animation_steps() {
                 return this.grid_height_animated_animation_steps();
             }
+            content_client_rect_height(val) {
+                let result = super.content_client_rect_height(val);
+                if (result === null) {
+                    const client_rect = this.content_client_rect();
+                    if (client_rect)
+                        result = client_rect.height;
+                }
+                return result;
+            }
             grid_height() {
-                const client_rect = this.content_client_rect();
-                const result = !client_rect ? { min: 0, max: 0 } :
+                const client_rect_height = this.content_client_rect_height();
+                const result = !client_rect_height ? { min: 0, max: 0 } :
                     {
-                        min: client_rect.height - this.map_height(),
-                        max: client_rect.height,
+                        min: client_rect_height - this.map_height(),
+                        max: client_rect_height,
                     };
                 return result;
             }
@@ -16439,11 +16707,26 @@ var $;
             grid_height_animated_animation_easing() {
                 return $$.BwEasing.easeInOutQuad;
             }
+            grid_height_animated_animation_finish(p) {
+                p.fn_store(null);
+            }
             grid_height_to_use() {
-                const grid_height = this.grid_height();
-                return this.map_on() || this.map_opacity() ? grid_height.max : grid_height.min;
+                let result = super.grid_height_to_use();
+                if (result === null) {
+                    window.addEventListener('resize', () => {
+                        if (window.innerHeight > super.grid_height_to_use()) {
+                            super.grid_height_to_use(window.innerHeight);
+                        }
+                    });
+                    result = window.innerHeight;
+                    super.grid_height_to_use(result);
+                }
+                return result;
             }
         }
+        __decorate([
+            $$.$bw_meter
+        ], $bw_search_result.prototype, "content_client_rect", null);
         __decorate([
             $$.$bw_animate
         ], $bw_search_result.prototype, "map_opacity", null);
@@ -16453,6 +16736,9 @@ var $;
         __decorate([
             $$.$bw_animate
         ], $bw_search_result.prototype, "grid_height_animated", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_search_result.prototype, "grid_height_to_use", null);
         $$.$bw_search_result = $bw_search_result;
         class $bw_search_result_grid extends $.$bw_search_result_grid {
         }
