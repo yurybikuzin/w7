@@ -13391,11 +13391,14 @@ var $;
                 const idx = this.row_def_idx(i);
                 return this.row_footer_height_of_idx(idx).footer;
             }
+            footer_opacity_animation_steps(i) {
+                return this.row_footer_height_animation_steps(i) * 2;
+            }
             footer_opacity_animation_triggered_value(i, trigger) {
                 return trigger ? 1 : 0;
             }
             footer_opacity_animation_easing(i, p) {
-                return p.trigger ? $$.BwEasing.easeInQuad : $$.BwEasing.easeOutQuad;
+                return p.trigger ? $$.BwEasing.easeInQuint : $$.BwEasing.easeOutQuint;
             }
             row_footer_height(i) {
                 const idx = this.row_def_idx(i);
@@ -13404,12 +13407,18 @@ var $;
             row_footer_height_animation_easing(i) {
                 return $$.BwEasing.easeOutQuad;
             }
+            row_footer_height_animation_steps(i) {
+                return 4;
+            }
             row_footer_height_animation_finish(i) {
                 this.animating_footer(null);
             }
             row_note_height(i) {
                 const idx = this.row_def_idx(i);
                 return this.row_footer_height_of_idx(idx).note;
+            }
+            row_note_height_animation_steps(i) {
+                return this.row_footer_height_animation_steps(i);
             }
             row_note_height_animation_easing(i) {
                 return $$.BwEasing.easeOutQuad;
@@ -13421,6 +13430,9 @@ var $;
             }
             row_user_note_height_animation_easing(i) {
                 return $$.BwEasing.easeOutQuad;
+            }
+            row_user_note_height_animation_steps(i) {
+                return this.row_footer_height_animation_steps(i);
             }
             row_footer_heights(val, force) {
                 let result = super.row_footer_heights(val, force);
@@ -14965,7 +14977,7 @@ var $;
         }
         MainDownerFirstCol() {
             return ((obj) => {
-                obj.sub = () => [].concat(this.RoomQt(), this.MainDownerFirstColSecondRow(), this.MainDownerFirstColThirdRow());
+                obj.sub = () => [].concat(this.RoomQt(), this.SqTotal(), this.Storey());
                 return obj;
             })(new this.$.$mol_view);
         }
@@ -14989,25 +15001,138 @@ var $;
                 return obj;
             })(new this.$.$mol_switch);
         }
-        MainDownerFirstColSecondRow() {
+        SqTotal() {
             return ((obj) => {
+                obj.label = () => "Площадь";
+                obj.control = () => [].concat(this.SqTotalControl());
                 return obj;
-            })(new this.$.$mol_view);
+            })(new this.$.$bw_search_params_field);
         }
-        MainDownerFirstColThirdRow() {
+        SqTotalControl() {
             return ((obj) => {
                 return obj;
-            })(new this.$.$mol_view);
+            })(new this.$.$bw_search_param_diap);
+        }
+        Storey() {
+            return ((obj) => {
+                obj.label = () => "Этаж";
+                obj.control = () => [].concat(this.StoreyControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        StoreyControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
         }
         MainDownerSecondCol() {
             return ((obj) => {
+                obj.sub = () => [].concat(this.DealType(), this.Price(), this.PricePerSq());
                 return obj;
             })(new this.$.$mol_view);
         }
-        MainDownerThirdCol() {
+        DealType() {
+            return ((obj) => {
+                obj.label = () => "Тип сделки";
+                obj.control = () => [].concat(this.DealTypeCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        DealTypeCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "direct_sale": "Прямая продажа",
+                    "alternative": "Альтернатива",
+                });
+                obj.value = () => "Прямая продажа";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Price() {
+            return ((obj) => {
+                obj.label = () => "Цена";
+                obj.control = () => [].concat(this.PriceControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        PriceControl() {
             return ((obj) => {
                 return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        PricePerSq() {
+            return ((obj) => {
+                obj.label = () => "Цена за м²";
+                obj.control = () => [].concat(this.PricePerSqControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        PricePerSqControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        MainDownerThirdCol() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Area(), this.Far(), this.Location());
+                return obj;
             })(new this.$.$mol_view);
+        }
+        Area() {
+            return ((obj) => {
+                obj.label = () => "Область";
+                obj.control = () => [].concat(this.AreaTypeCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        AreaTypeCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "both": "Москва и область",
+                    "msk": "Москва",
+                });
+                obj.value = () => "Москва и область";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Far() {
+            return ((obj) => {
+                obj.label = () => "От станции";
+                obj.control = () => [].concat(this.FarCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        FarCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "walk_2": "До 2 минут пешком",
+                    "walk_5": "До 5 минут пешком",
+                    "walk_10": "До 10 минут пешком",
+                    "bus_5": "До 5 минут транспортом",
+                    "bus_10": "До 10 минут транспортом",
+                    "bus_15": "До 15 минут транспортом",
+                });
+                obj.value = () => "До 2 минут пешком";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Location() {
+            return ((obj) => {
+                obj.label = () => "Цена за м²";
+                obj.control = () => [].concat(this.LocationControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        LocationControl() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "subway": "Метро",
+                    "railway": "Ж/Д",
+                    "districts": "Районы",
+                    "map": "Карта",
+                });
+                return obj;
+            })(new this.$.$mol_switch);
         }
         Full() {
             return ((obj) => {
@@ -15123,16 +15248,58 @@ var $;
     ], $bw_search_params.prototype, "RoomQtSwitch", null);
     __decorate([
         $.$mol_mem
-    ], $bw_search_params.prototype, "MainDownerFirstColSecondRow", null);
+    ], $bw_search_params.prototype, "SqTotal", null);
     __decorate([
         $.$mol_mem
-    ], $bw_search_params.prototype, "MainDownerFirstColThirdRow", null);
+    ], $bw_search_params.prototype, "SqTotalControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Storey", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "StoreyControl", null);
     __decorate([
         $.$mol_mem
     ], $bw_search_params.prototype, "MainDownerSecondCol", null);
     __decorate([
         $.$mol_mem
+    ], $bw_search_params.prototype, "DealType", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "DealTypeCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Price", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "PriceControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "PricePerSq", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "PricePerSqControl", null);
+    __decorate([
+        $.$mol_mem
     ], $bw_search_params.prototype, "MainDownerThirdCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Area", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "AreaTypeCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Far", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "FarCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Location", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "LocationControl", null);
     __decorate([
         $.$mol_mem
     ], $bw_search_params.prototype, "Full", null);
