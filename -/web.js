@@ -14959,13 +14959,13 @@ var $;
         }
         MainDowner() {
             return ((obj) => {
-                obj.sub = () => [].concat(this.MainDownerFirstRow(), this.MainDownerSecondRow(), this.MainDownerThirdRow());
+                obj.sub = () => [].concat(this.MainDownerFirstCol(), this.MainDownerSecondCol(), this.MainDownerThirdCol());
                 return obj;
             })(new this.$.$mol_view);
         }
-        MainDownerFirstRow() {
+        MainDownerFirstCol() {
             return ((obj) => {
-                obj.sub = () => [].concat(this.RoomQt(), this.DealType(), this.Area());
+                obj.sub = () => [].concat(this.RoomQt(), this.MainDownerFirstColSecondRow(), this.MainDownerFirstColThirdRow());
                 return obj;
             })(new this.$.$mol_view);
         }
@@ -14989,138 +14989,25 @@ var $;
                 return obj;
             })(new this.$.$mol_switch);
         }
-        DealType() {
+        MainDownerFirstColSecondRow() {
             return ((obj) => {
-                obj.label = () => "Тип сделки";
-                obj.control = () => [].concat(this.DealTypeCombo());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        DealTypeCombo() {
-            return ((obj) => {
-                obj.options = () => ({
-                    "direct_sale": "Прямая продажа",
-                    "alternative": "Альтернатива",
-                });
-                obj.value = () => "Прямая продажа";
-                return obj;
-            })(new this.$.$bw_input_combo);
-        }
-        Area() {
-            return ((obj) => {
-                obj.label = () => "Область";
-                obj.control = () => [].concat(this.AreaTypeCombo());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        AreaTypeCombo() {
-            return ((obj) => {
-                obj.options = () => ({
-                    "both": "Москва и область",
-                    "msk": "Москва",
-                });
-                obj.value = () => "Москва и область";
-                return obj;
-            })(new this.$.$bw_input_combo);
-        }
-        MainDownerSecondRow() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.SqTotal(), this.Price(), this.Far());
                 return obj;
             })(new this.$.$mol_view);
         }
-        SqTotal() {
+        MainDownerFirstColThirdRow() {
             return ((obj) => {
-                obj.label = () => "Площадь";
-                obj.control = () => [].concat(this.SqTotalControl());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        SqTotalControl() {
-            return ((obj) => {
-                return obj;
-            })(new this.$.$bw_search_param_diap);
-        }
-        Price() {
-            return ((obj) => {
-                obj.label = () => "Цена";
-                obj.control = () => [].concat(this.PriceControl());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        PriceControl() {
-            return ((obj) => {
-                return obj;
-            })(new this.$.$bw_search_param_diap);
-        }
-        Far() {
-            return ((obj) => {
-                obj.label = () => "От станции";
-                obj.control = () => [].concat(this.FarCombo());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        FarCombo() {
-            return ((obj) => {
-                obj.options = () => ({
-                    "walk_2": "До 2 минут пешком",
-                    "walk_5": "До 5 минут пешком",
-                    "walk_10": "До 10 минут пешком",
-                    "bus_5": "До 5 минут транспортом",
-                    "bus_10": "До 10 минут транспортом",
-                    "bus_15": "До 15 минут транспортом",
-                });
-                obj.value = () => "До 2 минут пешком";
-                return obj;
-            })(new this.$.$bw_input_combo);
-        }
-        MainDownerThirdRow() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.Storey(), this.PricePerSq(), this.Location());
                 return obj;
             })(new this.$.$mol_view);
         }
-        Storey() {
+        MainDownerSecondCol() {
             return ((obj) => {
-                obj.label = () => "Этаж";
-                obj.control = () => [].concat(this.StoreyControl());
                 return obj;
-            })(new this.$.$bw_search_params_field);
+            })(new this.$.$mol_view);
         }
-        StoreyControl() {
+        MainDownerThirdCol() {
             return ((obj) => {
                 return obj;
-            })(new this.$.$bw_search_param_diap);
-        }
-        PricePerSq() {
-            return ((obj) => {
-                obj.label = () => "Цена за м²";
-                obj.control = () => [].concat(this.PricePerSqControl());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        PricePerSqControl() {
-            return ((obj) => {
-                return obj;
-            })(new this.$.$bw_search_param_diap);
-        }
-        Location() {
-            return ((obj) => {
-                obj.label = () => "Цена за м²";
-                obj.control = () => [].concat(this.LocationControl());
-                return obj;
-            })(new this.$.$bw_search_params_field);
-        }
-        LocationControl() {
-            return ((obj) => {
-                obj.options = () => ({
-                    "subway": "Метро",
-                    "railway": "Ж/Д",
-                    "districts": "Районы",
-                    "map": "Карта",
-                });
-                return obj;
-            })(new this.$.$mol_switch);
+            })(new this.$.$mol_view);
         }
         Full() {
             return ((obj) => {
@@ -15227,7 +15114,7 @@ var $;
     ], $bw_search_params.prototype, "MainDowner", null);
     __decorate([
         $.$mol_mem
-    ], $bw_search_params.prototype, "MainDownerFirstRow", null);
+    ], $bw_search_params.prototype, "MainDownerFirstCol", null);
     __decorate([
         $.$mol_mem
     ], $bw_search_params.prototype, "RoomQt", null);
@@ -15236,58 +15123,16 @@ var $;
     ], $bw_search_params.prototype, "RoomQtSwitch", null);
     __decorate([
         $.$mol_mem
-    ], $bw_search_params.prototype, "DealType", null);
+    ], $bw_search_params.prototype, "MainDownerFirstColSecondRow", null);
     __decorate([
         $.$mol_mem
-    ], $bw_search_params.prototype, "DealTypeCombo", null);
+    ], $bw_search_params.prototype, "MainDownerFirstColThirdRow", null);
     __decorate([
         $.$mol_mem
-    ], $bw_search_params.prototype, "Area", null);
+    ], $bw_search_params.prototype, "MainDownerSecondCol", null);
     __decorate([
         $.$mol_mem
-    ], $bw_search_params.prototype, "AreaTypeCombo", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "MainDownerSecondRow", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "SqTotal", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "SqTotalControl", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Price", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "PriceControl", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Far", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "FarCombo", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "MainDownerThirdRow", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Storey", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "StoreyControl", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "PricePerSq", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "PricePerSqControl", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "Location", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_search_params.prototype, "LocationControl", null);
+    ], $bw_search_params.prototype, "MainDownerThirdCol", null);
     __decorate([
         $.$mol_mem
     ], $bw_search_params.prototype, "Full", null);

@@ -1,0 +1,21 @@
+{
+  "short_name": "w72",
+  "name": "WinNER7 newlook",
+  "icons": [
+    {
+      "src": "logo_icon_192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo_icon_512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/bw/app?#page=normal",
+  "background_color": "#101077",
+  "display": "standalone",
+  "theme_color": "#101077",
+  "gcm_sender_id": "653317226796"
+}

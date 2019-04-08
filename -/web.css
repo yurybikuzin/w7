@@ -4239,7 +4239,7 @@ body[_viewport-width=invalid] [bw_app_new_look]:after { content: 'min width is 3
 
 [bw_search] [bw_search_params] [bw_search_params_mainupper] {
       flex: 1 1 auto;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -4260,6 +4260,7 @@ body[_viewport-width=invalid] [bw_app_new_look]:after { content: 'min width is 3
 [bw_search] [bw_search_params] [bw_search_params_mainupper] [mol_check_box] [mol_check_box_icon] {
           border-radius: 2px;
           border: solid 1px #313745;
+          margin: 0;
         }
 
 [bw_search] [bw_search_params] [bw_search_params_mainupper] [mol_check_box] [mol_check_title] {
@@ -4283,7 +4284,7 @@ body[_viewport-width=invalid] [bw_app_new_look]:after { content: 'min width is 3
         }
 
 [bw_search] [bw_search_params] [bw_search_params_mainupper] [bw_search_params_field]:first-of-type [bw_search_params_field_control] > *:first-child {
-            flex: 0 0 110px;
+            flex: 0 0 118px;
           }
 
 [bw_search] [bw_search_params] [bw_search_params_mainupper] [bw_search_params_field]:not(:first-of-type) {
@@ -4314,7 +4315,12 @@ body[_viewport-width=invalid] [bw_app_new_look]:after { content: 'min width is 3
         background: #fcfcfd;
       }
 
-[bw_search] [bw_search_params] [bw_search_params_roomqt] [mol_check_checked] {
+[bw_search] [bw_search_params] [bw_search_params_roomqt] [mol_check]:hover {
+        border: solid 1px rgba(0, 142, 207, 0.5);
+        background-color: rgba(240, 241, 244, 0.5);
+      }
+
+[bw_search] [bw_search_params] [bw_search_params_roomqt] [mol_check][mol_check_checked] {
         background: #f0f1f4;
         border-radius: 3px;
         border: solid 1px #008ecf;
@@ -4359,54 +4365,68 @@ body[_viewport-width=invalid] [bw_app_new_look]:after { content: 'min width is 3
 [bw_search] [bw_search_params] [bw_search_params_maindowner] {
       flex: 0 0 104px;
       display: flex;
+      /* background: yellow; */
+      justify-content: space-between;
+/*
       flex-direction: column;
       justify-content: space-between;
-    }
-
-[bw_search] [bw_search_params] [bw_search_params_maindowner] [bw_input_combo] {
-        height: 24px;
-        width: 100%;
-      }
-
-[bw_search] [bw_search_params] [bw_search_params_maindowner] [bw_input_combo] [bw_input_combo_input] {
-          padding: 4px 7px;
-          font-size: 14px;
-          border-radius: 3px;
-          border: solid 1px #bdc3d1;
-          background-color: #fcfcfd;
-        }
-
-[bw_search] [bw_search_params] [bw_search_params_maindowner] [bw_input_combo] [bw_input_combo_check] {
-          width: 23px;
-          padding-right: 4px;
-        }
-
-[bw_search] [bw_search_params] [bw_search_params_maindowner] [bw_input_combo] [bw_input_combo_icon] {
-          width: 9px;
-        }
-
-[bw_search] [bw_search_params] [bw_search_params_maindowner] [bw_input_combo] [bw_input_combo_icon] path {
-            /* fill: red; */
-            fill: #444956;
-          }
-
-[bw_search] [bw_search_params] [bw_search_params_maindowner] [bw_search_param_diap] {
-        display: flex;
-        justify-content: space-between;
-      }
-
-[bw_search] [bw_search_params] [bw_search_params_maindowner] [bw_search_param_diap] > * {
-          flex: 0 0 100px;
-        }
-
-[bw_search] [bw_search_params] [bw_search_params_maindowner] > * {
+      & > * {
         flex: 0 0 24px;
         display: flex;
         justify-content: space-between;
       }
+ */
+    }
+
+[bw_search] [bw_search_params] [bw_search_params_maindowner] > * {
+        flex: 0 0 316px;
+        /* background: cyan; */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+[bw_search] [bw_search_params] [bw_search_params_maindowner] > * > * {
+          flex: 0 0 24px;
+          /* background: green; */
+        }
+
+[bw_search] [bw_search_params] [bw_search_param_diap] {
+      display: flex;
+      justify-content: space-between;
+    }
+
+[bw_search] [bw_search_params] [bw_search_param_diap] > * {
+        flex: 0 0 100px;
+      }
+
+[bw_search] [bw_search_params] [bw_input_combo] {
+      height: 24px;
+      width: 100%;
+    }
+
+[bw_search] [bw_search_params] [bw_input_combo] [bw_input_combo_input] {
+        padding: 4px 7px;
+        font-size: 14px;
+        border-radius: 3px;
+        border: solid 1px #bdc3d1;
+        background-color: #fcfcfd;
+      }
+
+[bw_search] [bw_search_params] [bw_input_combo] [bw_input_combo_check] {
+        width: 23px;
+        padding-right: 4px;
+      }
+
+[bw_search] [bw_search_params] [bw_input_combo] [bw_input_combo_icon] {
+        width: 9px;
+      }
+
+[bw_search] [bw_search_params] [bw_input_combo] [bw_input_combo_icon] path {
+          fill: #444956;
+        }
 
 [bw_search] [bw_search_params] [bw_search_params_field] {
-      flex: 0 0 316px;
       display: flex;
       align-items: center;
     }
