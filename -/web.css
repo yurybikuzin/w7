@@ -4608,7 +4608,7 @@ body[_viewport-width=invalid] [bw_app_new_look]:after { content: 'min width is 3
   }
 
 [bw_search_params_label] {
-  font-weight: bold;
+  font-weight: var(--bw-font-medium-weight);
 }
 
 [bw_search_params_input_commitable] {
