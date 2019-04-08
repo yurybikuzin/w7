@@ -12135,11 +12135,8 @@ var $;
         row_i_max(val, force) {
             return (val !== void 0) ? val : 0;
         }
-        row_i_first(val, force) {
-            return (val !== void 0) ? val : 0;
-        }
-        row_i_last(val, force) {
-            return (val !== void 0) ? val : 0;
+        row_i_diap(val, force) {
+            return (val !== void 0) ? val : null;
         }
         row_defs(val, force) {
             return (val !== void 0) ? val : null;
@@ -12390,10 +12387,7 @@ var $;
     ], $bw_grid2.prototype, "row_i_max", null);
     __decorate([
         $.$mol_mem
-    ], $bw_grid2.prototype, "row_i_first", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_grid2.prototype, "row_i_last", null);
+    ], $bw_grid2.prototype, "row_i_diap", null);
     __decorate([
         $.$mol_mem
     ], $bw_grid2.prototype, "row_defs", null);
@@ -13178,14 +13172,20 @@ var $;
                         top += height;
                         row_i_last = this.row_i(idx + 1);
                     }
-                    this.row_i_first(0);
-                    this.row_i_last(row_i_last);
+                    this.row_i_diap({ first: 0, last: row_i_last });
                     this.update_row_defs(result);
                 }
                 let delta = this.scroll_y_delta();
                 this.scroll_y_delta(0);
                 this.scroll_y(delta);
                 result = super.row_defs();
+                return result;
+            }
+            row_i_diap(val, force) {
+                let result = super.row_i_diap(val, force);
+                if (result === null) {
+                    result = { first: 0, last: 0 };
+                }
                 return result;
             }
             update_row_defs(row_defs_new, force) {
@@ -13211,9 +13211,10 @@ var $;
                 const rows_count = this.rows_count();
                 let is_bog = true;
                 let is_eog = true;
-                const row_i_first = this.row_i_first();
-                const row_i_last = this.row_i_last();
-                if (rows_count >= 2 && row_i_first != row_i_last) {
+                const row_i_diap = this.row_i_diap();
+                const row_i_first = row_i_diap.first;
+                const row_i_last = row_i_diap.last;
+                if (rows_count >= 2) {
                     const row_defs = super.row_defs();
                     let row_i = row_i_first;
                     const row_def = row_defs[row_i];
@@ -13267,8 +13268,7 @@ var $;
                         const row_def = row_defs_new[this.row_i(row_i_last_new - 1)];
                         is_eog = row_def.idx == rows_count - 1 && (body_height - row_def.top - row_def.height) >= this.row_space_bottom_max();
                     }
-                    this.row_i_first(row_i_first_new);
-                    this.row_i_last(row_i_last_new);
+                    this.row_i_diap({ first: row_i_first_new, last: row_i_last_new });
                     this.update_row_defs(row_defs_new);
                 }
                 this.is_bog(is_bog);
@@ -13287,18 +13287,14 @@ var $;
                 return result;
             }
             is_visible_row(i) {
-                const row_i_first = this.row_i_first();
-                const row_i_last = this.row_i_last();
-                const result = row_i_first == row_i_last ? false :
-                    (row_i_first < row_i_last ? row_i_first <= i && i < row_i_last : row_i_first <= i || i < row_i_last);
+                const row_i_diap = this.row_i_diap();
+                const row_i_first = row_i_diap.first;
+                const row_i_last = row_i_diap.last;
+                const result = (row_i_first < row_i_last ? row_i_first <= i && i < row_i_last : row_i_first <= i || i < row_i_last);
                 return result;
             }
             row_display(i) {
                 const result = this.is_visible_row(i) ? 'block' : 'none';
-                return result;
-            }
-            cell_display(ij) {
-                const result = this.is_visible_row(ij.i) ? 'block' : 'none';
                 return result;
             }
             row_def_idx(i, val, force) {
@@ -13746,12 +13742,6 @@ var $;
         __decorate([
             $.$mol_mem_key
         ], $bw_grid2.prototype, "is_visible_row", null);
-        __decorate([
-            $.$mol_mem_key
-        ], $bw_grid2.prototype, "row_display", null);
-        __decorate([
-            $.$mol_mem_key
-        ], $bw_grid2.prototype, "cell_display", null);
         __decorate([
             $.$mol_mem_key
         ], $bw_grid2.prototype, "row_def_idx", null);
