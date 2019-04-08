@@ -15471,26 +15471,388 @@ var $;
         }
         DownerFirstCol() {
             return ((obj) => {
-                obj.sub = () => [].concat(this.RoomQt(), this.SqTotal(), this.Storey());
+                obj.sub = () => [].concat(this.RoomQt(), this.SqTotal(), this.SqLife(), this.SqKitchen(), this.StoreyTotal(), this.Storey(), this.StoreyTune(), this.Source());
                 return obj;
             })(new this.$.$mol_view);
+        }
+        SqLife() {
+            return ((obj) => {
+                obj.label = () => "Жилая";
+                obj.control = () => [].concat(this.SqLifeControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        SqLifeControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        SqKitchen() {
+            return ((obj) => {
+                obj.label = () => "Кухня";
+                obj.control = () => [].concat(this.SqKitchenControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        SqKitchenControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        StoreyTotal() {
+            return ((obj) => {
+                obj.label = () => "Этажность";
+                obj.control = () => [].concat(this.StoreyTotalControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        StoreyTotalControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        StoreyTune() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "v0": "Включая первый и последний",
+                    "v1": "Кроме первого и последнего",
+                    "v2": "Кроме первого",
+                    "v3": "Кроме последнего",
+                    "v4": "Только первый",
+                    "v5": "Только последний",
+                });
+                obj.value = (val) => this.storey_tune(val);
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        storey_tune(val, force) {
+            return (val !== void 0) ? val : "Включая первый и последний";
+        }
+        Source() {
+            return ((obj) => {
+                obj.label = () => "Источник";
+                obj.control = () => [].concat(this.SourceControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        SourceControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_source);
         }
         DownerSecondCol() {
             return ((obj) => {
-                obj.sub = () => [].concat(this.DealType(), this.Price(), this.PricePerSq());
+                obj.sub = () => [].concat(this.DealType(), this.Price(), this.PricePerSq(), this.BuildingType(), this.HabitClass(), this.Remont(), this.Territory(), this.Parking(), this.Avariya(), this.BuildingYear());
                 return obj;
             })(new this.$.$mol_view);
+        }
+        BuildingType() {
+            return ((obj) => {
+                obj.label = () => "Тип дома";
+                obj.control = () => [].concat(this.BuildingTypeCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        BuildingTypeCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "any": "Любой",
+                });
+                obj.value = () => "Любой";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        HabitClass() {
+            return ((obj) => {
+                obj.label = () => "Класс жилья";
+                obj.control = () => [].concat(this.HabitClassCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        HabitClassCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "any": "Любой",
+                });
+                obj.value = () => "Любой";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Remont() {
+            return ((obj) => {
+                obj.label = () => "Ремонт";
+                obj.control = () => [].concat(this.RemontCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        RemontCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "any": "Любой",
+                });
+                obj.value = () => "Любой";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Territory() {
+            return ((obj) => {
+                obj.label = () => "Территория";
+                obj.control = () => [].concat(this.TerritoryCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        TerritoryCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "any": "Не важно",
+                });
+                obj.value = () => "Не важно";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Parking() {
+            return ((obj) => {
+                obj.label = () => "Парковка";
+                obj.control = () => [].concat(this.ParkingCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        ParkingCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "any": "Не важно",
+                });
+                obj.value = () => "Не важно";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Avariya() {
+            return ((obj) => {
+                obj.label = () => "Парковка";
+                obj.control = () => [].concat(this.AvariyaCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        AvariyaCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "any": "Кроме домов под снос",
+                });
+                obj.value = () => "Кроме домов под снос";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        BuildingYear() {
+            return ((obj) => {
+                obj.label = () => "Год постройки";
+                obj.control = () => [].concat(this.BuildingYearControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        BuildingYearControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
         }
         DownerThirdCol() {
             return ((obj) => {
-                obj.sub = () => [].concat(this.Area(), this.Far(), this.Location());
+                obj.sub = () => [].concat(this.Area(), this.Far(), this.Location(), this.Nova(), this.Apart(), this.Actual(), this.Spy(), this.PriceDynamic(), this.Planirovka());
                 return obj;
             })(new this.$.$mol_view);
         }
+        Nova() {
+            return ((obj) => {
+                obj.label = () => "Новостройки";
+                obj.control = () => [].concat(this.NovaCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        NovaCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "include": "Включая новостройки",
+                });
+                obj.value = () => "Включая новостройки";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Apart() {
+            return ((obj) => {
+                obj.label = () => "Апартаменты";
+                obj.control = () => [].concat(this.ApartCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        ApartCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "include": "Включая апартаменты",
+                });
+                obj.value = () => "Включая апартаменты";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Actual() {
+            return ((obj) => {
+                obj.label = () => "Актуальность";
+                obj.control = () => [].concat(this.ActualCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        ActualCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "include": "Кроме снятых с продажи",
+                });
+                obj.value = () => "Кроме снятых с продажи";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Spy() {
+            return ((obj) => {
+                obj.label = () => "Слежение";
+                obj.control = () => [].concat(this.SpyCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        SpyCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "include": "Включая отслеживаемые мной",
+                });
+                obj.value = () => "Включая отслеживаемые мной";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        PriceDynamic() {
+            return ((obj) => {
+                obj.label = () => "Динамика цен";
+                obj.control = () => [].concat(this.PriceDynamicCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        PriceDynamicCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "include": "Не учитывать изменения",
+                });
+                obj.value = () => "Не учитывать изменения";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Planirovka() {
+            return ((obj) => {
+                obj.label = () => "Планировка";
+                obj.control = () => [].concat(this.PlanirovkaCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        PlanirovkaCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "include": "Раздельные комнаты",
+                });
+                obj.value = () => "Раздельные комнаты";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
         DownerForthCol() {
             return ((obj) => {
+                obj.sub = () => [].concat(this.DeepSearchLabel(), this.Deep(), this.OnlyNew(), this.BlackPhone(), this.NoteSearchLabel(), this.NoteInclude(), this.NoteExclude(), this.PhoneSearchLabel(), this.PhoneInclude(), this.PhoneExclude());
                 return obj;
             })(new this.$.$mol_view);
+        }
+        DeepSearchLabel() {
+            return ((obj) => {
+                obj.text = () => "Глубина поиска";
+                return obj;
+            })(new this.$.$bw_search_params_label);
+        }
+        Deep() {
+            return ((obj) => {
+                obj.deep_value = (val) => this.deep_value(val);
+                return obj;
+            })(new this.$.$bw_input_deep);
+        }
+        deep_value(val, force) {
+            return (val !== void 0) ? val : 7;
+        }
+        OnlyNew() {
+            return ((obj) => {
+                obj.title = () => "Только новые (впервые опубликованные)";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        BlackPhone() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "include": "Включая черные телефоны",
+                    "exclude": "Кроме черных телефонов",
+                    "only": "Только черные телефоны",
+                });
+                obj.value = () => "Включая черные телефоны";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        NoteSearchLabel() {
+            return ((obj) => {
+                obj.text = () => "Поиск по примечанию";
+                return obj;
+            })(new this.$.$bw_search_params_label);
+        }
+        NoteInclude() {
+            return ((obj) => {
+                obj.label = () => "Включая";
+                obj.control = () => [].concat(this.NoteIncludeControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        NoteIncludeControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_input);
+        }
+        NoteExclude() {
+            return ((obj) => {
+                obj.label = () => "Исключая";
+                obj.control = () => [].concat(this.NoteExcludeControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        NoteExcludeControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_input);
+        }
+        PhoneSearchLabel() {
+            return ((obj) => {
+                obj.text = () => "Поиск по телефону";
+                return obj;
+            })(new this.$.$bw_search_params_label);
+        }
+        PhoneInclude() {
+            return ((obj) => {
+                obj.label = () => "Включая";
+                obj.control = () => [].concat(this.PhoneIncludeControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        PhoneIncludeControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_input);
+        }
+        PhoneExclude() {
+            return ((obj) => {
+                obj.label = () => "Исключая";
+                obj.control = () => [].concat(this.PhoneExcludeControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        PhoneExcludeControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_input);
         }
     }
     __decorate([
@@ -15516,14 +15878,276 @@ var $;
     ], $bw_search_params_block_full.prototype, "DownerFirstCol", null);
     __decorate([
         $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "SqLife", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "SqLifeControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "SqKitchen", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "SqKitchenControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "StoreyTotal", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "StoreyTotalControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "StoreyTune", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "storey_tune", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Source", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "SourceControl", null);
+    __decorate([
+        $.$mol_mem
     ], $bw_search_params_block_full.prototype, "DownerSecondCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "BuildingType", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "BuildingTypeCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "HabitClass", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "HabitClassCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Remont", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "RemontCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Territory", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "TerritoryCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Parking", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "ParkingCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Avariya", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "AvariyaCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "BuildingYear", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "BuildingYearControl", null);
     __decorate([
         $.$mol_mem
     ], $bw_search_params_block_full.prototype, "DownerThirdCol", null);
     __decorate([
         $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Nova", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "NovaCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Apart", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "ApartCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Actual", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "ActualCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Spy", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "SpyCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "PriceDynamic", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "PriceDynamicCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Planirovka", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "PlanirovkaCombo", null);
+    __decorate([
+        $.$mol_mem
     ], $bw_search_params_block_full.prototype, "DownerForthCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "DeepSearchLabel", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "Deep", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "deep_value", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "OnlyNew", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "BlackPhone", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "NoteSearchLabel", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "NoteInclude", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "NoteIncludeControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "NoteExclude", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "NoteExcludeControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "PhoneSearchLabel", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "PhoneInclude", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "PhoneIncludeControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "PhoneExclude", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_block_full.prototype, "PhoneExcludeControl", null);
     $.$bw_search_params_block_full = $bw_search_params_block_full;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_search_param_source extends $.$mol_view {
+        sub() {
+            return [].concat(this.FirstCol(), this.SecondCol());
+        }
+        FirstCol() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.SourceWinner(), this.SourceSob(), this.SourceCian(), this.SourceOther());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        SourceWinner() {
+            return ((obj) => {
+                obj.title = () => "WinNER";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        SourceSob() {
+            return ((obj) => {
+                obj.title = () => "Sob.ru";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        SourceCian() {
+            return ((obj) => {
+                obj.title = () => "Cian.ru";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        SourceOther() {
+            return ((obj) => {
+                obj.title = () => "Прочие";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        SecondCol() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.SourceWinnerPro(), this.SourceAvito(), this.SourceIrr(), this.SourceYandex());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        SourceWinnerPro() {
+            return ((obj) => {
+                obj.title = () => "WinNER Pro";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        SourceAvito() {
+            return ((obj) => {
+                obj.title = () => "Avito.ru";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        SourceIrr() {
+            return ((obj) => {
+                obj.title = () => "Irr.ru";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        SourceYandex() {
+            return ((obj) => {
+                obj.title = () => "Яндекс";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_source.prototype, "FirstCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_source.prototype, "SourceWinner", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_source.prototype, "SourceSob", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_source.prototype, "SourceCian", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_source.prototype, "SourceOther", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_source.prototype, "SecondCol", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_source.prototype, "SourceWinnerPro", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_source.prototype, "SourceAvito", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_source.prototype, "SourceIrr", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_source.prototype, "SourceYandex", null);
+    $.$bw_search_param_source = $bw_search_param_source;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_search_params_label extends $.$mol_view {
+        text() {
+            return "";
+        }
+        sub() {
+            return [].concat(this.text());
+        }
+    }
+    $.$bw_search_params_label = $bw_search_params_label;
 })($ || ($ = {}));
 (function ($) {
     class $bw_search_params_input_commitable extends $.$bw_input_checkable {
@@ -16494,7 +17118,7 @@ var $;
                 $bw_search.instance().Result().content_client_rect_height(null);
             }
             min_height_config() {
-                return { full: 627, main: 295, short: 100 };
+                return { full: 627 - 50, main: 295, short: 100 };
             }
             min_height_animation_steps(p) {
                 const config = this.min_height_config();
