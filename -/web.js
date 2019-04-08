@@ -1913,6 +1913,336 @@ var $;
 (function ($) {
     var $$;
     (function ($$) {
+        var isArray = Array.isArray;
+        var keyList = Object.keys;
+        var hasProp = Object.prototype.hasOwnProperty;
+        function $bw_equal(a, b) {
+            if (a === b)
+                return true;
+            if (a && b && typeof a == 'object' && typeof b == 'object') {
+                var arrA = isArray(a), arrB = isArray(b), i, length, key;
+                if (arrA != arrB)
+                    return false;
+                if (arrA && arrB) {
+                    length = a.length;
+                    if (length != b.length)
+                        return false;
+                    for (i = length; i-- !== 0;)
+                        if (!$bw_equal(a[i], b[i])) {
+                            const result = false;
+                            return result;
+                        }
+                    return true;
+                }
+                let setA = a instanceof Set;
+                let setB = b instanceof Set;
+                if (setA != setB)
+                    return false;
+                if (setA && setB) {
+                    if (a.size != b.size)
+                        return false;
+                    let iter = a.keys();
+                    let next = iter.next();
+                    while (!next.done) {
+                        if (!b.has(next.value))
+                            return false;
+                        next = iter.next();
+                    }
+                    iter = b.keys();
+                    next = iter.next();
+                    while (!next.done) {
+                        if (!a.has(next.value))
+                            return false;
+                        next = iter.next();
+                    }
+                    return true;
+                }
+                let mapA = a instanceof Map;
+                let mapB = b instanceof Map;
+                if (mapA != mapB)
+                    return false;
+                if (mapA && mapB) {
+                    const result = $bw_equal([...a], [...b]);
+                    return result;
+                }
+                var dateA = a instanceof Date, dateB = b instanceof Date;
+                if (dateA != dateB)
+                    return false;
+                if (dateA && dateB)
+                    return a.getTime() == b.getTime();
+                var regexpA = a instanceof RegExp, regexpB = b instanceof RegExp;
+                if (regexpA != regexpB)
+                    return false;
+                if (regexpA && regexpB)
+                    return a.toString() == b.toString();
+                var keys = keyList(a);
+                length = keys.length;
+                if (length !== keyList(b).length)
+                    return false;
+                for (i = length; i-- !== 0;)
+                    if (!hasProp.call(b, keys[i]))
+                        return false;
+                for (i = length; i-- !== 0;) {
+                    key = keys[i];
+                    if (!$bw_equal(a[key], b[key]))
+                        return false;
+                }
+                return true;
+            }
+            return a !== a && b !== b;
+        }
+        $$.$bw_equal = $bw_equal;
+        function bw_easing_value(initial, target, t, fn = $$.BwEasing.linear) {
+            const result = initial + (target - initial) * fn(t);
+            return result;
+        }
+        $$.bw_easing_value = bw_easing_value;
+        $$.BwEasing = {
+            linear: function (t) { return t; },
+            easeInQuad: function (t) { return t * t; },
+            easeOutQuad: function (t) { return t * (2 - t); },
+            easeInOutQuad: function (t) { return t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t; },
+            easeInCubic: function (t) { return t * t * t; },
+            easeOutCubic: function (t) { return (--t) * t * t + 1; },
+            easeInOutCubic: function (t) { return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1; },
+            easeInQuart: function (t) { return t * t * t * t; },
+            easeOutQuart: function (t) { return 1 - (--t) * t * t * t; },
+            easeInOutQuart: function (t) { return t < .5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t; },
+            easeInQuint: function (t) { return t * t * t * t * t; },
+            easeOutQuint: function (t) { return 1 + (--t) * t * t * t * t; },
+            easeInOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t; }
+        };
+        function bw_animate(config, val, force) {
+            const master = config._master();
+            let result = config._super(val, force);
+            if (val === void 0) {
+                const value = config._value(master);
+                if (result == null || value == null) {
+                    result = value;
+                    config._super(result);
+                }
+                else {
+                    let _equal = typeof config._equal == 'function' ? config._equal : $bw_equal;
+                    if (!_equal(result, value)) {
+                        const _data = typeof config._data == 'function' ? config._data : (() => {
+                            const key = config.data_key;
+                            if (!key) {
+                                console.error('bw_animate expects config._data or at least config.data_key', config);
+                            }
+                            else {
+                                return (val) => {
+                                    if (val === void 0) {
+                                        return this[key];
+                                    }
+                                    else if (val == null) {
+                                        this[key] = null;
+                                    }
+                                    else {
+                                        this[key] = val;
+                                    }
+                                };
+                            }
+                        })();
+                        if (!_data)
+                            return;
+                        let data = _data();
+                        const stopAnimation = () => {
+                            const data = _data();
+                            clearInterval(data.id);
+                            cancelAnimationFrame(data.id);
+                            _data(null);
+                        };
+                        if (data && !_equal(data.value, value)) {
+                            stopAnimation();
+                        }
+                        data = _data();
+                        if (!data) {
+                            const defaults = {
+                                steps: 16,
+                                timeInterval: 16,
+                            };
+                            const timeInterval = !config.timeInterval ? defaults.timeInterval : Math.ceil(Math.abs(config.timeInterval));
+                            const steps = typeof config._steps != 'function' && !Number.isFinite(config._steps) ? defaults.steps :
+                                Math.max(1, Math.round(Math.abs(Number.isFinite(config._steps) ? config._steps : config._steps(result, value))));
+                            const raf = timeInterval == defaults.timeInterval && window.requestAnimationFrame;
+                            const data = { value };
+                            const nextAnimation = () => {
+                                if (raf) {
+                                    data.id = raf(stepAnimation);
+                                }
+                            };
+                            const finishAnimation = () => {
+                                stopAnimation();
+                                if (typeof config._finish == 'function') {
+                                    config._finish();
+                                }
+                            };
+                            const _easing = typeof config._easing == 'function' ?
+                                config._easing : $$.BwEasing.linear;
+                            const _step_value = typeof config._step_value == 'function' ?
+                                config._step_value :
+                                (step, steps, initial, target) => bw_easing_value(initial, target, step / steps, _easing);
+                            let step = 0;
+                            const stepAnimation = () => {
+                                if (step >= steps) {
+                                    finishAnimation();
+                                }
+                                else {
+                                    const value_new = _step_value(++step, steps, result, value);
+                                    config._super(value_new);
+                                    nextAnimation();
+                                }
+                            };
+                            data.id = raf ? raf(stepAnimation) : setInterval(stepAnimation, timeInterval);
+                            _data(data);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+        $$.bw_animate = bw_animate;
+        function bw_animate_descr_value(obj, name, fn_initial, fn_store, has_key = false) {
+            const fn_equal = obj[name + '_equal'] || $bw_equal;
+            const fn_trigger = obj[name + '_animation_trigger'];
+            const fn_triggered_value = obj[name + '_animation_triggered_value'];
+            const fn_steps = obj[name + '_animation_steps'];
+            const fn_step_value = obj[name + '_animation_step_value'];
+            const fn_easing = obj[name + '_animation_easing'];
+            const fn_finish = obj[name + '_animation_finish'];
+            return function $bw_animate_value(key) {
+                const data_key = '_' + name + '_anim_data' + (has_key ? `_${key}` : '');
+                const keyArg = has_key ? [key] : [];
+                const host = this;
+                const trigger = fn_trigger ? fn_trigger.apply(host, [...keyArg]) : fn_initial.apply(this, [...keyArg]);
+                let result = fn_store.apply(host, [...keyArg]);
+                if (result === null) {
+                    result = !fn_trigger ? trigger : fn_initial.apply(this, [...keyArg]);
+                    fn_store.apply(host, [...keyArg, result]);
+                }
+                const value = !fn_triggered_value ? trigger : fn_triggered_value.apply(host, [...keyArg, trigger]);
+                if (result == null || value == null) {
+                    result = value;
+                    fn_store.apply(host, [...keyArg, result]);
+                }
+                else {
+                    if (!fn_equal.call(host, result, value)) {
+                        const stopAnimation = () => {
+                            const data = this[data_key];
+                            data.is_not_raf ? clearInterval(data.id) : cancelAnimationFrame(data.id);
+                            this[data_key] = null;
+                        };
+                        let data = this[data_key];
+                        if (data && !fn_equal.call(host, data.value, value)) {
+                            stopAnimation();
+                            data = null;
+                        }
+                        if (!data) {
+                            const defaults = {
+                                steps: 16,
+                                timeInterval: 16,
+                                easing: $$.BwEasing.linear,
+                            };
+                            const steps = !fn_steps ? defaults.steps :
+                                Math.max(1, Math.round(Math.abs(fn_steps.apply(host, [...keyArg, { start: result, end: value, trigger }]))));
+                            let step = 0;
+                            const finishAnimation = () => {
+                                stopAnimation();
+                                fn_finish && fn_finish.apply(host, [...keyArg, { start: result, end: value, trigger, steps }]);
+                            };
+                            const nextAnimation = () => {
+                                const data = this[data_key];
+                                if (!data.is_not_raf)
+                                    data.id = requestAnimationFrame(stepAnimation);
+                            };
+                            const stepAnimation = () => {
+                                if (step++ >= steps) {
+                                    finishAnimation();
+                                }
+                                else {
+                                    const args = [...keyArg, { step, steps, start: result, end: value, trigger }];
+                                    const value_new = fn_step_value ?
+                                        fn_step_value.apply(host, args) :
+                                        bw_easing_value(result, value, step / steps, fn_easing ? fn_easing.apply(host, args) :
+                                            defaults.easing);
+                                    fn_store.apply(host, [...keyArg, value_new]);
+                                    nextAnimation();
+                                }
+                            };
+                            const timeInterval = defaults.timeInterval;
+                            const raf = timeInterval == defaults.timeInterval && window.requestAnimationFrame;
+                            this[data_key] = {
+                                value,
+                                is_not_raf: !raf,
+                                id: raf ? raf(stepAnimation) : setInterval(stepAnimation, timeInterval),
+                            };
+                        }
+                    }
+                }
+                return result;
+            };
+        }
+        function $bw_animate(obj, name, descr) {
+            let fn_initial = descr.value;
+            descr.value = function (val, force) {
+                return (val !== void 0) ? val : null;
+            };
+            $.$mol_mem(obj, name, descr);
+            const fn_store = descr.value;
+            descr.value = bw_animate_descr_value(obj, name, fn_initial, fn_store);
+            descr.value['mem_value'] = fn_store;
+        }
+        $$.$bw_animate = $bw_animate;
+        function $bw_animate_key(obj, name, descr) {
+            let fn_initial = descr.value;
+            descr.value = function (key, val, force) {
+                return (val !== void 0) ? val : null;
+            };
+            $.$mol_mem_key(obj, name, descr);
+            const fn_store = descr.value;
+            descr.value = bw_animate_descr_value(obj, name, fn_initial, fn_store, true);
+            descr.value['mem_value'] = fn_store;
+        }
+        $$.$bw_animate_key = $bw_animate_key;
+        function $bw_meter_key(obj, name, descr) {
+            let fn_source = descr.value;
+            descr.value = function (key, val, force) {
+                return (val !== void 0) ? val : null;
+            };
+            $.$mol_mem_key(obj, name, descr);
+            const fn_store = descr.value;
+            descr.value = bw_meter_descr_value(obj, name, fn_source, fn_store, true);
+            descr.value['mem_value'] = fn_store;
+        }
+        $$.$bw_meter_key = $bw_meter_key;
+        function bw_meter_descr_value(obj, name, fn_source, fn_store, has_key = false) {
+            return function $bw_meter_value(key, val, force) {
+                const data_key = '_' + name + '_meter_data' + (has_key ? `_${key}` : '');
+                const keyArg = has_key ? [key] : [];
+                const host = this;
+                const adjust_value = () => {
+                    new $.$mol_defer(() => {
+                        let result;
+                        result = fn_source.apply(host, [...keyArg]);
+                        if (result !== null) {
+                            const { left, top, width, height, bottom, right } = result;
+                            result = { left, top, width, height, bottom, right };
+                        }
+                        fn_store.apply(host, [...keyArg, result]);
+                    });
+                };
+                if (!this[data_key]) {
+                    window.addEventListener('resize', adjust_value);
+                    window.addEventListener('bw_resize', adjust_value);
+                    this[data_key] = true;
+                }
+                let result = fn_store.apply(host, [...keyArg]);
+                if (result === null) {
+                    adjust_value();
+                }
+                return result;
+            };
+        }
         var initials;
         function getInitials() {
             if (!initials) {
@@ -1943,13 +2273,14 @@ var $;
                     fn_restore = obj[name + '_restore'];
                     if (need_transform) {
                         if (typeof fn_store != 'function') {
-                            console.error(`REQUIRED ${obj}._store(val: Value): any`);
+                            console.error(`@ $bw_${storage_name} ${obj}.${name} REQUIRES ${obj}.${name}_store(val: Value): any `);
                         }
                         if (typeof fn_restore != 'function') {
-                            console.error(`REQUIRED ${obj}._restore(val_store: any): Value`);
+                            console.error(`@ $bw_${storage_name} ${obj}.${name} REQUIRES ${obj}.${name}_restore(val_store: any): Value`);
                         }
                     }
                 }
+                let timer;
                 descr.value = function $bw_storage_value(next, need_store) {
                     const host = this;
                     const id = `${host}.${name}()`;
@@ -1979,12 +2310,20 @@ var $;
                         if (result === void 0)
                             result = next;
                         const stored = initial !== void 0 && fn_equal.call(obj, result, initial) ? null : result;
-                        state(stored);
+                        if (stored === null) {
+                            state(stored);
+                        }
+                        else {
+                            if (timer !== void 0)
+                                clearTimeout(timer);
+                            timer = setTimeout(() => {
+                                state(stored);
+                                timer = void 0;
+                            }, 100);
+                        }
                     }
                     else {
                         result = value.apply(host, arguments);
-                        if (name == 'orders')
-                            console.log({ result, initials });
                         let is_initial = false;
                         if (!initials.has(id)) {
                             initial = result;
@@ -1993,7 +2332,7 @@ var $;
                         }
                         else {
                             initial = initials.get(id);
-                            is_initial = fn_equal(result, initial);
+                            is_initial = fn_equal.call(obj, result, initial);
                         }
                         if (is_initial) {
                             const stored = state();
@@ -2006,8 +2345,6 @@ var $;
                                     result = stored;
                             }
                         }
-                        if (name == 'orders')
-                            console.log({ result });
                     }
                     return result;
                 };
@@ -2016,64 +2353,6 @@ var $;
             };
         }
         $$.$bw_store = $bw_store;
-        var isArray = Array.isArray;
-        var keyList = Object.keys;
-        var hasProp = Object.prototype.hasOwnProperty;
-        function $bw_equal(a, b) {
-            if (a === b)
-                return true;
-            if (a && b && typeof a == 'object' && typeof b == 'object') {
-                var arrA = isArray(a), arrB = isArray(b), i, length, key;
-                if (arrA != arrB)
-                    return false;
-                if (arrA && arrB) {
-                    length = a.length;
-                    if (length != b.length)
-                        return false;
-                    for (i = length; i-- !== 0;)
-                        if (!$bw_equal(a[i], b[i]))
-                            return false;
-                    return true;
-                }
-                let setA = a instanceof Set;
-                let setB = b instanceof Set;
-                if (setA != setB)
-                    return false;
-                if (setA && setB)
-                    return $bw_equal([...a], [...b]);
-                let mapA = a instanceof Map;
-                let mapB = b instanceof Map;
-                if (mapA != mapB)
-                    return false;
-                if (mapA && mapB)
-                    return $bw_equal([...a], [...b]);
-                var dateA = a instanceof Date, dateB = b instanceof Date;
-                if (dateA != dateB)
-                    return false;
-                if (dateA && dateB)
-                    return a.getTime() == b.getTime();
-                var regexpA = a instanceof RegExp, regexpB = b instanceof RegExp;
-                if (regexpA != regexpB)
-                    return false;
-                if (regexpA && regexpB)
-                    return a.toString() == b.toString();
-                var keys = keyList(a);
-                length = keys.length;
-                if (length !== keyList(b).length)
-                    return false;
-                for (i = length; i-- !== 0;)
-                    if (!hasProp.call(b, keys[i]))
-                        return false;
-                for (i = length; i-- !== 0;) {
-                    key = keys[i];
-                    if (!$bw_equal(a[key], b[key]))
-                        return false;
-                }
-                return true;
-            }
-            return a !== a && b !== b;
-        }
-        $$.$bw_equal = $bw_equal;
         function $bw_false_on_outside_click(obj, name, descr) {
             const value = descr.value;
             descr.value = function $bw_false_on_outside_click_impl(next, force) {
@@ -2201,14 +2480,15 @@ var $;
             }
         }
         $$.adjustOffsetParentScrollTop = adjustOffsetParentScrollTop;
-        function actualOffsetTop(fromEl, toEl, silent = false) {
+        function actualOffset(fromEl, toEl, silent = false) {
             if (fromEl instanceof $.$mol_view)
                 fromEl = fromEl.dom_node();
             if (toEl instanceof $.$mol_view)
                 toEl = toEl.dom_node();
-            let result = 0;
+            let result = { x: 0, y: 0 };
             while (true) {
-                result += fromEl.offsetTop;
+                result.x += fromEl.offsetLeft;
+                result.y += fromEl.offsetTop;
                 const offsetParent = fromEl.offsetParent;
                 if (!offsetParent) {
                     if (!silent) {
@@ -2222,12 +2502,12 @@ var $;
                 }
                 else {
                     fromEl = offsetParent;
-                    const delta = fromEl.offsetHeight - fromEl.clientHeight;
-                    result += delta;
+                    result.x += fromEl.offsetWidth - fromEl.clientWidth;
+                    result.y += fromEl.offsetHeight - fromEl.clientHeight;
                 }
             }
         }
-        $$.actualOffsetTop = actualOffsetTop;
+        $$.actualOffset = actualOffset;
         function do_autofocus(obj) {
             new $.$mol_defer(() => {
                 let autofocusElement = obj.dom_node().querySelector('[autofocus]');
@@ -5233,6 +5513,97 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var $;
 (function ($) {
+    class $bw_input_checkable extends $.$mol_view {
+        value(val, force) {
+            return (val !== void 0) ? val : "";
+        }
+        autofocus() {
+            return false;
+        }
+        readonly() {
+            return false;
+        }
+        autocomplete() {
+            return "";
+        }
+        hint() {
+            return "";
+        }
+        bw_dropped_down() {
+            return false;
+        }
+        bw_grid_column_filterable() {
+            return true;
+        }
+        input_enabled() {
+            return true;
+        }
+        checked(val, force) {
+            return (val !== void 0) ? val : false;
+        }
+        check_enabled() {
+            return true;
+        }
+        debounce() {
+            return 200;
+        }
+        minimal_height() {
+            return 32;
+        }
+        sub() {
+            return [].concat(this.Input(), this.Check());
+        }
+        Input() {
+            return ((obj) => {
+                obj.value = (val) => this.value(val);
+                obj.autofocus = () => this.autofocus();
+                obj.readonly = () => this.readonly();
+                obj.autocomplete = () => this.autocomplete();
+                obj.bw_dropped_down = () => this.bw_dropped_down();
+                obj.enabled = () => this.input_enabled();
+                obj.debounce = () => this.debounce();
+                obj.minimal_height = () => this.minimal_height();
+                obj.hint = () => this.hint();
+                return obj;
+            })(new this.$.$bw_input);
+        }
+        Check() {
+            return ((obj) => {
+                obj.checked = (val) => this.checked(val);
+                obj.enabled = () => this.check_enabled();
+                obj.sub = () => [].concat(this.Icon());
+                return obj;
+            })(new this.$.$mol_check);
+        }
+        Icon() {
+            return null;
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_input_checkable.prototype, "value", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_input_checkable.prototype, "checked", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_input_checkable.prototype, "Input", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_input_checkable.prototype, "Check", null);
+    $.$bw_input_checkable = $bw_input_checkable;
+})($ || ($ = {}));
+//checkable.view.tree.js.map
+;
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var $;
+(function ($) {
     class $bw_icon_logo extends $.$mol_svg_root {
         view_box() {
             return "0 0 487 442";
@@ -6069,8 +6440,12 @@ var $;
         }
         Path() {
             return ((obj) => {
+                obj.transform = () => this.transform();
                 return obj;
             })(new this.$.$bw_icon_svg_plus);
+        }
+        transform() {
+            return null;
         }
     }
     __decorate([
@@ -6121,98 +6496,6 @@ var $;
     $.$bw_icon_filter = $bw_icon_filter;
 })($ || ($ = {}));
 //icon.view.tree.js.map
-;
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var $;
-(function ($) {
-    class $bw_input_checkable extends $.$mol_view {
-        value(val, force) {
-            return (val !== void 0) ? val : "";
-        }
-        autofocus() {
-            return false;
-        }
-        readonly() {
-            return false;
-        }
-        autocomplete() {
-            return "";
-        }
-        bw_dropped_down() {
-            return false;
-        }
-        bw_grid_column_filterable() {
-            return true;
-        }
-        input_enabled() {
-            return true;
-        }
-        checked(val, force) {
-            return (val !== void 0) ? val : false;
-        }
-        check_enabled() {
-            return true;
-        }
-        debounce() {
-            return 200;
-        }
-        minimal_height() {
-            return 32;
-        }
-        sub() {
-            return [].concat(this.Input(), this.Check());
-        }
-        Input() {
-            return ((obj) => {
-                obj.value = (val) => this.value(val);
-                obj.autofocus = () => this.autofocus();
-                obj.readonly = () => this.readonly();
-                obj.autocomplete = () => this.autocomplete();
-                obj.bw_dropped_down = () => this.bw_dropped_down();
-                obj.enabled = () => this.input_enabled();
-                obj.debounce = () => this.debounce();
-                obj.minimal_height = () => this.minimal_height();
-                return obj;
-            })(new this.$.$bw_input);
-        }
-        Check() {
-            return ((obj) => {
-                obj.checked = (val) => this.checked(val);
-                obj.enabled = () => this.check_enabled();
-                obj.sub = () => [].concat(this.Icon());
-                return obj;
-            })(new this.$.$mol_check);
-        }
-        Icon() {
-            return ((obj) => {
-                return obj;
-            })(new this.$.$bw_icon_close_btn);
-        }
-    }
-    __decorate([
-        $.$mol_mem
-    ], $bw_input_checkable.prototype, "value", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_input_checkable.prototype, "checked", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_input_checkable.prototype, "Input", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_input_checkable.prototype, "Check", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_input_checkable.prototype, "Icon", null);
-    $.$bw_input_checkable = $bw_input_checkable;
-})($ || ($ = {}));
-//checkable.view.tree.js.map
 ;
 "use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -7006,6 +7289,31 @@ var $;
     $.$bw_grid = $bw_grid;
 })($ || ($ = {}));
 (function ($) {
+    class $bw_grid_table_col extends $.$mol_view {
+        dom_name() {
+            return "col";
+        }
+        width() {
+            return null;
+        }
+        span() {
+            return null;
+        }
+        style() {
+            return (Object.assign({}, super.style(), { "width": this.width() }));
+        }
+        attr() {
+            return (Object.assign({}, super.attr(), { "span": this.span() }));
+        }
+    }
+    $.$bw_grid_table_col = $bw_grid_table_col;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_grid_table extends $.$$.$mol_grid_table {
+    }
+    $.$bw_grid_table = $bw_grid_table;
+})($ || ($ = {}));
+(function ($) {
     class $bw_grid_row extends $.$mol_grid_row {
         is_cursor() {
             return false;
@@ -7223,7 +7531,8 @@ var $;
             }
             event_wheel(event) {
                 const deltaY = event.deltaY;
-                if (deltaY) {
+                const deltaX = event.deltaX;
+                if (Math.abs(deltaY) > Math.abs(deltaX)) {
                     const timer_callback = () => {
                         this._wheel_direction_down = void 0;
                         clearTimeout(this._wheel_timer);
@@ -7252,8 +7561,8 @@ var $;
                     else {
                         reset_timer();
                     }
+                    event.preventDefault();
                 }
-                event.preventDefault();
             }
             scrollTop(val, dont_adjust_cursor = false) {
                 if (val !== void 0 && val != super.scroll_top()) {
@@ -11207,8 +11516,8 @@ var $;
                                 const caption = node.querySelector('[bw_block_caption]');
                                 return {
                                     node,
-                                    offsetTop: $$.actualOffsetTop(node, dom_node),
-                                    offsetBottom: $$.actualOffsetTop(caption, dom_node) + caption.offsetHeight,
+                                    offsetTop: $$.actualOffset(node, dom_node).y,
+                                    offsetBottom: $$.actualOffset(caption, dom_node).y + caption.offsetHeight,
                                 };
                             })
                                 .filter((value) => value.offsetBottom > scrollTop && value.offsetTop < scrollBottom)
@@ -11221,7 +11530,7 @@ var $;
                             const items = [...dom_node.querySelectorAll('[bw_block]')]
                                 .map((node) => node)
                                 .map((node) => {
-                                const offsetTop = $$.actualOffsetTop(node, dom_node);
+                                const offsetTop = $$.actualOffset(node, dom_node).y;
                                 return {
                                     node,
                                     offsetTop: offsetTop,
@@ -11694,6 +12003,1803 @@ var $;
 //workspace.view.js.map
 ;
 "use strict";
+//grid2.row_animate.js.map
+;
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var $;
+(function ($) {
+    class $bw_grid2 extends $.$mol_view {
+        height() {
+            return 0;
+        }
+        animated_height() {
+            return 0;
+        }
+        top() {
+            return 0;
+        }
+        body_padding_left() {
+            return 2;
+        }
+        row_min_height() {
+            return 28;
+        }
+        style() {
+            return ({
+                "top": this.top(),
+                "height": this.animated_height(),
+                "cursor": this.cursor(),
+            });
+        }
+        cursor() {
+            return null;
+        }
+        sub() {
+            return [].concat(this.Header(), this.Body());
+        }
+        Header() {
+            return ((obj) => {
+                obj.style = () => ({
+                    "height": this.header_height(),
+                });
+                obj.event = () => ({
+                    "mouseleave": (event) => this.header_mouseleave(event),
+                    "mousedown": (event) => this.header_mousedown(event),
+                });
+                obj.sub = () => [].concat(this.cols());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        header_height(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        header_mouseleave(event, force) {
+            return (event !== void 0) ? event : null;
+        }
+        header_mousedown(event, force) {
+            return (event !== void 0) ? event : null;
+        }
+        cols() {
+            return [];
+        }
+        Body() {
+            return ((obj) => {
+                obj.style = () => ({
+                    "height": this.body_height(),
+                    "padding-left": this.body_padding_left(),
+                });
+                obj.sub = () => [].concat(this.rows());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        body_height(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        rows() {
+            return [];
+        }
+        col_defs(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_ids_visible(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_ids_visible_set(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_release_pos() {
+            return null;
+        }
+        col_release_pos_animation_trigger(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_moving_pos(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_to_move(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_to_resize(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_resizing(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_left_source(id, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_top_source(id) {
+            return 0;
+        }
+        col_client_left(id) {
+            return null;
+        }
+        col_client_right(id) {
+            return null;
+        }
+        search_result_id(val, force) {
+            return (val !== void 0) ? val : 0;
+        }
+        recs_count(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        recs(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        row_i_max(val, force) {
+            return (val !== void 0) ? val : 0;
+        }
+        row_i_first(val, force) {
+            return (val !== void 0) ? val : 0;
+        }
+        row_i_last(val, force) {
+            return (val !== void 0) ? val : 0;
+        }
+        row_defs(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        row_footer_height_of_idx(idx, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        row_footer_heights(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        row_footer_visible_offer_ids(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        row_def_idx(i, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        row_def_height(i, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        row_def_top(i, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        scroll_y_delta(val, force) {
+            return (val !== void 0) ? val : 0;
+        }
+        is_eog(val, force) {
+            return (val !== void 0) ? val : false;
+        }
+        is_bog(val, force) {
+            return (val !== void 0) ? val : false;
+        }
+        row_footers(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        Row(i) {
+            return ((obj) => {
+                obj.style = () => ({
+                    "display": this.row_display(i),
+                    "top": this.row_top(i),
+                    "height": this.row_height(i),
+                });
+                obj.event = () => ({
+                    "dblclick": (event) => this.row_dblclick(i, event),
+                });
+                obj.sub = () => [].concat(this.cells(i), this.Footer(i));
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        row_display(i) {
+            return "";
+        }
+        row_top(i) {
+            return 0;
+        }
+        row_height(i) {
+            return 0;
+        }
+        row_dblclick(i, event, force) {
+            return (event !== void 0) ? event : null;
+        }
+        cells(i) {
+            return [];
+        }
+        Footer(i) {
+            return ((obj) => {
+                obj.style = () => ({
+                    "height": this.row_footer_height(i),
+                    "opacity": this.footer_opacity(i),
+                });
+                obj.sub = () => [].concat(this.Note(i), this.UserNote(i));
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        row_footer_height(i) {
+            return 0;
+        }
+        footer_opacity(i) {
+            return 0;
+        }
+        Note(i) {
+            return ((obj) => {
+                obj.style = () => ({
+                    "height": this.row_note_height(i),
+                });
+                obj.sub = () => [].concat(this.row_note(i));
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        row_note_height(i) {
+            return 0;
+        }
+        row_note(i) {
+            return "";
+        }
+        UserNote(i) {
+            return ((obj) => {
+                obj.hint = () => "Вы можете оставить собственный комментарий";
+                obj.style = () => ({
+                    "top": this.row_note_height(i),
+                    "height": this.row_user_note_height(i),
+                });
+                obj.value = (val) => this.row_user_note(i, val);
+                return obj;
+            })(new this.$.$bw_input_textarea);
+        }
+        row_user_note_height(i) {
+            return 0;
+        }
+        row_user_note(i, val, force) {
+            return (val !== void 0) ? val : "";
+        }
+        animating_footer(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        Cell(ij) {
+            return ((obj) => {
+                obj.attr = () => ({
+                    "bw_grid2_moving": this.is_moving_col(ij),
+                    "bw_grid2_col_id": this.col_id(ij),
+                });
+                obj.style = () => ({
+                    "left": this.cell_left(ij),
+                    "width": this.cell_width(ij),
+                    "text-align": this.cell_align(ij),
+                });
+                obj.sub = () => [].concat(this.cell_content(ij));
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        is_moving_col(id) {
+            return false;
+        }
+        col_id(id) {
+            return "";
+        }
+        cell_left(ij, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        cell_width(ij, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        cell_align(ij) {
+            return "";
+        }
+        cell_content(ij) {
+            return "";
+        }
+        col_left(id, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_left_animated() {
+            return null;
+        }
+        col_left_animated_animation_trigger(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_top(id, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        Col(id) {
+            return ((obj) => {
+                obj.event = () => ({
+                    "mousemove": (event) => this.col_mousemove(id, event),
+                });
+                obj.attr = () => ({
+                    "bw_grid2_moving": this.is_moving_col(id),
+                    "bw_grid2_releasing": this.is_releasing_col(id),
+                    "bw_grid2_col_id": this.col_id(id),
+                });
+                obj.style = () => ({
+                    "left": this.col_left(id),
+                    "top": this.col_top(id),
+                    "width": this.col_width(id),
+                });
+                obj.sub = () => [].concat(this.col_caption(id));
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        col_mousemove(id, event, force) {
+            return (event !== void 0) ? event : null;
+        }
+        is_releasing_col(id) {
+            return false;
+        }
+        col_width(id, val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        col_caption(id) {
+            return "";
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "Header", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "header_height", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "header_mouseleave", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "header_mousedown", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "Body", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "body_height", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "col_defs", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "col_ids_visible", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "col_ids_visible_set", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "col_release_pos_animation_trigger", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "col_moving_pos", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "col_to_move", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "col_to_resize", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "col_resizing", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "col_left_source", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "search_result_id", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "recs_count", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "recs", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "row_i_max", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "row_i_first", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "row_i_last", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "row_defs", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "row_footer_height_of_idx", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "row_footer_heights", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "row_footer_visible_offer_ids", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "row_def_idx", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "row_def_height", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "row_def_top", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "scroll_y_delta", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "is_eog", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "is_bog", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "row_footers", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "Row", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "row_dblclick", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "Footer", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "Note", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "UserNote", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "row_user_note", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "animating_footer", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "Cell", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "cell_left", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "cell_width", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "col_left", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_grid2.prototype, "col_left_animated_animation_trigger", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "col_top", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "Col", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "col_mousemove", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_grid2.prototype, "col_width", null);
+    $.$bw_grid2 = $bw_grid2;
+})($ || ($ = {}));
+//grid2.view.tree.js.map
+;
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var $;
+(function ($) {
+    var $$;
+    (function ($$) {
+        function intersects(a, b, c, d) {
+            const result = a <= c && c <= b ||
+                a <= d && d <= b ||
+                c <= a && a <= d ||
+                c <= b && b <= d ||
+                false;
+            return result;
+        }
+        function meter(config, val) {
+            let result = config._super();
+            if (result === null) {
+                const adjust_value = () => {
+                    new $.$mol_defer(() => {
+                        const value = config._value();
+                        config._super(value);
+                    });
+                };
+                window.addEventListener('resize', (event) => {
+                    adjust_value();
+                });
+                adjust_value();
+            }
+            return result;
+        }
+        $$.meter = meter;
+        const DICTIONARIES = {
+            apartment_condition_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "треб.кап/р", "name": "требуется капитальный ремонт" }, { "id": 3, "code": "без отд.", "name": "без отделки" }, { "id": 4, "code": "треб.рем.", "name": "требуется ремонт" }, { "id": 5, "code": "ср.сост.", "name": "среднее состояние" }, { "id": 6, "code": "хор.сост.", "name": "хорошее состояние" }, { "id": 8, "code": "отл.сост.", "name": "отличное состояние" }, { "id": 9, "code": "евр.рем.", "name": "евроремонт" }, { "id": 10, "code": "дизайн.рем.", "name": "дизайнерский ремонт" }, { "id": 11, "code": "перв.отд.", "name": "первичная отделка" }],
+            building_batch: [{ "id": 0, "name": "" }, { "id": 1, "name": "02/98-НМ" }, { "id": 2, "name": "1385 АР-3" }, { "id": 3, "name": "1605/12" }, { "id": 4, "name": "1605/9" }, { "id": 5, "name": "1605/Б" }, { "id": 6, "name": "17/2004-АС" }, { "id": 7, "name": "1МГ-600" }, { "id": 8, "name": "1МГ-601" }, { "id": 9, "name": "2-71/358" }, { "id": 10, "name": "2548-01-АР" }, { "id": 11, "name": "2548-02-АР" }, { "id": 12, "name": "32/2005-АС" }, { "id": 13, "name": "349/01" }, { "id": 14, "name": "355/24" }, { "id": 15, "name": "7040-01" }, { "id": 16, "name": "I-303" }, { "id": 17, "name": "I-335" }, { "id": 18, "name": "I-447" }, { "id": 19, "name": "I-510" }, { "id": 20, "name": "I-511" }, { "id": 21, "name": "I-513" }, { "id": 22, "name": "I-515" }, { "id": 23, "name": "I605-АМ" }, { "id": 24, "name": "II-04" }, { "id": 25, "name": "II-05" }, { "id": 26, "name": "II-08" }, { "id": 27, "name": "II-18" }, { "id": 28, "name": "II-18-01-МН" }, { "id": 29, "name": "II-18-31/12" }, { "id": 30, "name": "II-29" }, { "id": 31, "name": "II-32" }, { "id": 32, "name": "II-49" }, { "id": 33, "name": "II-57" }, { "id": 34, "name": "II-68-02" }, { "id": 35, "name": "II-68-03" }, { "id": 36, "name": "II-89-01-МН" }, { "id": 37, "name": "III/17" }, { "id": 38, "name": "VI-23" }, { "id": 39, "name": "VII-51" }, { "id": 40, "name": "VII-58" }, { "id": 41, "name": "А-41K" }, { "id": 42, "name": "башня Вулыха" }, { "id": 43, "name": "Бекерон" }, { "id": 44, "name": "БОД-1" }, { "id": 45, "name": "В-2000" }, { "id": 46, "name": "В-2002" }, { "id": 47, "name": "В-2005" }, { "id": 48, "name": "ГМС-1" }, { "id": 49, "name": "ГМС-3" }, { "id": 50, "name": "И-1168 А3" }, { "id": 51, "name": "И-1168 А4" }, { "id": 52, "name": "И-1233" }, { "id": 53, "name": "И-1254" }, { "id": 54, "name": "И-1262А" }, { "id": 55, "name": "И-1429" }, { "id": 56, "name": "И-1430" }, { "id": 57, "name": "И-1459-132" }, { "id": 58, "name": "И-1491-17" }, { "id": 59, "name": "И-1501" }, { "id": 60, "name": "И-155" }, { "id": 61, "name": "И-155МК" }, { "id": 62, "name": "И-155Н" }, { "id": 63, "name": "И-1602" }, { "id": 64, "name": "И-1677" }, { "id": 65, "name": "И-1723" }, { "id": 66, "name": "И-1724" }, { "id": 67, "name": "И-1731" }, { "id": 68, "name": "И-1782/1" }, { "id": 69, "name": "И-1812/1" }, { "id": 70, "name": "И-1834" }, { "id": 71, "name": "И-1836" }, { "id": 72, "name": "И-1838" }, { "id": 73, "name": "И-1839" }, { "id": 74, "name": "И-1849" }, { "id": 75, "name": "И-1932" }, { "id": 76, "name": "И-208" }, { "id": 77, "name": "И-209А" }, { "id": 78, "name": "И-2342" }, { "id": 79, "name": "И-241" }, { "id": 80, "name": "И-491А" }, { "id": 81, "name": "И-515-5М" }, { "id": 82, "name": "И-515/9ш" }, { "id": 83, "name": "И-522" }, { "id": 84, "name": "И-522А" }, { "id": 85, "name": "И-679" }, { "id": 86, "name": "И-700" }, { "id": 87, "name": "И-700А" }, { "id": 88, "name": "И-760А" }, { "id": 89, "name": "И-79-99" }, { "id": 90, "name": "И-99-47/405" }, { "id": 91, "name": "И-99-47/406" }, { "id": 92, "name": "индивидуальный проект" }, { "id": 93, "name": "ИП-46С" }, { "id": 94, "name": "ИШ3/12" }, { "id": 95, "name": "К-7" }, { "id": 96, "name": "КМС-101" }, { "id": 97, "name": "Колос" }, { "id": 98, "name": "КОПЭ" }, { "id": 99, "name": "КОПЭ-М-ПАРУС" }, { "id": 100, "name": "КТЖС" }, { "id": 101, "name": "КТЖС-11/22" }, { "id": 102, "name": "1МГ-300" }, { "id": 103, "name": "МОНОЛИТ" }, { "id": 105, "name": "МЭС-84" }, { "id": 107, "name": "НП-46с" }, { "id": 108, "name": "П-06" }, { "id": 109, "name": "П-111" }, { "id": 110, "name": "П-111М" }, { "id": 111, "name": "П-111МО" }, { "id": 112, "name": "П-12-31/12" }, { "id": 113, "name": "II-14" }, { "id": 114, "name": "П-14/35" }, { "id": 115, "name": "П-18/22" }, { "id": 116, "name": "П-20" }, { "id": 117, "name": "П-21" }, { "id": 118, "name": "П-22" }, { "id": 119, "name": "П-23" }, { "id": 120, "name": "П-28" }, { "id": 121, "name": "П-29" }, { "id": 122, "name": "П-3" }, { "id": 123, "name": "П-3/16" }, { "id": 124, "name": "П-3/17" }, { "id": 125, "name": "П-3/22" }, { "id": 126, "name": "П-30" }, { "id": 127, "name": "П-31" }, { "id": 128, "name": "П-32" }, { "id": 129, "name": "П-321-60" }, { "id": 130, "name": "II-34" }, { "id": 131, "name": "II-35" }, { "id": 132, "name": "П-37" }, { "id": 133, "name": "II-38" }, { "id": 134, "name": "П-39" }, { "id": 135, "name": "П-3М" }, { "id": 136, "name": "П-4" }, { "id": 137, "name": "П-40" }, { "id": 138, "name": "П-41" }, { "id": 139, "name": "П-42" }, { "id": 140, "name": "П-43" }, { "id": 141, "name": "П-44" }, { "id": 142, "name": "П-44К" }, { "id": 143, "name": "П-44М" }, { "id": 144, "name": "П-44Т" }, { "id": 145, "name": "П-44ТМ" }, { "id": 146, "name": "П-45" }, { "id": 147, "name": "П-46" }, { "id": 148, "name": "П-46М" }, { "id": 149, "name": "П-47" }, { "id": 150, "name": "П-49 Д" }, { "id": 151, "name": "П-50" }, { "id": 152, "name": "П-53" }, { "id": 153, "name": "П-55" }, { "id": 154, "name": "П-55М" }, { "id": 155, "name": "II-29-41/37" }, { "id": 156, "name": "II-66" }, { "id": 157, "name": "II-67" }, { "id": 158, "name": "II-68" }, { "id": 159, "name": "ПД-4" }, { "id": 160, "name": "ПД-4/12" }, { "id": 161, "name": "Пд4-1/12Н1" }, { "id": 162, "name": "ПД4-1/8Н1" }, { "id": 163, "name": "ПЗМ-1/14" }, { "id": 164, "name": "ПЗМ-1/16" }, { "id": 165, "name": "ПЗМ-2/16" }, { "id": 166, "name": "ПЗМ-3/16" }, { "id": 167, "name": "ПП-70" }, { "id": 168, "name": "Призма" }, { "id": 169, "name": "РД-90" }, { "id": 170, "name": "С-111М" }, { "id": 171, "name": "С-220" }, { "id": 172, "name": "С-222" }, { "id": 173, "name": "ТИП-441" }, { "id": 174, "name": "ЦВП-4570-II-63" }, { "id": 175, "name": "Юбилейный" }, { "id": 176, "name": "II-02" }, { "id": 177, "name": "II-01" }, { "id": 178, "name": "II-18-01/08" }, { "id": 179, "name": "II-18-01/09" }, { "id": 180, "name": "1605-АМ/9" }, { "id": 181, "name": "1605-АМ/12" }, { "id": 182, "name": "II-49П" }, { "id": 183, "name": "II-49Д" }, { "id": 184, "name": "II-03" }, { "id": 185, "name": "II-18-01/12" }, { "id": 186, "name": "II-18-02/12" }, { "id": 187, "name": "II-18/12" }, { "id": 188, "name": "II-20" }, { "id": 189, "name": "1605-АМ/5" }, { "id": 190, "name": "И-III-3" }, { "id": 191, "name": "II-28" }, { "id": 192, "name": "II-68-02/16М" }, { "id": 193, "name": "КПД-4570" }, { "id": 194, "name": "II-68-01" }, { "id": 195, "name": "1-515/9" }, { "id": 196, "name": "К4/16" }, { "id": 197, "name": "И-155Б" }, { "id": 198, "name": "1-515/5" }, { "id": 199, "name": "II-18-01/12А" }, { "id": 200, "name": "СМ-1 " }, { "id": 201, "name": "П-44ТМ/25" }, { "id": 202, "name": "И-701" }, { "id": 203, "name": "И-155-с" }, { "id": 204, "name": "Айсберг" }, { "id": 205, "name": "II-14/35" }, { "id": 206, "name": "И-99-47/407" }, { "id": 207, "name": "П-101" }, { "id": 208, "name": "1-300" }, { "id": 209, "name": "II-18-01/09К" }, { "id": 210, "name": "И-1900" }, { "id": 211, "name": "М-10" }, { "id": 212, "name": "МПСМ" }, { "id": 213, "name": "ИП-46М" }, { "id": 214, "name": "П-30М" }, { "id": 215, "name": "II-07" }, { "id": 216, "name": "ПБ-01" }, { "id": 217, "name": "И-1414" }, { "id": 218, "name": "И-2111" }, { "id": 219, "name": "1605-АМЛ/5" }, { "id": 220, "name": "1-447С-26" }, { "id": 221, "name": "1-447С-1" }, { "id": 222, "name": "1-447С-36" }, { "id": 223, "name": "1-447С-2" }, { "id": 224, "name": "1-447С-5" }, { "id": 225, "name": "1-446" }, { "id": 226, "name": "ПБ-02" }, { "id": 227, "name": "КПД-4572А" }, { "id": 228, "name": "II-68-04" }, { "id": 229, "name": "124-124-1" }, { "id": 231, "name": "1605-А" }, { "id": 232, "name": "1-439" }, { "id": 233, "name": "Мм1-3" }, { "id": 234, "name": "И-1168" }, { "id": 235, "name": "СМ-06" }, { "id": 236, "name": "СМ-03" }, { "id": 237, "name": "1-419" }, { "id": 238, "name": "1-203" }, { "id": 239, "name": "ЭС-24" }, { "id": 240, "name": "8966" }, { "id": 242, "name": "1-126" }, { "id": 243, "name": "1-225" }, { "id": 244, "name": "1-402" }, { "id": 245, "name": "16/2188" }, { "id": 246, "name": "Т-1" }, { "id": 247, "name": "Т-3" }, { "id": 248, "name": "1-233" }, { "id": 249, "name": "1-260" }, { "id": 250, "name": "К-8-49" }, { "id": 251, "name": "1-255" }, { "id": 252, "name": "КС-8-50" }, { "id": 253, "name": "Д-23" }, { "id": 254, "name": "Д-25Н1" }, { "id": 256, "name": "ПП-83" }, { "id": 258, "name": "К2/16" }, { "id": 259, "name": "К7/16" }, { "id": 260, "name": "К8/16" }, { "id": 262, "name": "1-464А" }, { "id": 263, "name": "КОПЭ-87" }, { "id": 264, "name": "П-121М" }, { "id": 265, "name": "121-041" }, { "id": 266, "name": "121-042" }, { "id": 267, "name": "121-043" }, { "id": 268, "name": "II-29-208" }, { "id": 269, "name": "II-29-3" }, { "id": 270, "name": "II-29-9" }, { "id": 271, "name": "II-29-160" }, { "id": 272, "name": "ПД-1" }, { "id": 273, "name": "И-02/98-НМ" }, { "id": 274, "name": "1-467" }, { "id": 275, "name": "ЭЖРЧС" }, { "id": 276, "name": "П-3МК" }, { "id": 277, "name": "II-18-02/09" }, { "id": 278, "name": "ПД-3" }, { "id": 279, "name": "И-580" }, { "id": 280, "name": "II-18-03/12" }, { "id": 281, "name": "К-14" }, { "id": 282, "name": "И-700Н" }, { "id": 283, "name": "Юникон" }, { "id": 284, "name": "111-121" }, { "id": 285, "name": "1-211" }, { "id": 286, "name": "II-68-01/22" }, { "id": 287, "name": "Лебедь" }, { "id": 288, "name": "И-99-47" }],
+            balcony_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "-", "name": "нет" }, { "id": 2, "code": "Б", "name": "балкон" }, { "id": 3, "code": "Л", "name": "лоджия" }, { "id": 4, "code": "БЛ", "name": "балкон + лоджия" }, { "id": 5, "code": "2Б", "name": "два балкона" }, { "id": 6, "code": "2Л", "name": "две лоджии" }, { "id": 7, "code": "3Л", "name": "три лоджии" }, { "id": 8, "code": "4Л", "name": "четыре лоджии" }, { "id": 9, "code": "3Б", "name": "три балкона" }, { "id": 10, "code": "Б2Л", "name": "балкон + две лоджии" }, { "id": 11, "code": "2Б2Л", "name": "два балкона + две лоджии" }, { "id": 12, "code": "Эрк", "name": "эркер" }, { "id": 13, "code": "ЭркЛ", "name": "эркер + лоджия" }, { "id": 14, "code": "*Б", "name": "несколько балконов" }, { "id": 15, "code": "*Л", "name": "несколько лоджий" }],
+            currency_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "руб", "name": "RUB" }, { "id": 2, "code": "$", "name": "USD" }, { "id": 3, "code": "€", "name": "EUR" }, { "id": 4, "code": "TL", "name": "TL" }, { "id": 5, "code": "BYR", "name": "BYR" }],
+            deal_status: [{ "id": 1, "code": "продается/арендуется", "name": "продается/арендуется" }, { "id": 2, "code": "аванс/задаток", "name": "аванс/задаток" }, { "id": 3, "code": "продана/арендована", "name": "продана/арендована" }],
+            deal_type: [{ "id": 1, "code": "продажа", "name": "продажа" }, { "id": 2, "code": "аренда", "name": "аренда" }],
+            location_type: [{ "id": 13, "code": "ГСК", "name": "ГСК" }, { "id": 14, "code": "ГК", "name": "ГК" }, { "id": 15, "code": "ЖК", "name": "ЖК" }, { "id": 16, "code": "двор", "name": "двор" }, { "id": 17, "code": "паркинг", "name": "паркинг" }],
+            electricity_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "-", "name": "нет" }, { "id": 2, "code": "+", "name": "есть" }, { "id": 3, "code": "220В", "name": "220В" }, { "id": 4, "code": "380В", "name": "380В" }, { "id": 5, "code": "П", "name": "в перспективе" }, { "id": 6, "code": "ГУ", "name": "по границе" }, { "id": 7, "code": "10кВ", "name": "10кВ" }, { "id": 8, "code": "И", "name": "иное" }],
+            elevator_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "пасс.", "name": "лифт пассажирский" }, { "id": 2, "code": "груз.", "name": "лифт грузовой" }, { "id": 3, "code": "пасс.+ груз.", "name": "лифт пассажирский и лифт грузовой" }, { "id": 4, "code": "нет", "name": "нет лифта" }, { "id": 5, "code": "есть", "name": "есть лифт" }],
+            floor_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "-", "name": "полы не настелены", "master_realty_type_id": 1 }, { "id": 2, "code": "Д", "name": "дерево", "master_realty_type_id": 1 }, { "id": 3, "code": "п/д", "name": "паркетная доска", "master_realty_type_id": 1 }, { "id": 4, "code": "ЛМ", "name": "ламинат", "master_realty_type_id": 1 }, { "id": 5, "code": "К", "name": "ковролин", "master_realty_type_id": 1 }, { "id": 6, "code": "П", "name": "паркет", "master_realty_type_id": 1 }, { "id": 7, "code": "ЛН", "name": "линолеум", "master_realty_type_id": 1 }, { "id": 8, "code": "Стяж", "name": "стяжка", "master_realty_type_id": 1 }, { "id": 9, "code": "асфальт", "name": "асфальт", "master_realty_type_id": 4 }, { "id": 10, "code": "бетон", "name": "бетон", "master_realty_type_id": 4 }, { "id": 11, "code": "грунт", "name": "грунт", "master_realty_type_id": 4 }, { "id": 12, "code": "дерево", "name": "дерево", "master_realty_type_id": 4 }, { "id": 13, "code": "металл", "name": "металл", "master_realty_type_id": 4 }, { "id": 14, "code": "полимерное покрытие", "name": "полимерное покрытие", "master_realty_type_id": 4 }],
+            gas_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "-", "name": "нет" }, { "id": 2, "code": "+", "name": "есть" }, { "id": 3, "code": "ГУ", "name": "по границе" }, { "id": 4, "code": "П", "name": "перспектива" }, { "id": 5, "code": "Р", "name": "рядом" }, { "id": 6, "code": "Б", "name": "баллоны" }, { "id": 7, "code": "М", "name": "магистральный" }, { "id": 8, "code": "И", "name": "иное" }, { "id": 9, "code": "Ц", "name": "центральный" }],
+            habit_class: [{ "id": 1, "name": "эконом" }, { "id": 2, "name": "комфорт" }, { "id": 3, "name": "бизнес" }, { "id": 4, "name": "элитный" }],
+            heating_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "-", "name": "нет" }, { "id": 2, "code": "+", "name": "есть" }, { "id": 3, "code": "ЭК", "name": "электрокотел" }, { "id": 4, "code": "ГК", "name": "газовый котел" }, { "id": 5, "code": "ЖТК", "name": "жидкотопливный котел" }, { "id": 6, "code": "АГВ", "name": "автоматический газовый водонагреватель" }, { "id": 7, "code": "П", "name": "печь" }, { "id": 8, "code": "Ц", "name": "центральное" }, { "id": 9, "code": "И", "name": "иное" }],
+            media: [{ "id": 0, "name": "Прочие", "is_active": 1, "order_number": 1000 }, { "id": 1, "name": "Руки", "is_active": 1, "order_number": 50 }, { "id": 3, "name": "WinNER (зелёная зона)", "is_active": 1, "order_number": 10 }, { "id": 4, "name": "Крис", "is_active": 0, "order_number": 140 }, { "id": 5, "name": "Realty.dmir.ru", "is_active": 0, "order_number": 60 }, { "id": 6, "name": "БН", "is_active": 1, "order_number": 130 }, { "id": 7, "name": "Навигатор", "is_active": 0, "order_number": 1000 }, { "id": 8, "name": "БКН", "is_active": 1, "order_number": 120 }, { "id": 9, "name": "Собственники", "is_active": 0, "order_number": 900 }, { "id": 11, "name": "Приан", "is_active": 0, "order_number": 150 }, { "id": 12, "name": "eip.ru", "is_active": 0, "order_number": 110 }, { "id": 15, "name": "Sob.ru", "is_active": 1, "order_number": 20 }, { "id": 17, "name": "cian.ru", "is_active": 1, "order_number": 40 }, { "id": 20, "name": "A.baza-winner", "is_active": 0, "order_number": 15 }, { "id": 21, "name": "AVITO.ru", "is_active": 1, "order_number": 30 }, { "id": 22, "name": "WinNER Lite", "is_active": 1, "order_number": 16 }, { "id": 23, "name": "Яндекс", "is_active": 1, "order_number": 70 }, { "id": 24, "name": "WinNER (белая зона)", "is_active": 1, "order_number": 15 }],
+            office_class: [{ "id": 2, "name": "A+" }, { "id": 3, "name": "A" }, { "id": 4, "name": "B+" }, { "id": 5, "name": "B" }, { "id": 6, "name": "C+" }, { "id": 7, "name": "C" }, { "id": 8, "name": "D+" }, { "id": 9, "name": "D" }],
+            fire_alarm_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "name": "пожарная сигнализация", "code": "пожарная сигнализация" }, { "id": 2, "name": "система пожаротушения", "code": "система пожаротушения" }],
+            ownership_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "купля/продажа", "name": "купля/продажа" }, { "id": 2, "code": "ЖСК", "name": "ЖСК" }, { "id": 3, "code": "приватиз.", "name": "приватизация" }, { "id": 4, "code": "дар.", "name": "дарение" }, { "id": 5, "code": "наслед.", "name": "наследство" }, { "id": 6, "code": "мена", "name": "мена" }, { "id": 7, "code": "инвест.", "name": "инвестирование" }, { "id": 8, "code": "рента", "name": "рента" }, { "id": 9, "code": "реш.суда", "name": "решение суда" }, { "id": 10, "code": "залог(ипотека)", "name": "залог (ипотека)" }, { "id": 11, "code": "иное", "name": "иное" }, { "id": 12, "code": "кооператив", "name": "кооператив" }, { "id": 13, "code": "собственность", "name": "собственность" }, { "id": 14, "code": "по доверенности", "name": "по доверенности" }, { "id": 15, "code": "ДДУ", "name": "договор долевого участия" }, { "id": 16, "code": "ДУ", "name": "договор уступки прав требования" }, { "id": 17, "code": "ПДДК", "name": "предварительный договор купли-продажи" }],
+            parking_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "-", "name": "нет" }, { "id": 2, "code": "+", "name": "есть" }, { "id": 3, "code": "о", "name": "охраняемая" }, { "id": 4, "code": "п", "name": "подземная" }, { "id": 5, "code": "с", "name": "стихийная" }, { "id": 6, "code": "з", "name": "закрепленное место" }],
+            pay_period_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "в год", "name": "в год" }, { "id": 2, "code": "в мес.", "name": "в месяц" }, { "id": 3, "code": "в кв.", "name": "в квартал" }, { "id": 4, "code": "в сут.", "name": "в сутки" }],
+            plumbing_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "-", "name": "нет" }, { "id": 2, "code": "+", "name": "есть" }, { "id": 3, "code": "С", "name": "скважина" }, { "id": 4, "code": "К", "name": "колодец" }, { "id": 5, "code": "М", "name": "магистральный" }, { "id": 6, "code": "И", "name": "иное" }, { "id": 7, "code": "Ц", "name": "центральный" }, { "id": 8, "code": "Л", "name": "летний" }],
+            price_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "вся площадь", "name": "за всю площадь" }, { "id": 2, "code": "сотка", "name": "за сотку" }, { "id": 3, "code": "кв.м.", "name": "за кв.м." }],
+            realty_type: [{ "id": 1, "code": "кв.", "name": "квартира", "master_realty_type_id": 1 }, { "id": 2, "code": "комн.", "name": "комната", "master_realty_type_id": 1 }, { "id": 3, "code": "дом", "name": "дом", "master_realty_type_id": 2 }, { "id": 4, "code": "ЗУ", "name": "земельный участок", "master_realty_type_id": 2 }, { "id": 5, "code": "дача", "name": "дача", "master_realty_type_id": 2 }, { "id": 6, "code": "дуплекс", "name": "дуплекс", "master_realty_type_id": 2 }, { "id": 7, "code": "квадрохаус", "name": "квадрохаус", "master_realty_type_id": 2 }, { "id": 8, "code": "коттедж", "name": "коттедж", "master_realty_type_id": 2 }, { "id": 9, "code": "коттедж в КП", "name": "коттедж в КП", "master_realty_type_id": 2 }, { "id": 10, "code": "таунхаус", "name": "таунхаус", "master_realty_type_id": 2 }, { "id": 11, "code": "усадьба", "name": "усадьба", "master_realty_type_id": 2 }, { "id": 12, "code": "часть дома", "name": "часть дома", "master_realty_type_id": 2 }, { "id": 15, "code": "офис", "name": "офис", "master_realty_type_id": 3 }, { "id": 16, "code": "маг", "name": "магазин", "master_realty_type_id": 3 }, { "id": 17, "code": "склад", "name": "склад", "master_realty_type_id": 3 }, { "id": 18, "code": "другое", "name": "другое", "master_realty_type_id": 3 }, { "id": 19, "code": "БЦ", "name": "бизнес-центр", "master_realty_type_id": 3 }, { "id": 20, "code": "ТЦ", "name": "торговый центр", "master_realty_type_id": 3 }, { "id": 21, "code": "ППП", "name": "произв.-пром помещение", "master_realty_type_id": 3 }, { "id": 22, "code": "ПП", "name": "предприятие питания", "master_realty_type_id": 3 }, { "id": 23, "code": "ПСН", "name": "помещ.свободного назначения", "master_realty_type_id": 3 }, { "id": 24, "code": "ОСЗ", "name": "отдельно стоящее здание", "master_realty_type_id": 3 }, { "id": 25, "code": "гостиница/отель", "name": "гостиница/отель", "master_realty_type_id": 3 }, { "id": 26, "code": "КЗУ", "name": "ком.земельный участок", "master_realty_type_id": 3 }, { "id": 27, "code": "гар", "name": "гараж", "master_realty_type_id": 3 }, { "id": 28, "code": "автомойка", "name": "автомойка", "master_realty_type_id": 3 }, { "id": 29, "code": "автосервис", "name": "автосервис", "master_realty_type_id": 3 }, { "id": 30, "code": "ателье", "name": "ателье", "master_realty_type_id": 3 }, { "id": 31, "code": "гараж.комплекс", "name": "гараж.комплекс", "master_realty_type_id": 3 }, { "id": 32, "code": "медцентр", "name": "медцентр", "master_realty_type_id": 3 }, { "id": 33, "code": "парикмахерская", "name": "парикмахерская", "master_realty_type_id": 3 }, { "id": 34, "code": "стоматология", "name": "стоматология", "master_realty_type_id": 3 }, { "id": 35, "code": "турфирма", "name": "турфирма", "master_realty_type_id": 3 }, { "id": 36, "code": "учеб.цели", "name": "учеб.цели", "master_realty_type_id": 3 }, { "id": 37, "code": "фотоателье", "name": "фотоателье", "master_realty_type_id": 3 }, { "id": 38, "code": "химчистка", "name": "химчистка", "master_realty_type_id": 3 }, { "id": 39, "code": "офисное здание", "name": "офисное здание", "master_realty_type_id": 3 }, { "id": 40, "code": "торг.площадь", "name": "торговая площадь", "master_realty_type_id": 3 }, { "id": 41, "code": "пром.земли", "name": "промышленные земли", "master_realty_type_id": 3 }, { "id": 42, "code": "сельхоз.земли", "name": "сельхоз.земли", "master_realty_type_id": 3 }, { "id": 43, "code": "банк", "name": "банк", "master_realty_type_id": 3 }, { "id": 44, "code": "кафе/ресторан", "name": "кафе/ресторан", "master_realty_type_id": 3 }, { "id": 45, "code": "машиноместо", "name": "машиноместо", "master_realty_type_id": 3 }, { "id": 46, "code": "инвест.проект", "name": "инвестиционный проект", "master_realty_type_id": 3 }, { "id": 47, "code": "готовый бизнес", "name": "готовый бизнес", "master_realty_type_id": 3 }, { "id": 48, "code": "база отдыха/лагерь", "name": "база отдыха/лагерь", "master_realty_type_id": 3 }, { "id": 49, "code": "ферма", "name": "ферма", "master_realty_type_id": 3 }, { "id": 50, "code": "бизнес-проект", "name": "бизнес-проект", "master_realty_type_id": 3 }, { "id": 51, "code": "доходный дом", "name": "доходный дом", "master_realty_type_id": 3 }, { "id": 52, "code": "фабрика/завод", "name": "фабрика/завод", "master_realty_type_id": 3 }, { "id": 53, "code": "курортный комплекс", "name": "курортный комплекс", "master_realty_type_id": 3 }, { "id": 54, "code": "апартаменты", "name": "апартаменты", "master_realty_type_id": 1 }, { "id": 55, "code": "пентхаус", "name": "пентхаус", "master_realty_type_id": 1 }, { "id": 56, "code": "дом", "name": "дом", "master_realty_type_id": 1 }, { "id": 57, "code": "элит.недвижимость(поместье, замок, особняк)", "name": "элитная недвижимость(поместье, замок, особняк)", "master_realty_type_id": 1 }, { "id": 59, "code": "гараж", "name": "гараж", "master_realty_type_id": 4 }, { "id": 60, "code": "бокс", "name": "бокс", "master_realty_type_id": 4 }, { "id": 61, "code": "машиноместо", "name": "машиноместо", "master_realty_type_id": 4 }, { "id": 62, "code": "доля", "name": "доля", "master_realty_type_id": 1 }, { "id": 63, "code": "коттедж", "name": "коттедж", "master_realty_type_id": 1 }, { "id": 64, "code": "вилла", "name": "вилла", "master_realty_type_id": 1 }, { "id": 65, "code": "бунгало", "name": "бунгало", "master_realty_type_id": 1 }, { "id": 66, "code": "таунхаус", "name": "таунхаус", "master_realty_type_id": 1 }, { "id": 67, "code": "квартира", "name": "квартира", "master_realty_type_id": 5 }],
+            rent_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "любой срок", "name": "любой срок" }, { "id": 2, "code": "длительный срок", "name": "длительный срок" }, { "id": 3, "code": "посуточно", "name": "посуточно" }, { "id": 4, "code": "от месяца и более", "name": "от месяца и более" }, { "id": 5, "code": "сезонная сдача", "name": "сезонная сдача" }],
+            security_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "-", "name": "нет" }, { "id": 2, "code": "+", "name": "есть" }],
+            sewerage_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "-", "name": "нет" }, { "id": 2, "code": "+", "name": "есть" }, { "id": 3, "code": "ВД", "name": "вне дома" }, { "id": 4, "code": "С", "name": "септик" }, { "id": 5, "code": "Ц", "name": "центральная" }, { "id": 6, "code": "И", "name": "иное" }],
+            territory_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "огорож.", "name": "огороженная" }, { "id": 2, "code": "огорож.+охран.", "name": "огороженная и охраняемая" }, { "id": 3, "code": "не огорож.", "name": "не огорожена" }],
+            walls_material_type: [{ "id": 0, "code": "", "name": "", "master_realty_type_id": null }, { "id": 1, "code": "П", "name": "панельный", "master_realty_type_id": 1 }, { "id": 2, "code": "Б", "name": "блочный", "master_realty_type_id": 1 }, { "id": 3, "code": "М", "name": "монолитный", "master_realty_type_id": 1 }, { "id": 4, "code": "М-К", "name": "монолитно-кирпичный", "master_realty_type_id": 1 }, { "id": 5, "code": "К", "name": "кирпичный", "master_realty_type_id": 1 }, { "id": 6, "code": "Дер.", "name": "деревянный", "master_realty_type_id": 1 }, { "id": 9, "code": "Шлакоблок", "name": "шлакоблоки/шлакобетон", "master_realty_type_id": 1 }, { "id": 11, "code": "Ж-б", "name": "железобетон", "master_realty_type_id": 1 }, { "id": 18, "code": "Стал.", "name": "сталинский", "master_realty_type_id": 1 }, { "id": 19, "code": "бетон", "name": "бетон", "master_realty_type_id": 4 }, { "id": 20, "code": "дерево", "name": "дерево", "master_realty_type_id": 4 }, { "id": 21, "code": "кирпич", "name": "кирпич", "master_realty_type_id": 4 }, { "id": 22, "code": "металл", "name": "металл", "master_realty_type_id": 4 }, { "id": 23, "code": "пластик", "name": "пластик", "master_realty_type_id": 4 }, { "id": 24, "code": "Дер.", "name": "деревянный", "master_realty_type_id": 2 }, { "id": 25, "code": "Газоблок.", "name": "газоблочный", "master_realty_type_id": 2 }, { "id": 26, "code": "Кам.", "name": "каменный", "master_realty_type_id": 2 }, { "id": 27, "code": "Каркас.", "name": "каркасный", "master_realty_type_id": 2 }, { "id": 28, "code": "Кирп.", "name": "кирпичный", "master_realty_type_id": 2 }, { "id": 29, "code": "Легкобетон.", "name": "легкобетонный", "master_realty_type_id": 2 }, { "id": 30, "code": "Многослой.", "name": "многослойный", "master_realty_type_id": 2 }, { "id": 31, "code": "Монолит.", "name": "монолитный", "master_realty_type_id": 2 }, { "id": 32, "code": "Щит.", "name": "щитовой", "master_realty_type_id": 2 }],
+            water_closet_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "-", "name": "отсутствует" }, { "id": 2, "code": "С", "name": "совмещенный" }, { "id": 3, "code": "Р", "name": "раздельный" }, { "id": 4, "code": "2", "name": "два санузла" }, { "id": 5, "code": "3", "name": "три санузла" }, { "id": 6, "code": "4", "name": "четыре санузла" }, { "id": 7, "code": "2С", "name": "два совмещенных санузла" }, { "id": 8, "code": "2Р", "name": "два раздельных санузла" }, { "id": 9, "code": "3С", "name": "три совмещенных санузла" }, { "id": 10, "code": "3Р", "name": "три раздельных санузла" }, { "id": 11, "code": "4С", "name": "четыре совмещенных санузла" }, { "id": 12, "code": "4Р", "name": "четыре раздельных санузла" }, { "id": 13, "code": "+", "name": "есть санузел" }],
+            window_overlook_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "на улицу", "name": "окна на улицу" }, { "id": 2, "code": "во двор", "name": "окна во двор" }, { "id": 3, "code": "во двор и на улицу", "name": "окна во двор и на улицу" }],
+            rooms_adjacency_type: [{ "id": 0, "code": "", "name": "" }, { "id": 1, "code": "С", "name": "смежные" }, { "id": 2, "code": "Р", "name": "раздельные" }, { "id": 3, "code": "С+Р", "name": "смежные+раздельные" }],
+            sale_type: [{ "id": 0, "name": "" }, { "id": 9, "name": "прямая продажа" }, { "id": 10, "name": "альтернатива" }],
+        };
+        const _dics = new Map();
+        function dic_fld_value(dic_name, id, fld, default_value) {
+            let result;
+            let dic = _dics.get(dic_name);
+            if (!dic) {
+                const dic_def = DICTIONARIES[dic_name];
+                if (dic_def) {
+                    dic = new Map(dic_def.map((item) => [item.id, item]));
+                    _dics.set(dic_name, dic);
+                }
+            }
+            if (dic && dic.has(id)) {
+                const value = dic.get(id);
+                if (value)
+                    result = value[fld];
+            }
+            if (result === void 0 && default_value !== void 0)
+                result = default_value;
+            return result;
+        }
+        let BwGrid2ColAlign;
+        (function (BwGrid2ColAlign) {
+            BwGrid2ColAlign[BwGrid2ColAlign["center"] = 0] = "center";
+            BwGrid2ColAlign[BwGrid2ColAlign["justify"] = 1] = "justify";
+            BwGrid2ColAlign[BwGrid2ColAlign["left"] = 2] = "left";
+            BwGrid2ColAlign[BwGrid2ColAlign["right"] = 3] = "right";
+        })(BwGrid2ColAlign = $$.BwGrid2ColAlign || ($$.BwGrid2ColAlign = {}));
+        class $bw_grid2 extends $.$bw_grid2 {
+            cols() {
+                const result = this.col_ids_visible().map((id) => this.Col(id));
+                return result;
+            }
+            cells(i) {
+                let result = null;
+                if (this.is_visible_row(i) ||
+                    this.col_resizing() === null && this.col_moving_pos() === null && !this.col_release_pos_animation_trigger()) {
+                    const col_ids_visible_set = this.col_ids_visible_set();
+                    const iter = col_ids_visible_set.values();
+                    let next = iter.next();
+                    result = [];
+                    while (!next.done) {
+                        const id = next.value;
+                        result.push(this.Cell({ i, id }));
+                        next = iter.next();
+                    }
+                }
+                return result;
+            }
+            col_caption(id) {
+                const col_def = this.col_defs().get(id);
+                const result = !col_def ? '' : col_def.caption;
+                return result;
+            }
+            check_search_result_id() {
+                if (this.search_result_id() !== this._search_result_id) {
+                    this.recs_count(null);
+                    this._recs = void 0;
+                    this._search_result_id = this.search_result_id();
+                }
+            }
+            request_data_worker(request, response) {
+                if (!this._data_worker_requests)
+                    this._data_worker_requests = [];
+                if (!this._data_worker_requests.find((item) => $$.$bw_equal(item.request, request)))
+                    this._data_worker_requests.push({ request, response });
+                if (!this._data_worker_requesting) {
+                    const dataWorker = window.dataWorker;
+                    const processRequest = () => {
+                        if (this._data_worker_requests && this._data_worker_requests.length) {
+                            const item = this._data_worker_requests[0];
+                            request = item.request;
+                            response = item.response;
+                            this._data_worker_requesting = true;
+                            dataWorker.postMessage(request);
+                        }
+                    };
+                    dataWorker.onmessage = (event) => {
+                        this._data_worker_requests.shift();
+                        this._data_worker_requesting = false;
+                        if (event.data.status != 'ok') {
+                            console[event.data.status](event.data.message);
+                        }
+                        response(event);
+                        processRequest();
+                    };
+                    processRequest();
+                }
+            }
+            recs_count(val, force) {
+                let result;
+                if (val !== void 0) {
+                    result = super.recs_count(val, force);
+                }
+                else {
+                    this.check_search_result_id();
+                    result = super.recs_count();
+                    if (result === null) {
+                        this.request_data_worker({ cmd: 'count' }, (event) => {
+                            this.recs_count(event.data.count);
+                            this.row_defs(null);
+                        });
+                    }
+                }
+                return result || 0;
+            }
+            rec_fld(idx_fld, val, force) {
+                if (val !== void 0) {
+                    if (!this._recs)
+                        this._recs = new Map();
+                    let rec = this._recs.get(idx_fld.idx);
+                    if (!rec) {
+                        rec = new Map();
+                        this._recs.set(idx_fld.idx, rec);
+                    }
+                    rec.set(idx_fld.fld, val);
+                    return val;
+                }
+                if (this.search_result_id() !== this._search_result_id && this._recs) {
+                    this._recs = void 0;
+                    this._search_result_id = this.search_result_id();
+                }
+                let result;
+                if (!this._recs)
+                    this._recs = new Map();
+                const rec = this._recs.get(idx_fld.idx);
+                if (rec && rec.has(idx_fld.fld)) {
+                    result = rec.get(idx_fld.fld);
+                }
+                else {
+                    if (!rec || !rec.has('guid')) {
+                        if (!this._rec_fld_request_by_idx)
+                            this._rec_fld_request_by_idx = new Map();
+                        let request = this._rec_fld_request_by_idx.get(idx_fld.idx);
+                        if (!request) {
+                            request = new Set(['guid', 'w6_offer_id', 'object_guid']);
+                            this._rec_fld_request_by_idx.set(idx_fld.idx, request);
+                        }
+                        request.add(idx_fld.fld);
+                    }
+                    else {
+                        if (!this._rec_fld_request_by_guid) {
+                            this._rec_fld_request_by_guid = new Map();
+                        }
+                        const guid = rec.get('guid');
+                        let request = this._rec_fld_request_by_guid.get(guid);
+                        if (!request) {
+                            request = new Set();
+                            this._rec_fld_request_by_guid.set(guid, request);
+                            if (!this._idx_by_guid)
+                                this._idx_by_guid = new Map();
+                            this._idx_by_guid.set(guid, idx_fld.idx);
+                        }
+                        request.add(idx_fld.fld);
+                    }
+                    if (!this._rec_fld_waiting) {
+                        const doRequest = () => {
+                            if (!this._rec_fld_request_by_guid)
+                                this._idx_by_guid = void 0;
+                            if (!this._rec_fld_request_by_guid && !this._rec_fld_request_by_idx)
+                                return;
+                            const start = Date.now();
+                            this._rec_fld_waiting = true;
+                            setTimeout(() => {
+                                if (this._rec_fld_request_by_guid) {
+                                    this.request_data_worker({ cmd: 'recs', by_guid: this._rec_fld_request_by_guid }, (event) => {
+                                        this._rec_fld_waiting = false;
+                                        if (event.data.status == 'ok') {
+                                            event.data.by_guid.forEach((fld_values, guid) => {
+                                                const idx = this._idx_by_guid.get(guid);
+                                                if (idx !== void 0) {
+                                                    fld_values.forEach((fld_value, fld) => {
+                                                        this.rec_fld({ idx, fld }, fld_value);
+                                                    });
+                                                }
+                                            });
+                                        }
+                                        doRequest();
+                                    });
+                                    this._rec_fld_request_by_guid = void 0;
+                                }
+                                else if (this._rec_fld_request_by_idx) {
+                                    this.request_data_worker({ cmd: 'recs', by_idx: this._rec_fld_request_by_idx }, (event) => {
+                                        this._rec_fld_waiting = false;
+                                        if (event.data.status == 'ok') {
+                                            event.data.by_idx.forEach((fld_values, idx) => {
+                                                fld_values.forEach((fld_value, fld) => {
+                                                    this.rec_fld({ idx, fld }, fld_value);
+                                                });
+                                            });
+                                        }
+                                        doRequest();
+                                    });
+                                    this._rec_fld_request_by_idx = void 0;
+                                }
+                                else {
+                                    this._rec_fld_waiting = false;
+                                }
+                            }, 16);
+                        };
+                        doRequest();
+                    }
+                    result = void 0;
+                }
+                return result;
+            }
+            cell_content(ij) {
+                let result = '';
+                const idx = this.row_def_idx(ij.i);
+                if (ij.id == 'blank') {
+                    result = '';
+                }
+                else {
+                    if (idx !== void 0) {
+                        const col_def = this.col_defs_default()[ij.id];
+                        const fld = col_def.fld || ij.id;
+                        const fld_list = Array.isArray(fld) ? fld : [fld];
+                        const value_list = [];
+                        const count = fld_list.length;
+                        let has_undef = false;
+                        for (let i = 0; i < count; i++) {
+                            const value = this.rec_fld({ idx, fld: fld_list[i] });
+                            if (value === void 0)
+                                has_undef = true;
+                            value_list.push(value);
+                        }
+                        if (!has_undef)
+                            result = typeof col_def.formatter != 'function' ?
+                                `${value_list}` :
+                                col_def.formatter.apply(this, value_list);
+                    }
+                }
+                return result;
+            }
+            row_note(i) {
+                const idx = this.row_def_idx(i);
+                const result = this.rec_fld({ idx, fld: 'note' });
+                if (result) {
+                    new $.$mol_defer(() => {
+                        const dom_node = this.Note(i).dom_node();
+                        const height = dom_node.scrollHeight;
+                        const delta = height - dom_node.offsetHeight;
+                        if (delta > 0) {
+                            let { note, footer } = this.row_footer_height_of_idx(idx);
+                            note += delta;
+                            footer += delta;
+                            this.row_footer_height_of_idx(idx, { note, footer });
+                        }
+                    });
+                }
+                return result;
+            }
+            col_ids_visible_set(val, force) {
+                let result = super.col_ids_visible_set(val, force);
+                if (result === null) {
+                    result = new Set(this.col_ids_visible());
+                    super.col_ids_visible_set(result);
+                }
+                else {
+                    val = new Set(this.col_ids_visible());
+                    if (!$$.$bw_equal(result, val)) {
+                        console.warn(result, val);
+                        result = val;
+                        super.col_ids_visible_set(result);
+                    }
+                }
+                return result;
+            }
+            col_ids_visible(val, force) {
+                const col_defs = this.col_defs();
+                if (val !== void 0) {
+                    const col_defs_new = new Map();
+                    const count = val.length;
+                    const cols_visible = new Set();
+                    for (let i = 0; i < count; i++) {
+                        const col_id = val[i];
+                        if (!col_defs.has(col_id))
+                            continue;
+                        const col_def = col_defs.get(col_id);
+                        if (col_def.hidden)
+                            col_def.hidden = false;
+                        col_defs_new.set(col_id, col_def);
+                        cols_visible.add(col_id);
+                    }
+                    [...col_defs.keys()].filter(col_id => !cols_visible.has(col_id)).forEach(col_id => {
+                        const col_def = col_defs.get(col_id);
+                        if (!col_def.hidden)
+                            col_def.hidden = true;
+                        col_defs_new.set(col_id, col_def);
+                    });
+                    this.col_defs(col_defs_new);
+                }
+                const result = [...this.col_defs().entries()]
+                    .filter((entry) => !entry[1].hidden)
+                    .map((entry) => entry[0]);
+                return result;
+            }
+            col_id_idx_visible(id) {
+                return this.col_ids_visible().findIndex((col_id) => col_id == id);
+            }
+            col_defs(val) {
+                let result = super.col_defs(val);
+                if (result === null) {
+                    result = new Map();
+                    const col_defs_default = this.col_defs_default();
+                    Object.keys(col_defs_default).forEach((id) => {
+                        result.set(id, col_defs_default[id]);
+                    });
+                }
+                return result;
+            }
+            col_defs_store(val) {
+                const result = !val || !val.size ? null : [...val.entries()].map((entry) => {
+                    const { width, hidden } = entry[1];
+                    entry[1] = { width, hidden };
+                    return entry;
+                });
+                return result;
+            }
+            col_defs_restore(val_store) {
+                const col_defs_default = this.col_defs_default();
+                const restored_ids = new Set();
+                const entries = !Array.isArray(val_store) ? null : val_store
+                    .filter((item) => Array.isArray(item) &&
+                    item.length == 2 &&
+                    typeof item[0] == 'string' &&
+                    col_defs_default[item[0]] &&
+                    item[1] && typeof item[1] == 'object' &&
+                    Number.isInteger(item[1].width) &&
+                    (item[1].hidden === void 0 || typeof item[1].hidden == 'boolean') &&
+                    true)
+                    .map((item) => {
+                    const id = item[0];
+                    item[1] = Object.assign({}, col_defs_default[id], item[1]);
+                    restored_ids.add(id);
+                    return item;
+                })
+                    .concat(Object.keys(col_defs_default)
+                    .filter(id => !restored_ids.has(id))
+                    .map(id => {
+                    return [id, col_defs_default[id]];
+                }));
+                const result = !entries || !entries.length ? null : new Map(entries);
+                return result;
+            }
+            col_defs_default() {
+                const num_formatter = (num) => num == null ? '?' : '' + num;
+                const price_formatter = (price) => {
+                    if (Number.isFinite(price))
+                        price = Math.floor(Math.abs(price));
+                    if (!price)
+                        return '?';
+                    let result = price.toString();
+                    const pattern = /(-?\d+)(\d{3})/;
+                    while (pattern.test(result))
+                        result = result.replace(pattern, "$1 $2");
+                    return result;
+                };
+                const dic_col_def = (fld, caption, opt) => {
+                    const dic_name = fld + '_type';
+                    return {
+                        [dic_name]: Object.assign({ caption, width: this.col_width_min() * 1.2 }, opt, { fld: dic_name + '_id', formatter: (id) => dic_fld_value(dic_name, id, 'code', '') })
+                    };
+                };
+                const result = Object.assign({ 'blank': { width: 1.5 * this.col_width_min(), caption: '' }, 'photo': { width: this.col_width_min(), caption: 'Фото' }, 'room_qt': { width: this.col_width_min() * 2, caption: 'Комнат',
+                        fld: 'total_room_count',
+                        formatter: num_formatter,
+                    }, 'subway': { width: this.col_width_min() * 6, caption: 'Метро/ЖД',
+                        align: BwGrid2ColAlign.left,
+                        fld: 'geo_cache_subway_station_name_1',
+                        formatter: (value) => '' + value,
+                    }, 'far': { width: this.col_width_min() * 3, caption: 'От станции',
+                        fld: ['walking_access_1', 'transport_access_1'],
+                        formatter: (walking_access_1, transport_access_1) => walking_access_1 ? walking_access_1 + 'п' :
+                            transport_access_1 ? transport_access_1 + 'т' :
+                                '',
+                    }, 'address': { width: this.col_width_min() * 6, caption: 'Адрес',
+                        align: BwGrid2ColAlign.left,
+                        fld: ['geo_cache_street_name', 'geo_cache_building_name'],
+                        formatter: (geo_cache_street_name, geo_cache_building_name) => !geo_cache_building_name ? geo_cache_street_name : geo_cache_street_name + ', ' + geo_cache_building_name,
+                    }, 'bld': { width: this.col_width_min() * 3, caption: 'Дом',
+                        fld: ['storey', 'storeys_count', 'walls_material_type_id'],
+                        formatter: (storey, storeys_count, walls_material_type_id) => num_formatter(storey) + '/' + num_formatter(storeys_count) + ' ' + dic_fld_value('walls_material_type', walls_material_type_id, 'code', '?'),
+                    } }, dic_col_def('balcony', 'Балкон'), dic_col_def('water_closet', 'Санузел'), dic_col_def('parking', 'Парковка'), dic_col_def('territory', 'Территория', { width: this.col_width_min() * 4 }), dic_col_def('window_overlook', 'Окна', { width: this.col_width_min() * 2 }), dic_col_def('apartment_condition', 'Ремонт', { width: this.col_width_min() * 4 }), dic_col_def('elevator', 'Лифт', { width: this.col_width_min() * 2 }), { 'square': { width: this.col_width_min() * 4, caption: 'Площадь',
+                        fld: ['total_square', 'life_square', 'kitchen_square'],
+                        formatter: (total_square, life_square, kitchen_square) => num_formatter(total_square) + '/' + num_formatter(life_square) + '/' + num_formatter(kitchen_square),
+                    }, 'square_explication': { width: this.col_width_min() * 5, caption: 'По комнатам',
+                    }, 'is_mortgage_available': { width: this.col_width_min() * 1.5, caption: 'Ипотека',
+                        formatter: (value) => value === true ? '+' : value === false ? '-' : ''
+                    }, 'price_rub': { width: this.col_width_min() * 4, caption: 'Цена ₽',
+                        formatter: price_formatter,
+                    }, 'meter_price_rub': { width: this.col_width_min() * 3, caption: '₽/м²',
+                        formatter: price_formatter,
+                    }, 'pub_datetime': { width: this.col_width_min() * 3, caption: 'Дата',
+                        formatter: (value) => new $.$mol_time_moment(value).toString('DD.MM.YYYY')
+                    }, 'media_name': { width: this.col_width_min() * 3, caption: 'Источник' }, 'phone_list': { width: this.col_width_min() * 6, caption: 'Телефон',
+                        align: BwGrid2ColAlign.left,
+                        formatter: (value) => !value ? '' : value
+                            .split(/\D+/)
+                            .map(phone => '8-' + phone.slice(1, 4) + '-' + phone.slice(4, 7) + '-' + phone.slice(7, 9) + '-' + phone.slice(9, 11)).join(', '),
+                    } });
+                return result;
+            }
+            col_width(id, val, force) {
+                if (val !== void 0) {
+                    val = Math.max(val, this.col_width_min());
+                    if (this._col_width_defer !== void 0) {
+                        $.$mol_defer.drop(this._col_width_defer);
+                    }
+                    this._col_width_defer = new $.$mol_defer(() => {
+                        this._col_width_defer = void 0;
+                        const col_defs = this.col_defs();
+                        const col_def = col_defs.get(id);
+                        if (col_def) {
+                            const col_defs_new = new Map(col_defs.entries());
+                            col_defs_new.set(id, Object.assign({}, col_def, { width: val }));
+                            this.col_defs(col_defs_new);
+                        }
+                    });
+                    super.col_width(id, val, force);
+                }
+                let result = super.col_width(id);
+                if (result === null) {
+                    const col_defs = this.col_defs();
+                    const col_def = col_defs.get(id);
+                    if (col_def) {
+                        result = col_def.width;
+                        super.col_width(id, result);
+                    }
+                }
+                return result;
+            }
+            col_left_source(id, val, force) {
+                let result = super.col_left_source(id, val, force);
+                if (result === null || this.col_resizing() === null) {
+                    const col_ids = this.col_ids_visible();
+                    const count = col_ids.length;
+                    const i = col_ids.findIndex(col_id => col_id == id);
+                    result = i <= 0 ? this.body_padding_left() :
+                        this.col_left_source(col_ids[i - 1]) + this.col_width(col_ids[i - 1]);
+                    super.col_left_source(result);
+                }
+                return result;
+            }
+            cell_left(ij) {
+                const result = this.col_left(ij.id) - this.body_padding_left();
+                return result;
+            }
+            cell_width(ij) {
+                const result = this.col_width(ij.id);
+                return result;
+            }
+            cell_align(ij) {
+                const col_defs = this.col_defs_default();
+                const col_def = col_defs[ij.id];
+                const align = col_def.align || BwGrid2ColAlign.center;
+                const result = BwGrid2ColAlign[align];
+                return result;
+            }
+            col_left(id, val, force) {
+                let result;
+                const col_moving_pos = this.col_moving_pos();
+                if (col_moving_pos === null) {
+                    if (this.col_resizing() !== null) {
+                        result = super.col_left(id, val);
+                        if (result === null)
+                            result = this.col_left_source(id);
+                    }
+                    else {
+                        const col_release_pos = this.col_release_pos();
+                        if (col_release_pos === null || col_release_pos.id != id) {
+                            result = this.col_left_source(id);
+                        }
+                        else {
+                            result = col_release_pos.x;
+                        }
+                        result = super.col_left(id, result);
+                    }
+                }
+                else {
+                    let _initial;
+                    result = id == this.col_to_move() ? col_moving_pos.x : $$.bw_animate({
+                        _super: (val) => {
+                            const result = super.col_left(id, val);
+                            _initial = result;
+                            return result;
+                        },
+                        _master: () => {
+                            const result = this.col_left_source(id);
+                            return result;
+                        },
+                        _value: (master) => master,
+                        _steps: (initial, target) => (target - initial) / 16,
+                        _easing: $$.BwEasing.easeInOutQuad,
+                        data_key: '_' + 'col_left' + '_anim_data' + `_${id}`,
+                    }, val, force);
+                }
+                return result;
+            }
+            col_top(id, val, force) {
+                let result;
+                const col_moving_pos = this.col_moving_pos();
+                if (col_moving_pos !== null) {
+                    result = id == this.col_to_move() ?
+                        col_moving_pos.y :
+                        this.col_top_source(id);
+                }
+                else {
+                    const col_release_pos = this.col_release_pos();
+                    result = !col_release_pos || col_release_pos.id != id ?
+                        this.col_top_source(id) :
+                        col_release_pos.y;
+                }
+                return result;
+            }
+            col_release_pos() {
+                return this.col_release_pos_animation_trigger();
+            }
+            col_release_pos_animation_triggered_value(trigger) {
+                let result;
+                if (!trigger) {
+                    result = null;
+                }
+                else {
+                    const id = trigger.id;
+                    result = { id, x: this.col_left_source(id), y: this.col_top_source(id) };
+                }
+                return result;
+            }
+            col_release_pos_animation_steps(p) {
+                const result = p.start.id != p.end.id ? 1 :
+                    Math.max(4, Math.abs(p.end.y - p.start.y) / 16, Math.abs(p.end.x - p.start.x) / 16);
+                return result;
+            }
+            col_release_pos_animation_step_value(p) {
+                const t = p.step / p.steps;
+                const _easing = $$.BwEasing.easeInOutQuad;
+                const result = {
+                    x: $$.bw_easing_value(p.start.x, p.end.x, t, _easing),
+                    y: $$.bw_easing_value(p.start.y, p.end.y, t, _easing),
+                    id: p.start.id,
+                };
+                return result;
+            }
+            col_release_pos_animation_finish() {
+                super.col_release_pos_animation_trigger(null);
+            }
+            header_height(val, force) {
+                const result = this.row_min_height();
+                return result;
+            }
+            col_width_min() {
+                return this.col_resize_padding() * 3;
+            }
+            cursor() {
+                const result = this.col_to_resize() !== null || this.col_resizing() !== null ? 'col-resize' :
+                    this.col_moving_pos() !== null ? 'grabbing' :
+                        null;
+                return result;
+            }
+            col_resize_padding() {
+                return 8;
+            }
+            col_id(id) {
+                if (id && typeof id === 'object')
+                    id = id.id;
+                return id;
+            }
+            is_moving_col(id) {
+                if (id && typeof id === 'object')
+                    id = id.id;
+                const result = this.col_moving_pos() !== null && this.col_to_move() == id ||
+                    false;
+                return result;
+            }
+            is_releasing_col(id) {
+                if (id && typeof id === 'object')
+                    id = id.id;
+                const result = this.col_release_pos() !== null && this.col_release_pos().id == id ||
+                    false;
+                return result;
+            }
+            header_client_rect_left() {
+                const result = this.Header().dom_node().getBoundingClientRect().left;
+                return result;
+            }
+            body_height() {
+                const result = this.height() - this.header_height();
+                return result;
+            }
+            row_i_max() {
+                const result = Math.max(0, Math.ceil(this.body_height() / this.row_min_height()) * 2);
+                return result;
+            }
+            viewport_min() {
+                return -Math.floor(this.body_height() / 2);
+            }
+            viewport_max() {
+                return 3 * Math.floor(this.body_height() / 2);
+            }
+            rows() {
+                let result = [];
+                const row_i_max = this.row_i_max();
+                result.length = row_i_max + 1;
+                for (let i = 0; i <= row_i_max; i++) {
+                    result[i] = this.Row(i);
+                }
+                return result;
+            }
+            row_defs(val, force) {
+                let result;
+                if (val) {
+                    this.update_row_defs(val, force);
+                }
+                result = super.row_defs();
+                if (!result && this.row_i_max()) {
+                    const row_i_max = this.row_i_max();
+                    result = [];
+                    result.length = row_i_max + 1;
+                    let top = 0;
+                    let idx = 0;
+                    const body_height = this.body_height();
+                    let row_i_last = 0;
+                    const rows_count = this.rows_count();
+                    const viewport_max = this.viewport_max();
+                    for (; idx < rows_count && top < viewport_max && idx <= row_i_max; idx++) {
+                        const height = this.row_height_of_idx(idx);
+                        result[idx] = { idx, top, height };
+                        top += height;
+                        row_i_last = this.row_i(idx + 1);
+                    }
+                    this.row_i_first(0);
+                    this.row_i_last(row_i_last);
+                    this.update_row_defs(result);
+                }
+                let delta = this.scroll_y_delta();
+                this.scroll_y_delta(0);
+                this.scroll_y(delta);
+                result = super.row_defs();
+                return result;
+            }
+            update_row_defs(row_defs_new, force) {
+                const body_height = this.body_height();
+                const count = row_defs_new.length;
+                for (let i = 0; i < count; i++) {
+                    const row_def = row_defs_new[i];
+                    if (row_def) {
+                        this.row_def_idx(i, row_def.idx);
+                        const height_old = this.row_def_height(i);
+                        this.row_def_height(i, row_def.height);
+                        const top_old = this.row_def_top(i);
+                        if (intersects(top_old, top_old + height_old, 0, body_height) ||
+                            intersects(row_def.top, row_def.top + row_def.height, 0, body_height) ||
+                            false) {
+                            this.row_def_top(i, row_def.top);
+                        }
+                    }
+                }
+                super.row_defs(row_defs_new, force);
+            }
+            scroll_y(delta) {
+                const rows_count = this.rows_count();
+                let is_bog = true;
+                let is_eog = true;
+                const row_i_first = this.row_i_first();
+                const row_i_last = this.row_i_last();
+                if (rows_count >= 2 && row_i_first != row_i_last) {
+                    const row_defs = super.row_defs();
+                    let row_i = row_i_first;
+                    const row_def = row_defs[row_i];
+                    let top = row_def.top - delta;
+                    let idx = row_def.idx;
+                    const body_height = this.body_height();
+                    if (delta < 0) {
+                        while (0 < top && idx) {
+                            row_i = this.row_i(row_i - 1);
+                            top -= this.row_height_of_idx(--idx);
+                        }
+                        if (!idx && 0 < top)
+                            top = Math.max(0, top + delta);
+                    }
+                    else {
+                        for (; row_i != row_i_last && top < body_height && idx < rows_count; row_i = this.row_i(row_i + 1), idx++) {
+                            top += this.row_height_of_idx(idx);
+                        }
+                        for (; top < body_height && idx < rows_count; row_i = this.row_i(row_i + 1), idx++) {
+                            top += this.row_height_of_idx(idx);
+                        }
+                        if (idx == rows_count && top < body_height) {
+                            const row_space_bottom_max = this.row_space_bottom_max();
+                            delta = Math.min(delta, row_space_bottom_max - Math.min(row_space_bottom_max, body_height - top - delta));
+                        }
+                        top = row_def.top - delta;
+                        idx = row_def.idx;
+                        row_i = row_i_first;
+                    }
+                    const viewport_min = this.viewport_min();
+                    const viewport_max = this.viewport_max();
+                    let row_i_first_new;
+                    let row_i_last_new;
+                    const row_defs_new = [];
+                    row_defs_new.length = this.row_i_max() + 1;
+                    is_bog = false;
+                    is_eog = false;
+                    for (; top < viewport_max && idx < rows_count; row_i = this.row_i(row_i + 1), idx++) {
+                        const height = this.row_height_of_idx(idx);
+                        if (top + height >= viewport_min) {
+                            if (row_i_first_new === void 0) {
+                                row_i_first_new = row_i;
+                                is_bog = !idx && !top;
+                            }
+                            row_defs_new[row_i] = { idx, top, height };
+                            row_i_last_new = this.row_i(row_i + 1);
+                        }
+                        top += height;
+                    }
+                    {
+                        const row_def = row_defs_new[this.row_i(row_i_last_new - 1)];
+                        is_eog = row_def.idx == rows_count - 1 && (body_height - row_def.top - row_def.height) >= this.row_space_bottom_max();
+                    }
+                    this.row_i_first(row_i_first_new);
+                    this.row_i_last(row_i_last_new);
+                    this.update_row_defs(row_defs_new);
+                }
+                this.is_bog(is_bog);
+                this.is_eog(is_eog);
+            }
+            row_height_of_idx(idx) {
+                let result = this.row_min_height();
+                const animating_footer = this.animating_footer();
+                let i;
+                if (animating_footer && (i = animating_footer[idx]) !== void 0) {
+                    result += this.row_footer_height(i);
+                }
+                else {
+                    result += this.row_footer_height_of_idx(idx).footer;
+                }
+                return result;
+            }
+            is_visible_row(i) {
+                const row_i_first = this.row_i_first();
+                const row_i_last = this.row_i_last();
+                const result = row_i_first == row_i_last ? false :
+                    (row_i_first < row_i_last ? row_i_first <= i && i < row_i_last : row_i_first <= i || i < row_i_last);
+                return result;
+            }
+            row_display(i) {
+                const result = this.is_visible_row(i) ? 'block' : 'none';
+                return result;
+            }
+            cell_display(ij) {
+                const result = this.is_visible_row(ij.i) ? 'block' : 'none';
+                return result;
+            }
+            row_def_idx(i, val, force) {
+                let result = super.row_def_idx(i, val, force);
+                return result;
+            }
+            row_def_height(i, val, force) {
+                let result = super.row_def_height(i, val, force) || 0;
+                return result;
+            }
+            row_def_top(i, val, force) {
+                let result = super.row_def_top(i, val, force) || 0;
+                return result;
+            }
+            row_top(i) {
+                const result = this.row_def_top(i) || 0;
+                return result;
+            }
+            row_height(i) {
+                const result = this.row_def_height(i) || 0;
+                return result;
+            }
+            row_i(i) {
+                const count = this.row_i_max() + 1;
+                return (i + count) % count;
+            }
+            rows_count() {
+                return this.recs_count();
+            }
+            row_dblclick(i, event) {
+                const idx = this.row_def_idx(i);
+                const offer_id = this.rec_fld({ idx, fld: 'w6_offer_id' });
+                if (offer_id == void 0)
+                    return;
+                const row_footer_visible_offer_ids = this.row_footer_visible_offer_ids();
+                const row_footer_visible_offer_ids_new = new Set(row_footer_visible_offer_ids.keys());
+                if (row_footer_visible_offer_ids_new.has(offer_id)) {
+                    row_footer_visible_offer_ids_new.delete(offer_id);
+                }
+                else {
+                    row_footer_visible_offer_ids_new.add(offer_id);
+                }
+                this.animating_footer({ [idx]: i });
+                this.row_footer_visible_offer_ids(row_footer_visible_offer_ids_new);
+            }
+            row_footer_visible_offer_ids(val, force) {
+                let result = super.row_footer_visible_offer_ids(val, force);
+                if (result === null) {
+                    result = new Set();
+                }
+                return result;
+            }
+            row_footer_visible_offer_ids_store(val) {
+                return !val ? null : [...val.keys()];
+            }
+            row_footer_visible_offer_ids_restore(val_store) {
+                const result = !Array.isArray(val_store) ? null :
+                    new Set(val_store.filter(item => Number.isInteger(item) && item > 0));
+                return result;
+            }
+            row_footer_height_default() {
+                return 72;
+            }
+            row_footer_item_height_min() {
+                return 36;
+            }
+            row_footer_height_of_idx(idx, val, force) {
+                const offer_id = this.rec_fld({ idx, fld: 'w6_offer_id' });
+                let result = { footer: 0, note: 0 };
+                if (offer_id && this.row_footer_visible_offer_ids().has(offer_id)) {
+                    result = super.row_footer_height_of_idx(idx, val);
+                    if (!result) {
+                        const row_footer_height_default = this.row_footer_height_default();
+                        const row_footer_item_height_min = this.row_footer_item_height_min();
+                        const note = row_footer_item_height_min;
+                        const footer = note + row_footer_item_height_min;
+                        result = { note, footer };
+                    }
+                }
+                return result;
+            }
+            Footer(i) {
+                const result = !this.row_footer_height(i) ? null : super.Footer(i);
+                return result;
+            }
+            footer_opacity(i) {
+                return super.footer_opacity(i);
+            }
+            footer_opacity_animation_trigger(i) {
+                const idx = this.row_def_idx(i);
+                return this.row_footer_height_of_idx(idx).footer;
+            }
+            footer_opacity_animation_triggered_value(i, trigger) {
+                return trigger ? 1 : 0;
+            }
+            footer_opacity_animation_easing(i, p) {
+                return p.trigger ? $$.BwEasing.easeInQuad : $$.BwEasing.easeOutQuad;
+            }
+            row_footer_height(i) {
+                const idx = this.row_def_idx(i);
+                return this.row_footer_height_of_idx(idx).footer;
+            }
+            row_footer_height_animation_easing(i) {
+                return $$.BwEasing.easeOutQuad;
+            }
+            row_footer_height_animation_finish(i) {
+                this.animating_footer(null);
+            }
+            row_note_height(i) {
+                const idx = this.row_def_idx(i);
+                return this.row_footer_height_of_idx(idx).note;
+            }
+            row_note_height_animation_easing(i) {
+                return $$.BwEasing.easeOutQuad;
+            }
+            row_user_note_height(i) {
+                const idx = this.row_def_idx(i);
+                const row_footer_height_of_idx = this.row_footer_height_of_idx(idx);
+                return row_footer_height_of_idx.footer - row_footer_height_of_idx.note;
+            }
+            row_user_note_height_animation_easing(i) {
+                return $$.BwEasing.easeOutQuad;
+            }
+            row_footer_heights(val, force) {
+                let result = super.row_footer_heights(val, force);
+                if (!result) {
+                    result = new Map();
+                }
+                return result;
+            }
+            row_footer_heights_store(val) {
+                return !val ? null : [...val.entries()];
+            }
+            row_footer_heights_restore(val_store) {
+                const result = !Array.isArray(val_store) ? null : new Map(val_store
+                    .filter((item) => Array.isArray(item) &&
+                    typeof item[0] == 'number' &&
+                    (item[1] !== null && typeof item[1] == 'object') &&
+                    Number.isInteger(item[1].footer) && Number.isInteger(item[1].note) &&
+                    true).map((item) => {
+                    const note = Math.max(this.row_footer_item_height_min(), item[1].note);
+                    const footer = Math.max(this.row_footer_item_height_min() + note, item[1].footer);
+                    return [item[0], { note, footer }];
+                }));
+                return result;
+            }
+            is_bog(val, force) {
+                const result = this.rows_count() < 2 || super.is_bog(val, force);
+                return result;
+            }
+            is_eog(val, force) {
+                const result = this.rows_count() < 2 || super.is_eog(val, force);
+                return result;
+            }
+            row_space_bottom_max() {
+                let result = this.body_height();
+                for (let idx = this.rows_count() - 1; idx >= 0; idx--) {
+                    const height = this.row_height_of_idx(idx);
+                    if (result - height <= 0)
+                        break;
+                    result -= height;
+                }
+                return result;
+            }
+            Body() {
+                const result = super.Body();
+                const raf = window.requestAnimationFrame;
+                let raf_id;
+                let scrollAccu = 0;
+                let lastDelta;
+                const isPassive = false;
+                const stepAnimation = () => {
+                    this.scroll_y(scrollAccu);
+                    raf_id = void 0;
+                    scrollAccu = 0;
+                };
+                const mousewheelListener = (event) => {
+                    const deltaY = event.deltaY;
+                    if (!deltaY)
+                        return;
+                    if (Math.sign(lastDelta) != Math.sign(deltaY)) {
+                        scrollAccu = deltaY;
+                    }
+                    else {
+                        scrollAccu += deltaY;
+                    }
+                    lastDelta = deltaY;
+                    if (scrollAccu < 0 && !this.is_bog() || scrollAccu > 0 && !this.is_eog()) {
+                        if (!isPassive)
+                            event.preventDefault();
+                        if (raf_id == void 0) {
+                            raf_id = raf ? raf(stepAnimation) : setTimeout(stepAnimation, 16);
+                        }
+                    }
+                };
+                result.dom_node().addEventListener('mousewheel', mousewheelListener, { passive: isPassive });
+                new $.$mol_defer(() => {
+                    this.rows_count();
+                });
+                return result;
+            }
+            col_client_left(id) {
+                const result = this.header_client_rect_left() + this.col_left_source(id);
+                return result;
+            }
+            col_mousemove(id, event) {
+                if (!event)
+                    return;
+                if (this.col_moving_pos() === null && this.col_resizing() === null) {
+                    const resize_padding = this.col_resize_padding();
+                    const idx = this.col_id_idx_visible(id);
+                    const client_rect = this.Col(id).dom_node().getBoundingClientRect();
+                    if (event.clientX <= client_rect.left + resize_padding && idx) {
+                        this.col_to_resize(this.col_ids_visible()[idx - 1]);
+                        this.col_to_move(null);
+                    }
+                    else if (event.clientX >= client_rect.left + client_rect.width - resize_padding) {
+                        this.col_to_resize(id);
+                        this.col_to_move(null);
+                    }
+                    else if (idx) {
+                        this.col_to_resize(null);
+                        this.col_to_move(id);
+                    }
+                    else {
+                        this.col_to_resize(null);
+                        this.col_to_move(null);
+                    }
+                }
+            }
+            header_mouseleave(event) {
+                if (!event)
+                    return;
+                this.col_to_resize(null);
+                if (this.col_moving_pos() === null) {
+                    this.col_to_move(null);
+                }
+            }
+            header_mousedown(event) {
+                if (!event)
+                    return;
+                const col_to_resize = this.col_to_resize();
+                if (col_to_resize !== null) {
+                    const id = col_to_resize;
+                    this.col_resizing(id);
+                    const col_width = this.col_width(id);
+                    const target = this.Header().dom_node();
+                    let raf_id;
+                    let delta = 0;
+                    let col_width_new = col_width;
+                    let col_width_prev = col_width;
+                    let start = Date.now();
+                    const col_ids = this.col_ids_visible();
+                    const col_count = col_ids.length;
+                    const col_i = col_ids.findIndex(col_id => col_id == id);
+                    let col_left;
+                    let col_widths;
+                    if (0 <= col_i && col_i < col_count - 1) {
+                        col_left = this.col_left_source(id);
+                        col_widths = [];
+                        for (let i = col_i + 1; i < col_count - 1; i++) {
+                            col_widths[i] = this.col_width(col_ids[i]);
+                        }
+                    }
+                    const stepAnimation = () => {
+                        raf_id = void 0;
+                        if (col_width_new == col_width_prev)
+                            return;
+                        col_width_prev = col_width_new;
+                        this.col_width(id, col_width_new);
+                        if (col_left !== void 0) {
+                            let left = col_left + col_width_new;
+                            for (let i = col_i + 1; i < col_count; i++) {
+                                this.col_left(col_ids[i], left);
+                                left += col_widths[i];
+                            }
+                        }
+                    };
+                    const raf = window.requestAnimationFrame;
+                    const stopAnimation = () => {
+                        if (raf_id === void 0)
+                            return;
+                        raf ? cancelAnimationFrame(raf_id) : clearTimeout(raf_id);
+                        raf_id = void 0;
+                    };
+                    const doMove = (e) => {
+                        col_width_new = Math.max(this.col_width_min(), col_width + (e.clientX - event.clientX));
+                        stopAnimation();
+                        if (col_width_new == col_width_prev)
+                            return;
+                        start = Date.now();
+                        raf_id = raf ? raf(stepAnimation) : setTimeout(stepAnimation, 6);
+                    };
+                    const finishMove = (e) => {
+                        this.col_resizing(null);
+                        target.removeEventListener('mousemove', doMove);
+                        target.removeEventListener('mouseup', finishMove);
+                        target.removeEventListener('mouseleave', finishMove);
+                    };
+                    target.addEventListener('mousemove', doMove);
+                    target.addEventListener('mouseup', finishMove);
+                    target.addEventListener('mouseleave', finishMove);
+                }
+                else {
+                    const id = this.col_to_move();
+                    const target = document.body;
+                    const col_left = this.col_left_source(id);
+                    const header_height = this.header_height();
+                    const clientX = event.clientX;
+                    const clientY = event.clientY;
+                    let clientXlast = clientX;
+                    let is_to_left;
+                    let offset = this.col_client_left(id) - event.clientX;
+                    const width = this.col_width(id);
+                    new $.$mol_defer(() => {
+                        offset = this.col_client_left(id) - event.clientX;
+                    });
+                    const col_resize_padding = this.col_resize_padding();
+                    const doMove = (e) => {
+                        const deltaX = e.clientX - clientX;
+                        const deltaY = e.clientY - clientY;
+                        if (Math.abs(e.clientX - clientXlast) > col_resize_padding) {
+                            is_to_left = e.clientX < clientXlast;
+                            clientXlast = e.clientX;
+                        }
+                        if (deltaY < header_height && is_to_left !== void 0) {
+                            let col_ids = this.col_ids_visible();
+                            let left = e.clientX + offset;
+                            const idx = col_ids.findIndex((col_id) => col_id == id);
+                            const count = col_ids.length;
+                            const idx_list = [];
+                            for (let i = 1; i < count; i++) {
+                                const col_id = col_ids[i];
+                                const col_left = this.col_client_left(col_id);
+                                const col_width = this.col_width(col_id);
+                                if (intersects(left + col_resize_padding, left + width - col_resize_padding, col_left + col_resize_padding, col_left + col_width - col_resize_padding)) {
+                                    idx_list.push(i);
+                                }
+                            }
+                            let idx_new;
+                            if (idx_list.length) {
+                                if (idx_list.length == 1) {
+                                    idx_new = idx_list[0] + (is_to_left ? 0 : 1);
+                                }
+                                else if (idx_list.length > 1) {
+                                    if (col_ids[idx_list[0]] == id) {
+                                        if (!is_to_left)
+                                            idx_new = idx_list[1] + 1;
+                                    }
+                                    else if (col_ids[idx_list[idx_list.length - 1]] == id) {
+                                        if (is_to_left)
+                                            idx_new = idx_list[0];
+                                    }
+                                    else {
+                                        idx_new = idx_list[1];
+                                    }
+                                }
+                            }
+                            if (idx_new !== void 0) {
+                                is_to_left = void 0;
+                                col_ids = col_ids.slice(0);
+                                if (idx_new > idx) {
+                                    col_ids.splice(idx_new, 0, id);
+                                    col_ids.splice(idx, 1);
+                                }
+                                else {
+                                    col_ids.splice(idx, 1);
+                                    col_ids.splice(idx_new, 0, id);
+                                }
+                                this.col_ids_visible(col_ids);
+                            }
+                        }
+                        this.col_moving_pos({ x: col_left + deltaX, y: deltaY });
+                    };
+                    const finishMove = (e) => {
+                        this.col_release_pos_animation_trigger(Object.assign({}, this.col_moving_pos(), { id }));
+                        this.col_moving_pos(null);
+                        target.removeEventListener('mousemove', doMove);
+                        target.removeEventListener('mouseup', finishMove);
+                        target.removeEventListener('mouseleave', finishMove);
+                    };
+                    target.addEventListener('mousemove', doMove);
+                    target.addEventListener('mouseup', finishMove);
+                    target.addEventListener('mouseleave', finishMove);
+                }
+            }
+        }
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "col_caption", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "rec_fld", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "cell_content", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "row_note", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_grid2.prototype, "col_ids_visible_set", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_grid2.prototype, "col_ids_visible", null);
+        __decorate([
+            $$.$bw_session
+        ], $bw_grid2.prototype, "col_defs", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "col_width", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "col_left_source", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "col_left", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "col_top", null);
+        __decorate([
+            $$.$bw_animate
+        ], $bw_grid2.prototype, "col_release_pos", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_grid2.prototype, "header_height", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_grid2.prototype, "rows", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_grid2.prototype, "row_defs", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "is_visible_row", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "row_display", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "cell_display", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "row_def_idx", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "row_def_height", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "row_def_top", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "row_top", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "row_height", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_grid2.prototype, "row_footer_visible_offer_ids", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "row_footer_height_of_idx", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "Footer", null);
+        __decorate([
+            $$.$bw_animate_key
+        ], $bw_grid2.prototype, "footer_opacity", null);
+        __decorate([
+            $$.$bw_animate_key
+        ], $bw_grid2.prototype, "row_footer_height", null);
+        __decorate([
+            $$.$bw_animate_key
+        ], $bw_grid2.prototype, "row_note_height", null);
+        __decorate([
+            $$.$bw_animate_key
+        ], $bw_grid2.prototype, "row_user_note_height", null);
+        __decorate([
+            $$.$bw_session
+        ], $bw_grid2.prototype, "row_footer_heights", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_grid2.prototype, "is_bog", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_grid2.prototype, "is_eog", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_grid2.prototype, "row_space_bottom_max", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_grid2.prototype, "Body", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_grid2.prototype, "col_client_left", null);
+        $$.$bw_grid2 = $bw_grid2;
+    })($$ = $.$$ || ($.$$ = {}));
+})($ || ($ = {}));
+//grid2.view.js.map
+;
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -12033,6 +14139,511 @@ var $;
 })($ || ($ = {}));
 //app.view.js.map
 ;
+// const STORE = 'adv'
+// const KEY_NAME = 'guid'
+
+// function idb() {
+//   return new Promise((resolve, reject) => {
+//     const open = indexedDB.open('bw', DB_VERSION )
+//     open.onupgradeneeded = event => {
+//       idb = event.target.result
+//       idb.createObjectStore(STORE, {
+//         keyPath: KEY_NAME
+//       })
+//     }
+//     open.onversionchange = event => {
+//       console.warn(event)
+//     }
+//     open.onerror = event => {
+//       console.log(event)
+//       reject(event.target.error)
+//     }
+//     open.onsuccess = event => {
+//       resolve(event.target.result)
+//     }
+//     // console.log(open)
+//   })
+//   .catch(error => console.log(error))
+// }
+
+const DB_NAME = 'bw'
+const DB_VERSION = 1
+
+function open_idb(onsuccess) {
+  const open = indexedDB.open(DB_NAME, DB_VERSION )
+  open.onupgradeneeded = event => {
+    idb = event.target.result
+    const advStore = idb.createObjectStore('adv', {
+      keyPath: 'guid',
+    })
+    advStore.createIndex('w6_offer_id', 'w6_offer_id', {unique: true})
+    advStore.createIndex('object_guid', 'object_guid', {unique: false})
+    idb.createObjectStore('user', {
+      keyPath: ['user_id', 'offer_id'],
+    })
+    // idb.createObjectStore('offerIdSpecific', {
+    //   keyPath: 'offer_id',
+    // })
+    // idb.createObjectStore('snippet', {
+    //   keyPath: 'object_guid',
+    // })
+  }
+  open.onversionchange = event => {
+    postMessage({status: 'warn', message: `${event}`})
+  }
+  open.onerror = event => {
+    postMessage({status: 'error', message: `${event}`})
+  }
+  open.onsuccess = event => {
+    onsuccess(event.target.result)
+  }
+}
+
+// https://www.w3.org/TR/IndexedDB/
+onmessage = function(event) {
+  if (event.data.cmd == 'recs') {
+    const request = event.data
+    // console.log(request)
+    open_idb(idb => {
+      const response = {}
+
+      const transaction = idb.transaction('adv', 'readonly')
+      const start = Date.now()
+      const objectStore = transaction.objectStore('adv');
+      let idx = 0
+      if (request.by_guid) {
+        response.by_guid = new Map()
+        const guidIter = request.by_guid.keys()
+        const nextGuid = () => {
+          const next = guidIter.next()
+          // console.log(next)
+          if (next.done) {
+            // console.log(response)
+            postMessage({status: 'ok', ...response, timing: Date.now() - start})
+          } else {
+            let guidRequest = objectStore.get(next.value) // https://www.oreilly.com/library/view/client-side-data-storage/9781491935101/ch04.html
+            guidRequest.onsuccess = (event) => {
+              // console.log(event)
+              const fld_values = event.target.result
+              const guid = next.value
+              const guid_request = request.by_guid.get(guid)
+              const guid_response = new Map()
+              // console.log(guid_request)
+              guid_request.forEach(fld => {
+                const fld_value = fld_values[fld]
+                if (fld_value !== void 0) {
+                  guid_response.set(fld, fld_value)
+                }
+              })
+              if (guid_response.size) {
+                response.by_guid.set(guid, guid_response)
+              }
+              // console.log(guid_response, response.by_guid)
+              nextGuid()
+            }
+            guidRequest.onerror = (event) => {
+              console.error(event)
+              nextGuid()
+            }
+          }
+        }
+        nextGuid()
+      } else if (request.by_idx) {
+        response.by_idx = new Map()
+        const openCursor = objectStore.openCursor()
+        openCursor.onsuccess = function(event) {
+          var cursor = event.target.result;
+          // const size = 500
+          if (cursor) {
+            if (request.by_idx.has(idx)) {
+              const idx_request = request.by_idx.get(idx)
+              const idx_response = new Map()
+              idx_request.forEach(fld => {
+                const fld_value = cursor.value[fld]
+                if (fld_value !== void 0) {
+                  idx_response.set(fld, fld_value)
+                }
+              })
+              response.by_idx.set(idx, idx_response)
+              if (response.by_idx.size >= request.by_idx.size) {
+                postMessage({status: 'ok', ...response, timing: Date.now() - start})
+                return
+              }
+            }
+            idx++
+            cursor.continue();
+          } else {
+            postMessage({status: 'ok', ...response, timing: Date.now() - start})
+          }
+        }
+      } else {
+        postMessage({status: 'warn', message: 'no .by_guid, neither .by_idx'})
+      }
+    })
+  } else if (event.data.cmd == 'count') {
+    open_idb(idb => {
+      const transaction = idb.transaction(['adv'], 'readonly')
+      const start = Date.now()
+      const objectStore = transaction.objectStore('adv');
+      let count = 0
+      const openCursor = objectStore.openCursor()
+      openCursor.onsuccess = function(event) {
+        var cursor = event.target.result;
+        // postMessage({status: 'ok', count, timing: Date.now() - start})
+        // const size = 1
+        const size = 10000
+        if (cursor) {
+          count++
+          cursor.continue();
+        } else if (count >= size) {
+          postMessage({status: 'ok', count, timing: Date.now() - start})
+        } else {
+          const headers = new Headers([
+            ['Accept', 'application/json'],
+            ['Content-Type', 'application/json'],
+          ])
+          // {"filters":{"guid":"00B3EA1A-9961-0000-002C-00638D7C0000"},"conditions":{"realty_section":{"code":["flat"]},"area":{"code":["msk"]},"deal_type":{"code":["sale"]}},"from":0,"size":1,"dsl_version":2,"fields":["user_note","note","owners_count","ownership_type_id","ownership_year"]}
+          const bodyJson = {
+            aggregations: {
+              avg_price_rub: true,
+              avg_meter_price_rub: true,
+            },
+            fields: [
+              // key
+              "guid",
+
+              // adv hash like
+              'search_update_datetime',
+
+              "w6_offer_id",
+              'object_guid',
+
+              // user specific (linked to offer id)
+              "is_selected",
+              "is_favorite",
+              "is_hidden",
+              "is_sended_to_viewboard",
+              "is_liked_on_viewboard",
+              "is_disliked_on_viewboard",
+              "is_monitored",
+              "user_note",
+
+              // linked to offer id
+              "offer_pub_list",
+
+              "deal_status_id",
+              "user_deal_status_id",
+              "winner_relevance",
+              "free_mode_relevance",
+              "photo_count",
+              "video_count",
+              "geo_cache_street_name",
+              "price_rub",
+              "pub_datetime",
+              "media_id",
+              "media_name",
+              "broker.short_name",
+              "broker.url",
+              "external_url",
+              "phone_list.is_black",
+              "phone_list.black_note",
+              "creation_datetime",
+              "deal_type_id",
+              "geo_cache_building_name",
+              "storey",
+              "storeys_count",
+              "walls_material_type_id",
+              "total_square",
+              "life_square",
+              "kitchen_square",
+              "security_type_id",
+              "note",
+              "owners_count",
+              "ownership_type_id",
+              "ownership_year",
+              "balcony_type_id",
+              "price_change_date",
+              "price_change_type_id",
+              "video_list",
+              "built_year",
+              "sale_type_name",
+              "agency_bonus",
+              "agency_bonus_type_id",
+              "agency_bonus_currency_type_id",
+              "total_room_count",
+              "offer_room_count",
+              "is_studio",
+              "is_free_planning",
+              "realty_type_id",
+              "rooms_adjacency_type_id",
+              "geo_cache_subway_station_name_1",
+              "geo_subway_station_guid_1",
+              "transport_access_1",
+              "walking_access_1",
+              "geo_cache_subway_station_name_2",
+              "geo_subway_station_guid_2",
+              "transport_access_2",
+              "walking_access_2",
+              "geo_cache_subway_station_name_3",
+              "geo_subway_station_guid_3",
+              "transport_access_3",
+              "walking_access_3",
+              "geo_cache_subway_station_name_4",
+              "geo_subway_station_guid_4",
+              "transport_access_4",
+              "walking_access_4",
+              'water_closet_type_id',
+              'parking_type_id',
+              'territory_type_id',
+              'window_overlook_type_id',
+              'apartment_condition_type_id',
+              'elevator_type_id',
+              'square_explication',
+              'meter_price_rub',
+            ],
+            sort: [
+              { winner_relevance: { order:"desc" } },
+              { w6_offer_id: { order:"desc" } },
+            ],
+            from: 0,
+            size,
+            conditions: {
+              published_days_ago: { days: 7 },
+              realty_section: { code: ["flat"] },
+              deal_type: { code: ["sale"] },
+              area: { code:["msk"] },
+              is_deal_actual: true,
+              use_strict_conditions: true,
+            },
+            mixins: { is_selected: true },
+            dsl_version:2,
+          }
+          const body = JSON.stringify(bodyJson)
+          const start = Date.now()
+          fetch('https://mls.baza-winner.ru/v2/users/unauthenticated/items/_search.json?project_code=w7', {
+            method: 'POST',
+            headers,
+            body,
+            // body: `{"aggregations":{"avg_price_rub":true,"avg_meter_price_rub":true},"fields":["guid","deal_status_id","user_deal_status_id","winner_relevance","w6_offer_id","w6_offer_pub_list","object_guid","free_mode_relevance","is_selected","is_favorite","is_hidden","is_sended_to_viewboard","is_liked_on_viewboard","is_disliked_on_viewboard","is_monitored","photo_count","video_count","geo_cache_street_name","price_rub","pub_datetime","media_id","media_name","broker.short_name","broker.url","external_url","phone_list.is_black","phone_list.black_note","creation_datetime","deal_type_id","geo_cache_building_name","storey","storeys_count","walls_material_type_id","total_square","life_square","kitchen_square","security_type_id","user_note","note","owners_count","ownership_type_id","ownership_year","balcony_type_id","price_change_date","price_change_type_id","video_list","built_year","sale_type_name","agency_bonus","agency_bonus_type_id","agency_bonus_currency_type_id","total_room_count","offer_room_count","is_studio","is_free_planning","realty_type_id","rooms_adjacency_type_id","geo_cache_subway_station_name_1","geo_subway_station_guid_1","transport_access_1","walking_access_1","geo_cache_subway_station_name_2","geo_subway_station_guid_2","transport_access_2","walking_access_2","geo_cache_subway_station_name_3","geo_subway_station_guid_3","transport_access_3","walking_access_3","geo_cache_subway_station_name_4","geo_subway_station_guid_4","transport_access_4","walking_access_4"],"sort":[{"winner_relevance":{"order":"desc"}},{"w6_offer_id":{"order":"desc"}}],"from":0,"size":${size},"conditions":{"published_days_ago":{"days":7},"realty_section":{"code":["flat"]},"deal_type":{"code":["sale"]},"area":{"code":["msk"]},"is_deal_actual":true,"use_strict_conditions":true},"mixins":{"is_selected":true},"dsl_version":2}`,
+            mode: 'cors',
+            cache: 'no-store',
+          })
+          .catch(error => postMessage({status: 'error', message: `${error}`}))
+          .then(response => {
+            console.log({fetch: Date.now() - start})
+            if (response.status != 200) {
+              postMessage({status: 'error', message: response.statusText})
+            } else {
+              const start = Date.now()
+              response.json()
+              .catch(error => postMessage({status: 'error', message: `${error}`}))
+              .then(data => {
+                // console.log(data)
+                const count = data.advs.length
+                const transaction = idb.transaction(['adv', 'user'], 'readwrite')
+                transaction.oncomplete = (event) => {
+                  postMessage({status: 'ok', count, timing: Date.now() - start})
+                  console.log(event)
+                }
+                transaction.onabort = (event) => {
+                  postMessage({status: 'error', message: `${event}`})
+                  console.error(event)
+                }
+                const advStore = transaction.objectStore('adv')
+                const userStore = transaction.objectStore('user')
+                let success_qt = count
+                const object_guid = {}
+                for (let i = 0; i < count; i++) {
+                  const adv = data.advs[i]
+                  const user = { user_id: 'anon', offer_id: adv.w6_offer_id }
+                  const flds = ['is_selected', 'is_favorite', 'is_hidden', 'is_sended_to_viewboard', 'is_liked_on_viewboard', 'is_disliked_on_viewboard', 'is_monitored', 'user_note']
+                  for (let j = 0; j < flds.length; j++) {
+                    const fld = flds[i]
+                    user[fld] = adv[fld]
+                    delete adv[fld]
+                  }
+                  advStore.put(adv)
+                  userStore.put(user)
+                  object_guid[adv.object_guid] = (object_guid[adv.object_guid] || 0) + 1
+                }
+                {
+                  const qt = Object.keys(object_guid).length
+                  const max = Math.max(...Object.keys(object_guid).map(key => object_guid[key]))
+                  const avg = count / qt
+                  console.log({qt, max, avg})
+                  for (let i = max; i > 1; i--) {
+                    console.log(i + ': ' + Object.keys(object_guid).map(key => object_guid[key]).filter(qt => qt == i).length)
+                  }
+                }
+              })
+            }
+          })
+        }
+      }
+    })
+  }
+}
+
+
+;
+// const DB_NAME = 'bw'
+// const DB_VERSION = 2
+// const STORE = 'advs'
+// const KEY_NAME = 'guid'
+// function createDB() {
+//   if (!indexedDB) {
+//     console.error('!window.indexedDB')
+//     return
+//   }
+//   console.log('createDB')
+//   const open = indexedDB.open('bw', DB_VERSION, function(upgradeDB) {
+//     console.log('upgradeDB')
+//     var store = upgradeDB.createObjectStore(STORE, {
+//       keyPath: KEY_NAME
+//     });
+//     // store.put({id: 123, name: 'coke', price: 10.99, quantity: 200});
+//     // store.put({id: 321, name: 'pepsi', price: 8.99, quantity: 100});
+//     // store.put({id: 222, name: 'water', price: 11.99, quantity: 300});
+//   })
+
+//   open.onerror = function(event) {
+//     console.error(event)
+//   }
+//   open.onsuccess = function(event) {
+//     console.log(event)
+//   }
+// }
+// self.addEventListener('activate', function(event) {
+//   event.waitUntil(
+//     createDB()
+//   );
+//   console.log('Brand new Finally active. Ready to start serving content!')
+// })
+// self.addEventListener('message', function(event){
+//   // console.log(event.data)
+//     // console.log("SW Received Message: ", event.data);
+//     // event.ports[0].postMessage("SW Says 'Hello back!'");
+//     // console.log(event)
+//     const headers = new Headers([
+//       ['Accept', 'application/json'],
+//       ['Content-Type', 'application/json'],
+//     ])
+//     const size = event.data.size
+//     fetch('https://mls.baza-winner.ru/v2/users/unauthenticated/items/_search.json?project_code=w7', {
+//       method: 'POST',
+//       headers,
+//       body: `{"aggregations":{"avg_price_rub":true,"avg_meter_price_rub":true},"fields":["guid","deal_status_id","user_deal_status_id","winner_relevance","w6_offer_id","object_guid","free_mode_relevance","is_selected","is_favorite","is_hidden","is_sended_to_viewboard","is_liked_on_viewboard","is_disliked_on_viewboard","is_monitored","photo_count","video_count","geo_cache_street_name","price_rub","pub_datetime","media_id","media_name","broker.short_name","broker.url","external_url","phone_list.is_black","phone_list.black_note","creation_datetime","deal_type_id","geo_cache_building_name","storey","storeys_count","walls_material_type_id","total_square","life_square","kitchen_square","security_type_id","user_note","balcony_type_id","price_change_date","price_change_type_id","video_list","built_year","sale_type_name","agency_bonus","agency_bonus_type_id","agency_bonus_currency_type_id","total_room_count","offer_room_count","is_studio","is_free_planning","realty_type_id","rooms_adjacency_type_id","geo_cache_subway_station_name_1","geo_subway_station_guid_1","transport_access_1","walking_access_1","geo_cache_subway_station_name_2","geo_subway_station_guid_2","transport_access_2","walking_access_2","geo_cache_subway_station_name_3","geo_subway_station_guid_3","transport_access_3","walking_access_3","geo_cache_subway_station_name_4","geo_subway_station_guid_4","transport_access_4","walking_access_4"],"sort":[{"winner_relevance":{"order":"desc"}},{"w6_offer_id":{"order":"desc"}}],"from":0,"size":${size},"conditions":{"published_days_ago":{"days":7},"realty_section":{"code":["flat"]},"deal_type":{"code":["sale"]},"area":{"code":["msk"]},"is_deal_actual":true,"use_strict_conditions":true},"mixins":{"is_selected":true},"dsl_version":2}`,
+//       mode: 'cors',
+//       cache: 'no-store',
+//     }).then(response => {
+//       if (response.status != 200) {
+//         event.ports[0].postMessage({error: response.statusText});
+//       } else {
+//         response.json()
+//         .catch(error =>
+//           event.ports[0].postMessage({error})
+//         )
+//         .then(data => {
+//           event.ports[0].postMessage(data.advs)
+
+//           const open = indexedDB.open(DB_NAME, DB_VERSION);
+//           console.log(open)
+
+//           open.onerror = function(event) {
+//             console.error(event)
+//           }
+//           open.onsuccess = function(event) {
+//             console.log(event)
+//             let db = event.target.result
+//             const advs = [...data.advs]
+//             const putAdv = () => {
+//               const transaction = db.transaction(STORE, 'readwrite')
+//               const store = transaction.objectStore(STORE)
+//               const request = store.put(advs[0])
+//               request.onsuccess = function(e) {
+//                 // todoDB.indexedDB.getAllTodoItems();
+//                 console.log('request.onsuccess')
+//               }
+//               request.onerror = function(e) {
+//                 console.error("Error Adding an item: ", e);
+//               }
+
+//               transaction.onerror = function(event) {
+//                 console.error(event)
+//               }
+//               transaction.oncomplete(result => {
+//                 console.log(result)
+//               })
+//             }
+//             putAdv()
+
+//             // result.onsuccess = function(event) {
+//             //   if (!event.target.result) {
+//             //     console.error(event)
+//             //     reject('filesDir not set');
+//             //   } else {
+//             //     resolve(JSON.parse(event.target.result.value));
+//             //   }
+//             // }
+//           }
+
+//         })
+//       }
+//       return response
+//     })
+// });
+
+const CACHE_NAME = 'bw-app-cache-v1'
+self.addEventListener('install', (event) => {
+  self.skipWaiting()
+})
+self.addEventListener('activate', function(event) {
+  // event.waitUntil(
+  //   createDB()
+  // );
+  console.log('Brand new Finally active. Ready to start serving content!')
+})
+self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    fetch(event.request).then(response => {
+      // console.log(event.request.url, response.status)
+      if (response.status == 200) {
+        if (event.request.referrer.endsWith('/dw.js')) {
+          // console.log(event.request)
+          return response
+        } else {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, response.clone());
+            return response;
+          })
+        }
+      } else {
+        caches.match(event.request).then(cachedResponse => {
+          console.log('used cache')
+          if (cachedResponse) {
+            return cachedResponse
+          } else {
+            return response
+          }
+        })
+      }
+    })
+  )
+})
+// self.addEventListener('push', function(event) {
+//   var title = 'Yay a message.';
+//   var body = 'We have received a push message.';
+//   var icon = '/bw/app/logo_icon_192.png';
+//   var tag = 'simple-push-example-tag';
+//   event.waitUntil(
+//     self.registration.showNotification(title, {
+//       body: body,
+//       icon: icon,
+//       tag: tag
+//     })
+//   )
+// })
+;
 "use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -12216,8 +14827,21 @@ var $;
 })($ || ($ = {}));
 (function ($) {
     class $bw_search_params extends $.$mol_view {
+        style() {
+            return ({
+                "min-height": this.min_height(),
+            });
+        }
+        min_height() {
+            return 0;
+        }
+        attr() {
+            return ({
+                "bw_search_params_mode": this.mode(),
+            });
+        }
         sub() {
-            return [].concat(this.Mode(), this.Content(), this.Footer());
+            return [].concat(this.Mode(), this.Input(), this.bread_crumbs(), this.Content(), this.Footer());
         }
         Mode() {
             return ((obj) => {
@@ -12237,21 +14861,317 @@ var $;
         mode_enabled(id) {
             return true;
         }
+        Input() {
+            return ((obj) => {
+                obj.hint = () => "Параметры";
+                return obj;
+            })(new this.$.$bw_search_params_input_commitable);
+        }
+        bread_crumbs() {
+            return [];
+        }
         Content() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Main(), this.Full());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Main() {
+            return ((obj) => {
+                obj.style = () => ({
+                    "opacity": this.main_params_opacity(),
+                });
+                obj.sub = () => [].concat(this.MainUpper(), this.MainDowner());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        main_params_opacity() {
+            return 0;
+        }
+        MainUpper() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.MainUpperFirstRow(), this.MainUpperSecondRow());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        MainUpperFirstRow() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.ApartmentType(), this.GeoSpot());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        ApartmentType() {
+            return ((obj) => {
+                obj.label = () => "Квартира";
+                obj.control = () => [].concat(this.Studio(), this.FreePlan());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        Studio() {
+            return ((obj) => {
+                obj.title = () => "Студия";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        FreePlan() {
+            return ((obj) => {
+                obj.title = () => "Св.планировка";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        GeoSpot() {
+            return ((obj) => {
+                obj.label = () => "Адрес";
+                obj.control = () => [].concat(this.GeoSpotControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        GeoSpotControl() {
+            return ((obj) => {
+                obj.hint = () => "Город, район, адрес, метро, название ЖКХ";
+                return obj;
+            })(new this.$.$bw_search_params_input_commitable);
+        }
+        MainUpperSecondRow() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.OnlyWith());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        OnlyWith() {
+            return ((obj) => {
+                obj.label = () => "Только с";
+                obj.control = () => [].concat(this.Photo(), this.Video());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        Photo() {
+            return ((obj) => {
+                obj.title = () => "Фото";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        Video() {
+            return ((obj) => {
+                obj.title = () => "Видео";
+                return obj;
+            })(new this.$.$mol_check_box);
+        }
+        MainDowner() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.MainDownerFirstRow(), this.MainDownerSecondRow(), this.MainDownerThirdRow());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        MainDownerFirstRow() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.RoomQt(), this.DealType(), this.Area());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        RoomQt() {
+            return ((obj) => {
+                obj.label = () => "Комнаты";
+                obj.control = () => [].concat(this.RoomQtSwitch());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        RoomQtSwitch() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "one": 1,
+                    "two": 2,
+                    "three": 3,
+                    "four": 4,
+                    "five": 5,
+                    "sixplus": "6+",
+                });
+                return obj;
+            })(new this.$.$mol_switch);
+        }
+        DealType() {
+            return ((obj) => {
+                obj.label = () => "Тип сделки";
+                obj.control = () => [].concat(this.DealTypeCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        DealTypeCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "direct_sale": "Прямая продажа",
+                    "alternative": "Альтернатива",
+                });
+                obj.value = () => "Прямая продажа";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        Area() {
+            return ((obj) => {
+                obj.label = () => "Область";
+                obj.control = () => [].concat(this.AreaTypeCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        AreaTypeCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "both": "Москва и область",
+                    "msk": "Москва",
+                });
+                obj.value = () => "Москва и область";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        MainDownerSecondRow() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.SqTotal(), this.Price(), this.Far());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        SqTotal() {
+            return ((obj) => {
+                obj.label = () => "Площадь";
+                obj.control = () => [].concat(this.SqTotalControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        SqTotalControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        Price() {
+            return ((obj) => {
+                obj.label = () => "Цена";
+                obj.control = () => [].concat(this.PriceControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        PriceControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        Far() {
+            return ((obj) => {
+                obj.label = () => "От станции";
+                obj.control = () => [].concat(this.FarCombo());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        FarCombo() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "walk_2": "До 2 минут пешком",
+                    "walk_5": "До 5 минут пешком",
+                    "walk_10": "До 10 минут пешком",
+                    "bus_5": "До 5 минут транспортом",
+                    "bus_10": "До 10 минут транспортом",
+                    "bus_15": "До 15 минут транспортом",
+                });
+                obj.value = () => "До 2 минут пешком";
+                return obj;
+            })(new this.$.$bw_input_combo);
+        }
+        MainDownerThirdRow() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Storey(), this.PricePerSq(), this.Location());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Storey() {
+            return ((obj) => {
+                obj.label = () => "Этаж";
+                obj.control = () => [].concat(this.StoreyControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        StoreyControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        PricePerSq() {
+            return ((obj) => {
+                obj.label = () => "Цена за м²";
+                obj.control = () => [].concat(this.PricePerSqControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        PricePerSqControl() {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_search_param_diap);
+        }
+        Location() {
+            return ((obj) => {
+                obj.label = () => "Цена за м²";
+                obj.control = () => [].concat(this.LocationControl());
+                return obj;
+            })(new this.$.$bw_search_params_field);
+        }
+        LocationControl() {
+            return ((obj) => {
+                obj.options = () => ({
+                    "subway": "Метро",
+                    "railway": "Ж/Д",
+                    "districts": "Районы",
+                    "map": "Карта",
+                });
+                return obj;
+            })(new this.$.$mol_switch);
+        }
+        Full() {
             return ((obj) => {
                 return obj;
             })(new this.$.$mol_view);
         }
         Footer() {
             return ((obj) => {
-                obj.sub = () => [].concat("Найдено вариантов: 10 000 / Предложений: 100");
+                obj.sub = () => [].concat("Найдено предложений: 10 000 / Объектов: 7084");
                 return obj;
             })(new this.$.$mol_view);
         }
-        attr() {
-            return ({
-                "bw_search_params_mode": this.mode(),
-            });
+        input_client_rect(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        mode_client_rect(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        BreadCrumb(i) {
+            return ((obj) => {
+                obj.style = () => ({
+                    "top": this.bread_crumb_top(i),
+                    "left": this.bread_crumb_left(i),
+                    "display": this.bread_crumb_display(i),
+                });
+                obj.sub = () => [].concat(this.bread_crumb_text(i), this.IconClose(i));
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        bread_crumb_top(i) {
+            return null;
+        }
+        bread_crumb_left(i) {
+            return null;
+        }
+        bread_crumb_display(i, val, force) {
+            return (val !== void 0) ? val : "none";
+        }
+        bread_crumb_text(i) {
+            return "";
+        }
+        IconClose(i) {
+            return ((obj) => {
+                return obj;
+            })(new this.$.$bw_icon_cross);
+        }
+        break_crumb_client_rect(i) {
+            return null;
+        }
+        client_rect(val, force) {
+            return (val !== void 0) ? val : null;
         }
     }
     __decorate([
@@ -12262,16 +15182,214 @@ var $;
     ], $bw_search_params.prototype, "mode", null);
     __decorate([
         $.$mol_mem
+    ], $bw_search_params.prototype, "Input", null);
+    __decorate([
+        $.$mol_mem
     ], $bw_search_params.prototype, "Content", null);
     __decorate([
         $.$mol_mem
+    ], $bw_search_params.prototype, "Main", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "MainUpper", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "MainUpperFirstRow", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "ApartmentType", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Studio", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "FreePlan", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "GeoSpot", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "GeoSpotControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "MainUpperSecondRow", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "OnlyWith", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Photo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Video", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "MainDowner", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "MainDownerFirstRow", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "RoomQt", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "RoomQtSwitch", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "DealType", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "DealTypeCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Area", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "AreaTypeCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "MainDownerSecondRow", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "SqTotal", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "SqTotalControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Price", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "PriceControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Far", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "FarCombo", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "MainDownerThirdRow", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Storey", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "StoreyControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "PricePerSq", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "PricePerSqControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Location", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "LocationControl", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "Full", null);
+    __decorate([
+        $.$mol_mem
     ], $bw_search_params.prototype, "Footer", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "input_client_rect", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "mode_client_rect", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_search_params.prototype, "BreadCrumb", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_search_params.prototype, "bread_crumb_display", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $bw_search_params.prototype, "IconClose", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params.prototype, "client_rect", null);
     $.$bw_search_params = $bw_search_params;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_search_params_input_commitable extends $.$bw_input_checkable {
+        Icon() {
+            return ((obj) => {
+                obj.transform = () => "scale(0.6) translate(8 8)";
+                return obj;
+            })(new this.$.$bw_icon_plus);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_input_commitable.prototype, "Icon", null);
+    $.$bw_search_params_input_commitable = $bw_search_params_input_commitable;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_search_param_diap extends $.$mol_view {
+        sub() {
+            return [].concat(this.Min(), this.Max());
+        }
+        Min() {
+            return ((obj) => {
+                obj.hint = () => "от";
+                return obj;
+            })(new this.$.$bw_input);
+        }
+        Max() {
+            return ((obj) => {
+                obj.hint = () => "до";
+                return obj;
+            })(new this.$.$bw_input);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_diap.prototype, "Min", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_param_diap.prototype, "Max", null);
+    $.$bw_search_param_diap = $bw_search_param_diap;
+})($ || ($ = {}));
+(function ($) {
+    class $bw_search_params_field extends $.$mol_view {
+        label() {
+            return "";
+        }
+        control() {
+            return [];
+        }
+        sub() {
+            return [].concat(this.Label(), this.Control());
+        }
+        Label() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.label());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Control() {
+            return ((obj) => {
+                obj.sub = () => this.control();
+                return obj;
+            })(new this.$.$mol_view);
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_field.prototype, "Label", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_params_field.prototype, "Control", null);
+    $.$bw_search_params_field = $bw_search_params_field;
 })($ || ($ = {}));
 (function ($) {
     class $bw_search_result extends $.$mol_view {
         sub() {
-            return [].concat(this.Header());
+            return [].concat(this.Header(), this.Content());
         }
         Header() {
             return ((obj) => {
@@ -12399,6 +15517,57 @@ var $;
         map_on(val, force) {
             return (val !== void 0) ? val : false;
         }
+        Content() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Map(), this.Grid());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Map() {
+            return ((obj) => {
+                obj.dom_name = () => "img";
+                obj.attr = () => ({
+                    "src": this.map_image_src(),
+                });
+                obj.style = () => ({
+                    "height": this.map_height_max(),
+                    "opacity": this.map_opacity(),
+                });
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        map_image_src() {
+            return "map.png";
+        }
+        map_opacity() {
+            return 0;
+        }
+        Grid() {
+            return ((obj) => {
+                obj.height = () => this.grid_height_to_use();
+                obj.animated_height = () => this.grid_height_animated();
+                obj.top = () => this.grid_top();
+                return obj;
+            })(new this.$.$bw_search_result_grid);
+        }
+        grid_height_to_use() {
+            return 0;
+        }
+        grid_height_animated() {
+            return 0;
+        }
+        grid_top() {
+            return 0;
+        }
+        map_height_max() {
+            return 424;
+        }
+        grid_height() {
+            return null;
+        }
+        content_client_rect(val, force) {
+            return (val !== void 0) ? val : null;
+        }
     }
     __decorate([
         $.$mol_mem
@@ -12463,6 +15632,18 @@ var $;
     __decorate([
         $.$mol_mem
     ], $bw_search_result.prototype, "map_on", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_result.prototype, "Content", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_result.prototype, "Map", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_result.prototype, "Grid", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_search_result.prototype, "content_client_rect", null);
     $.$bw_search_result = $bw_search_result;
 })($ || ($ = {}));
 (function ($) {
@@ -12487,6 +15668,11 @@ var $;
     $.$bw_search_result_mapon = $bw_search_result_mapon;
 })($ || ($ = {}));
 (function ($) {
+    class $bw_search_result_grid extends $.$$.$bw_grid2 {
+    }
+    $.$bw_search_result_grid = $bw_search_result_grid;
+})($ || ($ = {}));
+(function ($) {
     class $bw_search_block_for_sale extends $.$bw_block {
         orders() {
             return null;
@@ -12496,7 +15682,7 @@ var $;
         }
         City() {
             return ((obj) => {
-                obj.table_title = () => "Москва";
+                obj.table_title = () => "Москва24";
                 obj.table_data = () => this.data_city();
                 obj.table_row_click = (row_data, event) => this.city_row_click(row_data, event);
                 return obj;
@@ -12824,7 +16010,6 @@ var $;
             }
             orders(val) {
                 const result = super.orders(val);
-                console.log(result);
                 return result;
             }
             orders_equal(a, b) {
@@ -12843,7 +16028,6 @@ var $;
                         typeof item.realty == 'number' &&
                         BwSearchRealty.Квартиры <= item.realty && item.realty <= BwSearchRealty.Доли &&
                         true));
-                console.log(result);
                 return result;
             }
             menu_options() {
@@ -13041,21 +16225,139 @@ var $;
         }
         $$.$bw_search_block_table = $bw_search_block_table;
         class $bw_search_params extends $.$bw_search_params {
+            main_params_opacity() {
+                return this.mode() === 'short' ? 0 : 1;
+            }
+            Main() {
+                const result = this.mode() == 'short' && this.main_params_opacity() == 0 ? null : super.Main();
+                return result;
+            }
+            min_height() {
+                const result = this.min_height_config()[this.mode()] || 0;
+                return result;
+            }
+            min_height_config() {
+                return { full: 627, main: 295, short: 100 };
+            }
+            min_height_animation_steps(p) {
+                const config = this.min_height_config();
+                const result = Math.sqrt(Math.abs(p.start - p.end)) / Math.sqrt(config['full'] - config['short']) * 16;
+                return result;
+            }
             mode_enabled(id) {
                 return id != this.mode();
             }
             mode(val, force) {
                 return super.mode(val, force);
             }
+            bread_crumb_defs() {
+                return ['1-комн.кв', 'общая: 35-45м²', 'кухня: от 9м²', 'до 4.8 млн.₽'];
+            }
+            bread_crumbs() {
+                const result = this.bread_crumb_defs().map((def, i) => this.BreadCrumb(i));
+                return result;
+            }
+            break_crumb_client_rect(i) {
+                const elem = this.BreadCrumb(i).dom_node();
+                const display = elem.currentStyle ?
+                    elem.currentStyle.display :
+                    getComputedStyle(elem, null).display;
+                const result = display == 'none' ? null :
+                    this.BreadCrumb(i).dom_node().getBoundingClientRect();
+                return result;
+            }
+            client_rect() {
+                return $$.meter({
+                    _super: (val) => super.client_rect(val),
+                    _value: () => {
+                        const result = this.dom_node().getBoundingClientRect();
+                        return result;
+                    }
+                });
+            }
+            input_client_rect() {
+                return $$.meter({
+                    _super: (val) => super.input_client_rect(val),
+                    _value: () => {
+                        const result = this.Input().dom_node().getBoundingClientRect();
+                        return result;
+                    }
+                });
+            }
+            bread_crumb_display(i) {
+                const result = i < this.bread_crumb_defs().length && (i == 0 || this.bread_crumb_pos(i - 1) !== null) ?
+                    'block' : 'none';
+                return result;
+            }
+            mode_client_rect() {
+                return $$.meter({
+                    _super: (val) => super.mode_client_rect(val),
+                    _value: () => {
+                        const result = this.Mode().dom_node().getBoundingClientRect();
+                        return result;
+                    }
+                });
+            }
+            bread_crumb_pos(i) {
+                let result = null;
+                if (i == 0) {
+                    const client_rect = this.client_rect();
+                    const input_client_rect = this.input_client_rect();
+                    if (client_rect && input_client_rect) {
+                        result = {
+                            top: input_client_rect.top - client_rect.top,
+                            left: input_client_rect.right - client_rect.left + 16,
+                        };
+                        window.dispatchEvent(new CustomEvent('bw_resize'));
+                    }
+                }
+                else if (i < this.bread_crumb_defs().length) {
+                    const client_rect = this.client_rect();
+                    const prev_client_rect = this.break_crumb_client_rect(i - 1);
+                    if (client_rect && prev_client_rect) {
+                        result = {
+                            top: prev_client_rect.top - client_rect.top,
+                            left: prev_client_rect.right - client_rect.left + 8,
+                        };
+                        window.dispatchEvent(new CustomEvent('bw_resize'));
+                    }
+                }
+                return result;
+            }
+            bread_crumb_top(i) {
+                const pos = this.bread_crumb_pos(i);
+                return pos === null ? null : pos.top;
+            }
+            bread_crumb_left(i) {
+                const pos = this.bread_crumb_pos(i);
+                return pos === null ? null : pos.left;
+            }
+            bread_crumb_text(i) {
+                return this.bread_crumb_defs()[i];
+            }
         }
+        __decorate([
+            $$.$bw_animate
+        ], $bw_search_params.prototype, "main_params_opacity", null);
+        __decorate([
+            $$.$bw_animate
+        ], $bw_search_params.prototype, "min_height", null);
         __decorate([
             $$.$bw_session
         ], $bw_search_params.prototype, "mode", null);
+        __decorate([
+            $$.$bw_meter_key
+        ], $bw_search_params.prototype, "break_crumb_client_rect", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_search_params.prototype, "bread_crumb_display", null);
+        __decorate([
+            $.$mol_mem_key
+        ], $bw_search_params.prototype, "bread_crumb_pos", null);
         $$.$bw_search_params = $bw_search_params;
         class $bw_search_result_mapon extends $.$bw_search_result_mapon {
             Icon() {
                 const result = this.checked() ? this.SwitchOn() : this.SwitchOff();
-                console.log(result, this.checked());
                 return result;
             }
         }
@@ -13087,6 +16389,72 @@ var $;
             }
         }
         $$.$bw_search_menu_option = $bw_search_menu_option;
+        class $bw_search_result extends $.$bw_search_result {
+            content_client_rect() {
+                return $$.meter({
+                    _super: (val) => super.content_client_rect(val),
+                    _value: () => {
+                        const result = this.Content().dom_node().getBoundingClientRect();
+                        return result;
+                    }
+                });
+            }
+            map_height() {
+                return !this.map_on() ? 0 : this.map_height_max();
+            }
+            map_opacity() {
+                const result = this.map_on() ? 1 : 0;
+                return result;
+            }
+            map_opacity_animation_steps() {
+                return this.grid_height_animated_animation_steps();
+            }
+            grid_top() {
+                return this.map_height();
+            }
+            grid_top_animation_easing() {
+                return this.grid_height_animated_animation_easing();
+            }
+            grid_top_animation_steps() {
+                return this.grid_height_animated_animation_steps();
+            }
+            grid_height() {
+                const client_rect = this.content_client_rect();
+                const result = !client_rect ? { min: 0, max: 0 } :
+                    {
+                        min: client_rect.height - this.map_height(),
+                        max: client_rect.height,
+                    };
+                return result;
+            }
+            grid_height_animated() {
+                const grid_height = this.grid_height();
+                return this.map_on() ? grid_height.min : grid_height.max;
+            }
+            grid_height_animated_animation_steps() {
+                return 16;
+            }
+            grid_height_animated_animation_easing() {
+                return $$.BwEasing.easeInOutQuad;
+            }
+            grid_height_to_use() {
+                const grid_height = this.grid_height();
+                return this.map_on() || this.map_opacity() ? grid_height.max : grid_height.min;
+            }
+        }
+        __decorate([
+            $$.$bw_animate
+        ], $bw_search_result.prototype, "map_opacity", null);
+        __decorate([
+            $$.$bw_animate
+        ], $bw_search_result.prototype, "grid_top", null);
+        __decorate([
+            $$.$bw_animate
+        ], $bw_search_result.prototype, "grid_height_animated", null);
+        $$.$bw_search_result = $bw_search_result;
+        class $bw_search_result_grid extends $.$bw_search_result_grid {
+        }
+        $$.$bw_search_result_grid = $bw_search_result_grid;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
 //search.view.js.map
@@ -14340,21 +17708,33 @@ var $;
             return (val !== void 0) ? val : "";
         }
         sub() {
-            return [].concat(this.Login(), this.Ear(), this.List());
+            return [].concat(this.Login(), this.Ear(), this.ListWrapper());
         }
         Login() {
             return ((obj) => {
+                obj.style = () => ({
+                    "width": this.flex_basis(),
+                });
                 return obj;
             })(new this.$.$bw_mainmenu_login);
         }
         Ear() {
             return ((obj) => {
                 obj.checked = (val) => this.is_narrow(val);
+                obj.style = () => ({
+                    "left": this.flex_basis(),
+                });
                 return obj;
             })(new this.$.$bw_mainmenu_login_ear);
         }
         is_narrow(val, force) {
             return (val !== void 0) ? val : false;
+        }
+        ListWrapper() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.List());
+                return obj;
+            })(new this.$.$mol_view);
         }
         List() {
             return ((obj) => {
@@ -14370,8 +17750,19 @@ var $;
         attr() {
             return (Object.assign({}, super.attr(), { "bw_mainmenu_width": this.bw_mainmenu_width() }));
         }
-        bw_mainmenu_width() {
-            return "";
+        bw_mainmenu_width(val, force) {
+            return (val !== void 0) ? val : "";
+        }
+        style() {
+            return ({
+                "flex-basis": this.flex_basis(),
+            });
+        }
+        flex_basis() {
+            return null;
+        }
+        opacity() {
+            return 0;
         }
     }
     __decorate([
@@ -14388,7 +17779,13 @@ var $;
     ], $bw_mainmenu.prototype, "is_narrow", null);
     __decorate([
         $.$mol_mem
+    ], $bw_mainmenu.prototype, "ListWrapper", null);
+    __decorate([
+        $.$mol_mem
     ], $bw_mainmenu.prototype, "List", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_mainmenu.prototype, "bw_mainmenu_width", null);
     $.$bw_mainmenu = $bw_mainmenu;
 })($ || ($ = {}));
 (function ($) {
@@ -14427,9 +17824,15 @@ var $;
         }
         Footer() {
             return ((obj) => {
+                obj.style = () => ({
+                    "opacity": this.opacity(),
+                });
                 obj.sub = () => [].concat(this.App(), this.Browser());
                 return obj;
             })(new this.$.$mol_view);
+        }
+        opacity() {
+            return null;
         }
         App() {
             return ((obj) => {
@@ -14471,53 +17874,6 @@ var $;
         $.$mol_mem
     ], $bw_mainmenu_list.prototype, "Browser", null);
     $.$bw_mainmenu_list = $bw_mainmenu_list;
-})($ || ($ = {}));
-(function ($) {
-    class $bw_mainmenu_list_item extends $.$mol_check {
-        id() {
-            return "";
-        }
-        title() {
-            return "";
-        }
-        Icon() {
-            return null;
-        }
-        minimal_height() {
-            return 53;
-        }
-        sub() {
-            return [].concat(this.Inner());
-        }
-        Inner() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.Content());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-        Content() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.Icon(), this.Title());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-        Title() {
-            return ((obj) => {
-                obj.sub = () => [].concat(this.title());
-                return obj;
-            })(new this.$.$mol_view);
-        }
-    }
-    __decorate([
-        $.$mol_mem
-    ], $bw_mainmenu_list_item.prototype, "Inner", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_mainmenu_list_item.prototype, "Content", null);
-    __decorate([
-        $.$mol_mem
-    ], $bw_mainmenu_list_item.prototype, "Title", null);
-    $.$bw_mainmenu_list_item = $bw_mainmenu_list_item;
 })($ || ($ = {}));
 (function ($) {
     class $bw_mainmenu_login_ear extends $.$mol_check {
@@ -14568,10 +17924,35 @@ var $;
         sub() {
             return [].concat(this.Icon(), this.label(), this.Menu());
         }
+        label() {
+            return [].concat(this.Title());
+        }
+        Title() {
+            return ((obj) => {
+                obj.style = () => ({
+                    "opacity": this.opacity(),
+                });
+                obj.sub = () => [].concat(this.title());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        opacity() {
+            return null;
+        }
         Menu() {
             return ((obj) => {
+                obj.style = () => ({
+                    "width": this.menu_width(),
+                    "opacity": this.menu_opacity(),
+                });
                 return obj;
             })(new this.$.$bw_mainmenu_login_menu);
+        }
+        menu_width() {
+            return null;
+        }
+        menu_opacity() {
+            return 0;
         }
         checked(val, force) {
             return this.shown(val);
@@ -14579,10 +17960,16 @@ var $;
         shown(val, force) {
             return (val !== void 0) ? val : false;
         }
+        is_hiding(val, force) {
+            return (val !== void 0) ? val : false;
+        }
     }
     __decorate([
         $.$mol_mem
     ], $bw_mainmenu_login.prototype, "Icon", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_mainmenu_login.prototype, "Title", null);
     __decorate([
         $.$mol_mem
     ], $bw_mainmenu_login.prototype, "Menu", null);
@@ -14592,6 +17979,9 @@ var $;
     __decorate([
         $.$mol_mem
     ], $bw_mainmenu_login.prototype, "shown", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_mainmenu_login.prototype, "is_hiding", null);
     $.$bw_mainmenu_login = $bw_mainmenu_login;
 })($ || ($ = {}));
 (function ($) {
@@ -14704,6 +18094,59 @@ var $;
     $.$bw_mainmenu_login_menu = $bw_mainmenu_login_menu;
 })($ || ($ = {}));
 (function ($) {
+    class $bw_mainmenu_list_item extends $.$mol_check {
+        id() {
+            return "";
+        }
+        title() {
+            return "";
+        }
+        Icon() {
+            return null;
+        }
+        minimal_height() {
+            return 53;
+        }
+        sub() {
+            return [].concat(this.Inner());
+        }
+        Inner() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Content());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Content() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Icon(), this.Title());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        Title() {
+            return ((obj) => {
+                obj.style = () => ({
+                    "opacity": this.opacity(),
+                });
+                obj.sub = () => [].concat(this.title());
+                return obj;
+            })(new this.$.$mol_view);
+        }
+        opacity() {
+            return null;
+        }
+    }
+    __decorate([
+        $.$mol_mem
+    ], $bw_mainmenu_list_item.prototype, "Inner", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_mainmenu_list_item.prototype, "Content", null);
+    __decorate([
+        $.$mol_mem
+    ], $bw_mainmenu_list_item.prototype, "Title", null);
+    $.$bw_mainmenu_list_item = $bw_mainmenu_list_item;
+})($ || ($ = {}));
+(function ($) {
     class $bw_mainmenu_login_menu_list_item extends $.$bw_mainmenu_list_item {
     }
     $.$bw_mainmenu_login_menu_list_item = $bw_mainmenu_login_menu_list_item;
@@ -14757,14 +18200,58 @@ var $;
             static instance() {
                 return $$.$bw_app.Root(0).NewLook().Menu();
             }
+            flex_basis_narrow() {
+                return 64;
+            }
+            flex_basis_wide() {
+                return 290;
+            }
+            opacity() {
+                return this.is_narrow() ? 0 : 1;
+            }
+            opacity_animation_trigger() {
+                return this.is_narrow();
+            }
+            opacity_animation_triggered_value(trigger) {
+                return trigger ? 0 : 1;
+            }
+            ListWrapper() {
+                return super.ListWrapper();
+            }
+            flex_basis() {
+                return super.flex_basis();
+            }
+            flex_basis_animation_trigger() {
+                return this.is_narrow();
+            }
+            flex_basis_animation_triggered_value(trigger) {
+                if (!trigger)
+                    this.bw_mainmenu_width('wide');
+                const result = trigger ? this.flex_basis_narrow() : this.flex_basis_wide();
+                return result;
+            }
+            flex_basis_animation_easing() {
+                return $$.BwEasing.easeInOutCubic;
+            }
+            flex_basis_animation_finish(p) {
+                if (p.start) {
+                    if (p.trigger)
+                        this.bw_mainmenu_width('narrow');
+                }
+            }
             selected_item(val, force) {
                 return super.selected_item(val, force);
             }
             is_narrow(val, force) {
                 return super.is_narrow(val, force);
             }
-            bw_mainmenu_width() {
-                return this.is_narrow() ? 'narrow' : 'wide';
+            bw_mainmenu_width(val, force) {
+                let result = super.bw_mainmenu_width(val, force);
+                if (!result) {
+                    result = this.is_narrow() ? 'narrow' : 'wide';
+                    super.bw_mainmenu_width(result);
+                }
+                return result;
             }
             items_def() {
                 const result = {
@@ -14829,10 +18316,19 @@ var $;
             }
         }
         __decorate([
-            $$.$bw_local
+            $$.$bw_animate
+        ], $bw_mainmenu.prototype, "opacity", null);
+        __decorate([
+            $.$mol_mem
+        ], $bw_mainmenu.prototype, "ListWrapper", null);
+        __decorate([
+            $$.$bw_animate
+        ], $bw_mainmenu.prototype, "flex_basis", null);
+        __decorate([
+            $$.$bw_session
         ], $bw_mainmenu.prototype, "selected_item", null);
         __decorate([
-            $$.$bw_local
+            $$.$bw_session
         ], $bw_mainmenu.prototype, "is_narrow", null);
         __decorate([
             $.$mol_mem
@@ -14840,13 +18336,44 @@ var $;
         $$.$bw_mainmenu = $bw_mainmenu;
         class $bw_mainmenu_login extends $.$bw_mainmenu_login {
             Menu() {
-                const result = !this.shown() ? null : super.Menu();
+                const result = !(this.shown() || this.is_hiding()) ? null : super.Menu();
                 return result;
+            }
+            opacity() {
+                const result = $bw_mainmenu.instance().opacity();
+                return result;
+            }
+            menu_width() {
+                return $bw_mainmenu.instance().flex_basis();
+            }
+            menu_opacity() {
+                return super.menu_opacity();
+            }
+            menu_opacity_animation_trigger() {
+                return this.shown() === false && this.is_hiding() === true;
+            }
+            menu_opacity_animation_triggered_value(trigger) {
+                return trigger ? 0 : 1;
+            }
+            menu_opacity_animation_finish() {
+                this.is_hiding(false);
+            }
+            shown(val) {
+                if (super.shown() && val === false) {
+                    this.is_hiding(true);
+                }
+                else if (val === true) {
+                    this.is_hiding(false);
+                }
+                return super.shown(val);
             }
         }
         __decorate([
             $.$mol_mem
         ], $bw_mainmenu_login.prototype, "Menu", null);
+        __decorate([
+            $$.$bw_animate
+        ], $bw_mainmenu_login.prototype, "menu_opacity", null);
         $$.$bw_mainmenu_login = $bw_mainmenu_login;
         class $bw_mainmenu_login_menu extends $.$bw_mainmenu_login_menu {
             NewDesign() {
@@ -14894,10 +18421,16 @@ var $;
         ], $bw_mainmenu_login_ear.prototype, "Icon", null);
         $$.$bw_mainmenu_login_ear = $bw_mainmenu_login_ear;
         class $bw_mainmenu_list extends $.$bw_mainmenu_list {
+            opacity() {
+                const result = $bw_mainmenu.instance().opacity();
+                return result;
+            }
             sub() {
                 const result = Object.keys(this.items_def())
                     .map((value) => this.MenuItem(value));
-                result.push(this.Footer());
+                if ($bw_mainmenu.instance().bw_mainmenu_width() == 'wide') {
+                    result.push(this.Footer());
+                }
                 return result;
             }
             menu_item_id(name) {
@@ -14914,9 +18447,6 @@ var $;
                     return obj;
                 })(new this.$['$bw_icon_' + this.items_def()[name].icon]);
             }
-            Footer() {
-                return this.is_narrow() ? null : super.Footer();
-            }
             browser_version() {
                 const bowser = this.$.$bw_bowser;
                 const browser = bowser.getParser(window.navigator.userAgent);
@@ -14932,12 +18462,13 @@ var $;
         ], $bw_mainmenu_list.prototype, "MenuItemIcon", null);
         __decorate([
             $.$mol_mem
-        ], $bw_mainmenu_list.prototype, "Footer", null);
-        __decorate([
-            $.$mol_mem
         ], $bw_mainmenu_list.prototype, "browser_version", null);
         $$.$bw_mainmenu_list = $bw_mainmenu_list;
         class $bw_mainmenu_list_item extends $.$bw_mainmenu_list_item {
+            opacity() {
+                const result = $bw_mainmenu.instance().opacity();
+                return result;
+            }
             checked(val, force) {
                 return this.id() === $bw_mainmenu.instance().selected_item(val === true ? this.id() : void 0);
             }
@@ -14947,6 +18478,10 @@ var $;
         }
         $$.$bw_mainmenu_list_item = $bw_mainmenu_list_item;
         class $bw_mainmenu_login_menu_list_item extends $.$bw_mainmenu_login_menu_list_item {
+            opacity() {
+                const result = $bw_mainmenu.instance().opacity();
+                return result;
+            }
             checked(val, force) {
                 if (val !== void 0) {
                     switch (this.id()) {

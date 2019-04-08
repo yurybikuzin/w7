@@ -10,6 +10,7 @@
 <!-- Disable mobile browser auto zoom, $mol is adaptive -->
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1" />
 
+<link rel="manifest" href="manifest.json">
 <!-- https://developer.mozilla.org/ru/docs/Web/HTML/Preloading_content -->
 <!-- about crossorigin="anonymous": https://github.com/Polymer/pwa-starter-kit/issues/254#issuecomment-434047143 -->
 <link rel="preload" href="font/Roboto-Regular-cyrillic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
@@ -18,6 +19,7 @@
 <link rel="preload" href="font/Roboto-Medium-cyrillic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="preload" href="font/Roboto-Medium-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="preload" href="font/Roboto-Light-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="font/Roboto-Light-latin-ext.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="preload" href="font/Roboto-Light-cyrillic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="preload" href="font/Roboto-Thin-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="preload" href="font/Roboto-Thin-cyrillic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
@@ -43,6 +45,56 @@
   } )
 </script>
  -->
+<script>
+window.dataWorker = new Worker('dw.js')
+console.log(window.dataWorker)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').then(function(registration) {
+      // Registration was successful
+    }, function(err) {
+      console.error('ServiceWorker registration failed: ', err);
+    });
+  })
+  // function subscribe() {
+  //   // Disable the button so it can't be changed while
+  //   // we process the permission request
+  //   // pushButton.disabled = true;
+
+  //   navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+  //     serviceWorkerRegistration.pushManager.subscribe({ userVisibleOnly: true })
+  //       .then(function(subscription) {
+  //         // The subscription was successful
+  //         isPushEnabled = true;
+  //         // pushButton.textContent = 'Disable Push Messages';
+  //         // pushButton.disabled = false;
+
+  //         // TODO: Send the subscription.endpoint to your server
+  //         // and save it to send a push message at a later date
+  //         // return sendSubscriptionToServer(subscription);
+  //       })
+  //       .catch(function(e) {
+  //         if(Notification.permission === 'denied') {
+  //           // The user denied the notification permission which
+  //           // means we failed to subscribe and the user will need
+  //           // to manually change the notification permission to
+  //           // subscribe to push messages
+  //           console.warn('Permission for Notifications was denied');
+  //           // pushButton.disabled = true;
+  //         } else {
+  //           // A problem occurred with the subscription; common reasons
+  //           // include network errors, and lacking gcm_sender_id and/or
+  //           // gcm_user_visible_only in the manifest.
+  //           console.error('Unable to subscribe to push.', e);
+  //           // pushButton.disabled = false;
+  //           // pushButton.textContent = 'Enable Push Messages';
+  //         }
+  //       });
+  //   });
+  // }
+  // subscribe()
+}
+</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
