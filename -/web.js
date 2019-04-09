@@ -13596,7 +13596,7 @@ var $;
                         }
                     }
                 };
-                result.dom_node().addEventListener('mousewheel', mousewheelListener, { passive: isPassive });
+                result.dom_node().addEventListener('wheel', mousewheelListener, { passive: isPassive });
                 new $.$mol_defer(() => {
                     this.rows_count();
                 });
