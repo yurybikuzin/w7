@@ -4125,11 +4125,14 @@ body[_viewport-width=invalid] [bw_app_new_look]:after { content: 'min width is 3
     flex: 1 1 auto;
     display: block;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
 [bw_search] [bw_search_workspace] {
-    width: 100%;
-    height: 100%;
+    flex: 1 1 auto;
+    /* width: 100%; */
+    /* height: 100%; */
     display: flex;
     flex-direction: column;
   }

@@ -14562,15 +14562,15 @@ onmessage = function(event) {
                   userStore.put(user)
                   object_guid[adv.object_guid] = (object_guid[adv.object_guid] || 0) + 1
                 }
-                {
-                  const qt = Object.keys(object_guid).length
-                  const max = Math.max(...Object.keys(object_guid).map(key => object_guid[key]))
-                  const avg = count / qt
-                  console.log({qt, max, avg})
-                  for (let i = max; i > 1; i--) {
-                    console.log(i + ': ' + Object.keys(object_guid).map(key => object_guid[key]).filter(qt => qt == i).length)
-                  }
-                }
+                // {
+                //   const qt = Object.keys(object_guid).length
+                //   const max = Math.max(...Object.keys(object_guid).map(key => object_guid[key]))
+                //   const avg = count / qt
+                //   console.log({qt, max, avg})
+                //   for (let i = max; i > 1; i--) {
+                //     console.log(i + ': ' + Object.keys(object_guid).map(key => object_guid[key]).filter(qt => qt == i).length)
+                //   }
+                // }
               })
             }
           })
