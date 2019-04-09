@@ -4232,6 +4232,7 @@ body[_viewport-width=invalid] [bw_app_new_look]:after { content: 'min width is 3
 
 [bw_search_block_table] {
   border-collapse: collapse;
+  width: 100%;
 }
 
 [bw_search_block_table]:not(:last-of-type) {
