@@ -50,11 +50,14 @@ window.dataWorker = new Worker('dw.js')
 console.log(window.dataWorker)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
+    console.warn('serviceWorker disabled')
+
     navigator.serviceWorker.register('sw.js').then(function(registration) {
       // Registration was successful
     }, function(err) {
       console.error('ServiceWorker registration failed: ', err);
     });
+
   })
   // function subscribe() {
   //   // Disable the button so it can't be changed while

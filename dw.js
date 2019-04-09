@@ -149,18 +149,14 @@ onmessage = function(event) {
       openCursor.onsuccess = function(event) {
         var cursor = event.target.result;
         // postMessage({status: 'ok', count, timing: Date.now() - start})
-        // const size = 1
-        const size = 10000
+        const size = 1000
+        // const size = 10000
         if (cursor) {
           count++
           cursor.continue();
         } else if (count >= size) {
           postMessage({status: 'ok', count, timing: Date.now() - start})
         } else {
-          const headers = new Headers([
-            ['Accept', 'application/json'],
-            ['Content-Type', 'application/json'],
-          ])
           // {"filters":{"guid":"00B3EA1A-9961-0000-002C-00638D7C0000"},"conditions":{"realty_section":{"code":["flat"]},"area":{"code":["msk"]},"deal_type":{"code":["sale"]}},"from":0,"size":1,"dsl_version":2,"fields":["user_note","note","owners_count","ownership_type_id","ownership_year"]}
           const bodyJson = {
             aggregations: {
@@ -279,13 +275,26 @@ onmessage = function(event) {
           }
           const body = JSON.stringify(bodyJson)
           const start = Date.now()
+          const headersInit = [
+            // ['Access-Control-Request-Headers', 'origin, content-type, accept, Pragma, Cache-Control'],
+            // ['Access-Control-Request-Method', 'POST'],
+            // ['Access-Control-Request-Headers', '*'],
+            // ['Access-Control-Request-Method', 'POST'],
+            // ['Access-Control-Expose-Headers', '*'],
+            // ['Access-Control-Allow-Headers', 'Pragma'],
+            // ['Access-Control-Allow-Origin', '*'],
+            ['Accept', 'application/json'],
+            ['Content-Type', 'application/json'],
+          ]
+          console.log(headersInit)
+          const headers = new Headers(headersInit)
           fetch('https://mls.baza-winner.ru/v2/users/unauthenticated/items/_search.json?project_code=w7', {
             method: 'POST',
             headers,
             body,
             // body: `{"aggregations":{"avg_price_rub":true,"avg_meter_price_rub":true},"fields":["guid","deal_status_id","user_deal_status_id","winner_relevance","w6_offer_id","w6_offer_pub_list","object_guid","free_mode_relevance","is_selected","is_favorite","is_hidden","is_sended_to_viewboard","is_liked_on_viewboard","is_disliked_on_viewboard","is_monitored","photo_count","video_count","geo_cache_street_name","price_rub","pub_datetime","media_id","media_name","broker.short_name","broker.url","external_url","phone_list.is_black","phone_list.black_note","creation_datetime","deal_type_id","geo_cache_building_name","storey","storeys_count","walls_material_type_id","total_square","life_square","kitchen_square","security_type_id","user_note","note","owners_count","ownership_type_id","ownership_year","balcony_type_id","price_change_date","price_change_type_id","video_list","built_year","sale_type_name","agency_bonus","agency_bonus_type_id","agency_bonus_currency_type_id","total_room_count","offer_room_count","is_studio","is_free_planning","realty_type_id","rooms_adjacency_type_id","geo_cache_subway_station_name_1","geo_subway_station_guid_1","transport_access_1","walking_access_1","geo_cache_subway_station_name_2","geo_subway_station_guid_2","transport_access_2","walking_access_2","geo_cache_subway_station_name_3","geo_subway_station_guid_3","transport_access_3","walking_access_3","geo_cache_subway_station_name_4","geo_subway_station_guid_4","transport_access_4","walking_access_4"],"sort":[{"winner_relevance":{"order":"desc"}},{"w6_offer_id":{"order":"desc"}}],"from":0,"size":${size},"conditions":{"published_days_ago":{"days":7},"realty_section":{"code":["flat"]},"deal_type":{"code":["sale"]},"area":{"code":["msk"]},"is_deal_actual":true,"use_strict_conditions":true},"mixins":{"is_selected":true},"dsl_version":2}`,
             mode: 'cors',
-            cache: 'no-store',
+            // cache: 'no-store',
           })
           .catch(error => postMessage({status: 'error', message: `${error}`}))
           .then(response => {
