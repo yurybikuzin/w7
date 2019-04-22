@@ -1,0 +1,57 @@
+<!doctype html>
+
+<html>
+
+<meta charset="utf-8" />
+
+<title>$me Demo</title>
+
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+
+<!-- <link rel="manifest" href="mol/app/demo/manifest.json"> -->
+
+<!-- description -->
+<meta name="description" content="$me Demo">
+<meta name="application-name" content="$me">
+<meta name="apple-mobile-web-app-title" content="$me Demo">
+
+<!-- colors -->
+<meta name="theme-color" content="#000000">
+<meta name="msapplication-TileColor" content="#000000">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- logo -->
+<!-- <link href="me/logo_16.png" rel="icon" /> -->
+<!-- <link rel="apple-touch-icon" sizes="128x128" href="me/logo_128.png"> -->
+<!-- <link rel="apple-touch-icon-precomposed" sizes="128x128" href="me/logo_128.png"> -->
+<!-- <meta name="msapplication-TileImage" content="me/logo_192.png"> -->
+
+<!-- full screen -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- <link rel="shortcut icon" href="fav.ico" type="image/x-icon"> -->
+<!-- <link rel="stylesheet" href="-/web.css" /> -->
+
+ <style>
+  html {
+    height: 100%
+  }
+  body {
+    height: 100%;
+    margin: 0;
+    background: rgba(255, 0, 0, 0.1);
+  }
+  #w7i {
+    margin: 20px;
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+    border: 0;
+  }
+ </style>
+
+<body me_view_root="$me_demo" tabindex="0">
+  <iframe id="w7i" src="http://localhost:8081/me/demo/w7index.html"></iframe>
+</body>
+
+

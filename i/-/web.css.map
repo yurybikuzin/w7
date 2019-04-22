@@ -1,0 +1,12 @@
+{
+	"version": 3,
+	"sources": [
+		"../demo.view.css"
+	],
+	"names": [],
+	"mappings": "AAAA;EACE,aAAa;AASf;EARE;IACE,cAAc;IACd,YAAY;EACd;EACA;IACE,eAAe;IACf,cAAc;EAChB,CACD;EACC,aAAa;AAQf,CAPE;IACE,cAAc;EAChB,CACA;IACE,gBAAgB;IAChB,cAAc;EAChB",
+	"file": "web.css",
+	"sourcesContent": [
+		".red {\n  display: flex;\n  * {\n    flex: 1 1 auto;\n    height: 100%;\n  }\n  *:nth-child(even) {\n    background: red;\n    flex: 1 1 auto;\n  }\n}.blue {\n  display: flex;\n  * {\n    flex: 1 1 auto;\n  }\n  *:nth-child(even) {\n    background: blue;\n    flex: 1 1 auto;\n  }\n}"
+	]
+}

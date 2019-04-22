@@ -1,0 +1,19 @@
+.red {
+  display: flex;
+}
+  .red * {
+    flex: 1 1 auto;
+    height: 100%;
+  }
+  .red *:nth-child(even) {
+    background: red;
+    flex: 1 1 auto;
+  }.blue {
+  display: flex;
+}.blue * {
+    flex: 1 1 auto;
+  }.blue *:nth-child(even) {
+    background: blue;
+    flex: 1 1 auto;
+  }
+/*# sourceMappingURL=web.css.map */
