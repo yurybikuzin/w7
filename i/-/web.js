@@ -1177,7 +1177,7 @@ var $;
                     },
                     touchend: !('ontouchstart' in window) ? void 0 : (event) => {
                         prev_time = void 0;
-                        accel_k = 0.99;
+                        accel_k = 0.95;
                         function touch_inert(accel) {
                             if (Math.abs(accel) >= 1 / 17) {
                                 inert_raf = requestAnimationFrame((t) => {
@@ -1185,7 +1185,7 @@ var $;
                                     const scrollAccu = accel * (t - prev_t);
                                     if (Math.abs(scrollAccu) > 1 && scroll_y(Math.round(scrollAccu))) {
                                         const accel_new = accel * accel_k;
-                                        accel_k = accel_k * 0.99;
+                                        accel_k = accel_k * 0.9999;
                                         prev_t = t;
                                         touch_inert(accel_new);
                                     }
@@ -1711,6 +1711,9 @@ onmessage = function(event) {
 let _guids_to_fetch = new Set()
 let _process_in_progress
 let _process_failed
+let _current_process
+let _networkDuration
+let _start
 function finish(error) {
   if (error) {
     console.error(error, error.message, error.name)
@@ -1718,6 +1721,16 @@ function finish(error) {
     _process_failed = true
   } else {
     _process_in_progress = false
+    if (_current_process) {
+      _current_process.totalTime = +(performance.now() - _start).toFixed(1)
+      if (_networkDuration !== void 0) {
+        _current_process.networkTime = +_networkDuration.toFixed(1)
+        _current_process.dbTime = +(_current_process.totalTime - _current_process.networkTime).toFixed(1)
+        _networkDuration = void 0
+      }
+      console.log(_current_process)
+      _current_process = void 0
+    }
     process()
   }
 }
@@ -1738,11 +1751,12 @@ function process() {
     return
   }
   // console.log(_idx_set, {_count}, _guids_to_fetch.size)
+  _start = performance.now()
   if (_conditions && _page && (_count === void 0 || _idx_set.size) ) {
     _last_section = 'idx'
     _process_in_progress = true
     if (_count === void 0) {
-      fetchSearchResult(0, _page * 3 + 1)
+      fetchSearchResult(0, _page * 3)
     } else {
       open_idb(idb => {
         fetchHelper(idb, () => {
@@ -1813,6 +1827,8 @@ function process() {
 }
 
 function fetchAdv(guids_to_fetch) {
+  _current_process = {fetchAdv: guids_to_fetch.size}
+  // console.log({fetchAdv: guids_to_fetch.size})
   const bodyJson = {
     fields: [
       // key
@@ -1903,13 +1919,15 @@ function fetchAdv(guids_to_fetch) {
   }
 
   const body = JSON.stringify(bodyJson)
+  const fetchStart = performance.now()
   fetch(_url, {method: 'POST', headers, body, mode: 'cors'})
   .catch(error => finish(error) )
   .then(response => {
       if (response.status != 200) {
       finish([response.status, response.statusText, bodyJson])
     } else {
-      const start = Date.now()
+      _networkDuration = performance.now() - fetchStart
+      // const start = Date.now()
       response.json()
       .catch(error => finish(error))
       .then(data => {
@@ -1975,6 +1993,8 @@ function fetchAdv(guids_to_fetch) {
 
 const _url = 'https://mls.baza-winner.ru/v2/users/unauthenticated/items/_search.json?project_code=w7'
 function fetchSearchResult(fetchFrom, size) {
+   _current_process = {fetchFrom, size}
+  // console.log({fetchFrom, size})
    const bodyJson = {
     aggregations: {
       avg_price_rub: true,
@@ -2009,6 +2029,7 @@ function fetchSearchResult(fetchFrom, size) {
   }
   const body = JSON.stringify(bodyJson)
   // console.log({fetchFrom, size})
+  const fetchStart = performance.now()
   fetch(_url, {method: 'POST', headers, body, mode: 'cors'})
   .catch(error => finish(error))
   .then(response => {
@@ -2018,7 +2039,8 @@ function fetchSearchResult(fetchFrom, size) {
       _process_in_progress = false
       _process_failed = true
     } else {
-      const start = Date.now()
+      _networkDuration = performance.now() - fetchStart
+      // const start = Date.now()
       response.json()
       .catch(error => {
         console.error(error)
@@ -2027,7 +2049,7 @@ function fetchSearchResult(fetchFrom, size) {
         _process_failed = true
       })
       .then(data => {
-        postMessage({cmd: 'count', status: 'ok', count: _count = data.meta.total, timing: Date.now() - start})
+        postMessage({cmd: 'count', status: 'ok', count: _count = data.meta.total})
         // console.warn({_count, fetchFrom, size}, data.advs)
 
         open_idb(idb => {

@@ -1,19 +1,19 @@
 <!doctype html>
 
-<html>
+<html style="height: 100%">
 
 <meta charset="utf-8" />
 
-<title>w7i</title>
+<title>w7iframe</title>
 
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
 
 <!-- <link rel="manifest" href="mol/app/demo/manifest.json"> -->
 
 <!-- description -->
-<meta name="description" content="$me Demo">
-<meta name="application-name" content="$me">
-<meta name="apple-mobile-web-app-title" content="$me Demo">
+<meta name="description" content="w7i">
+<meta name="application-name" content="w7i">
+<meta name="apple-mobile-web-app-title" content="w7i">
 
 <!-- colors -->
 <meta name="theme-color" content="#000000">
@@ -31,31 +31,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
 <!-- <link rel="shortcut icon" href="fav.ico" type="image/x-icon"> -->
-<!-- <link rel="stylesheet" href="-/web.css" /> -->
+<link rel="stylesheet" href="-/web.css" />
+<script src="-/web.js" type="text/javascript" defer></script>
 
- <style>
-  html {
-    height: 100%
-  }
-  body {
-    height: 100%;
-    margin: 0;
+<script>
+(function() { 'use strict'
+  addEventListener('load' , function() {
+    $.$$.$me_demo_app(document.body)
+  })
+})()
+</script>
 
-    /* https://design.alfabank.ru/style/colors */
-    /*background: #F3F4F5;*/
-    background: rgba(239, 49, 36, .9);
-  }
-  #frame {
-    margin: 20px;
-    width: calc(100% - 40px);
-    height: calc(100% - 40px);
-    border: 0;
-  }
- </style>
-
-<body me_view_root="$me_demo" tabindex="0">
-  <!-- <iframe id="w7i" src="http://localhost:8081/me/demo/w7index.html"></iframe> -->
-  <iframe id="frame" src="frame.html"></iframe>
-</body>
-
-
+<body></body>
