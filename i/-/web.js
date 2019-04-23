@@ -1121,7 +1121,6 @@ var $;
             let inert_raf;
             let inert_delay;
             let prev_t;
-            let accel_k;
             const self = Object.assign({}, $$.$me_elem(parent, {
                 props: { id: 'search_result_grid' },
                 style: {
@@ -1137,6 +1136,7 @@ var $;
                             cancelAnimationFrame(inert_raf);
                             inert_raf = void 0;
                         }
+                        accel = 0;
                     },
                     touchmove: !('ontouchstart' in window) ? void 0 : (event) => {
                         const deltaY = clientY - event.touches[0].clientY;
@@ -1177,7 +1177,7 @@ var $;
                     },
                     touchend: !('ontouchstart' in window) ? void 0 : (event) => {
                         prev_time = void 0;
-                        accel_k = 0.95;
+                        let accel_k = 0.95;
                         function touch_inert(accel) {
                             if (Math.abs(accel) >= 1 / 17) {
                                 inert_raf = requestAnimationFrame((t) => {
